@@ -3,11 +3,35 @@
  */
 
 #include <string>
+#include <vector>
 
 namespace args
 {
-    std::string hello()
+    class ArgumentParser
     {
-        return "Hello, World!";
-    }
+        private:
+            std::string prog;
+            std::string description;
+            std::string epilog;
+
+        public:
+            ArgumentParser(
+                const std::string &prog,
+                const std::string &description,
+                const std::string &epilog = std::string()) : prog(prog), description(description), epilog(epilog) {}
+
+            void ParseArgs(const std::vector<std::string> &args)
+            {
+            }
+
+            void ParseCLI(const int argc, const char * const * const argv)
+            {
+                std::vector<std::string> args;
+                for (int i = 1; i < argc; ++i)
+                {
+                    args.emplace_back(argv[i]);
+                }
+                ParseArgs(args);
+            }
+    };
 }
