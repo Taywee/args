@@ -23,8 +23,8 @@ namespace args
     class Matcher
     {
         private:
-            std::vector<char> shortOpts;
-            std::vector<std::string> longOpts;
+            const std::vector<char> shortOpts;
+            const std::vector<std::string> longOpts;
 
         public:
             // Specify short and long opts separately as iterators
@@ -37,8 +37,22 @@ namespace args
             // Specify short and long opts separately as iterables
             template <typename Short, typename Long>
             Matcher(Short &&shortIn, Long &&longIn) :
-                Matcher(std::begin(shortIn), std::end(shortIn), std::begin(longIn), std::end(longIn))
+                shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
             {}
+
+            // Specify short and long opts as initializer lists
+            template <typename Short, typename Long>
+            Matcher(const std::initializer_list<Short> &shortIn, const std::initializer_list<Long> &longIn) :
+                shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
+            {}
+
+            Matcher(const Matcher &other) : shortOpts(other.shortOpts), longOpts(other.longOpts)
+            {}
+
+            Matcher(Matcher &&other) : shortOpts(std::move(other.shortOpts)), longOpts(std::move(other.longOpts))
+            {}
+
+            ~Matcher() {}
 
             bool Match(const char opt) const
             {
@@ -64,12 +78,12 @@ namespace args
             virtual Base *Match(const std::string &arg) = 0;
             virtual Base *Match(const char arg) = 0;
 
-            virtual bool Matched() const
+            virtual bool Matched() const noexcept
             {
                 return matched;
             }
 
-            operator bool() const
+            operator bool() const noexcept
             {
                 return matched;
             }
@@ -137,7 +151,7 @@ namespace args
                 return sum;
             }
 
-            virtual bool Matched() const override
+            virtual bool Matched() const noexcept override
             {
                 return validator(children.size(), MatchedChildren());
             }
@@ -274,20 +288,15 @@ namespace args
     class Flag : public Base
     {
         private:
-            Matcher matcher;
+            const Matcher matcher;
 
         public:
-            //template <typename ... Types>
-            //Flag(std::string help, Types ...args): matcher(args...) {}
-
-            template <typename ... Types>
-            Flag(ArgumentParser &parser, std::string help, Types&& ...args): matcher(args...)
+            Flag(ArgumentParser &parser, std::string help, const Matcher &matcher): matcher(matcher)
             {
                 parser.Add(*this);
             }
 
-            template <typename Short, typename Long>
-            Flag(ArgumentParser &parser, std::string help, const std::initializer_list<Short> &shortIn, const std::initializer_list<Long> &longIn): matcher(shortIn, longIn)
+            Flag(ArgumentParser &parser, std::string help, Matcher &&matcher): matcher(std::move(matcher))
             {
                 parser.Add(*this);
             }
