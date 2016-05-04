@@ -82,9 +82,6 @@ namespace args
             Base(const std::string &help) : matched(false), help(help) {}
             virtual ~Base() {}
 
-            virtual Base *Match(const std::string &arg) = 0;
-            virtual Base *Match(const char arg) = 0;
-
             virtual bool Matched() const noexcept
             {
                 return matched;
@@ -92,51 +89,157 @@ namespace args
 
             operator bool() const noexcept
             {
-                return matched;
+                return Matched();
+            }
+    };
+
+    // Named arguments, not including groups
+    class NamedBase : public Base
+    {
+        protected:
+            const std::string name;
+
+        public:
+            NamedBase(const std::string &name, const std::string &help) : Base(help), name(name) {}
+            virtual ~NamedBase() {}
+
+            const std::string &Name();
+    };
+
+    // Base class for flag arguments
+    class FlagBase : public NamedBase
+    {
+        protected:
+            const Matcher matcher;
+
+        public:
+            FlagBase(const std::string &name, const std::string &help, const Matcher &matcher) : NamedBase(name, help), matcher(matcher) {}
+            FlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : NamedBase(name, help), matcher(std::move(matcher)) {}
+
+            virtual ~FlagBase() {}
+
+            virtual FlagBase *Match(const std::string &arg)
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    return this;
+                }
+                return nullptr;
+            }
+
+            virtual FlagBase *Match(const char arg)
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    return this;
+                }
+                return nullptr;
             }
     };
 
     // Base class that takes arguments
-    class ArgBase : public Base
+    class ArgFlagBase : public FlagBase
     {
         public:
-            ArgBase(const std::string &help) : Base(help) {}
-            virtual ~ArgBase() {}
-            virtual void ParseArg(const std::string &arg, const std::string &value) = 0;
+            ArgFlagBase(const std::string &name, const std::string &help, const Matcher &matcher) : FlagBase(name, help, matcher) {}
+            ArgFlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : FlagBase(name, help, std::move(matcher)) {}
+            virtual ~ArgFlagBase() {}
+            virtual void ParseArg(const std::string &value) = 0;
+    };
+
+    // Base class for positional arguments
+    class PosBase : public NamedBase
+    {
+        protected:
+            bool ready;
+
+        public:
+            PosBase(const std::string &name, const std::string &help) : NamedBase(name, help), ready(true) {}
+            virtual ~PosBase() {}
+
+            bool Ready()
+            {
+                return ready;
+            }
+
+            virtual void ParseArg(const std::string &value) = 0;
     };
 
     class Group : public Base
     {
         private:
             std::vector<Base*> children;
-            std::function<bool(int, int)> validator;
+            std::function<bool(const Group &)> validator;
 
         public:
-
-            Group(const std::string &help, const std::function<bool(int, int)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
+            Group(const std::string &help, const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
             virtual ~Group() {}
 
-            virtual Base *Match(const std::string &arg) override
+            FlagBase *Match(const std::string &arg)
             {
                 for (Base *child: children)
                 {
-                    Base *match = child->Match(arg);
-                    if (match)
+                    FlagBase *flag = dynamic_cast<FlagBase *>(child);
+                    Group *group = dynamic_cast<Group *>(child);
+                    if (flag)
                     {
-                        return match;
+                        FlagBase *match = flag->Match(arg);
+                        if (match)
+                        {
+                            return match;
+                        }
+                    } else if (group)
+                    {
+                        FlagBase *match = group->Match(arg);
+                        if (match)
+                        {
+                            return match;
+                        }
                     }
                 }
                 return nullptr;
             }
 
-            virtual Base *Match(const char arg) override
+            FlagBase *Match(const char arg)
             {
                 for (Base *child: children)
                 {
-                    Base *match = child->Match(arg);
-                    if (match)
+                    FlagBase *flag = dynamic_cast<FlagBase *>(child);
+                    Group *group = dynamic_cast<Group *>(child);
+                    if (flag)
                     {
-                        return match;
+                        FlagBase *match = flag->Match(arg);
+                        if (match)
+                        {
+                            return match;
+                        }
+                    } else if (group)
+                    {
+                        FlagBase *match = group->Match(arg);
+                        if (match)
+                        {
+                            return match;
+                        }
+                    }
+                }
+                return nullptr;
+            }
+
+            PosBase *GetNextPos()
+            {
+                for (Base *child: children)
+                {
+                    PosBase *next = dynamic_cast<PosBase *>(child);
+                    Group *group = dynamic_cast<Group *>(child);
+                    if (group)
+                    {
+                        next = group->GetNextPos();
+                    }
+                    if (next and next->Ready())
+                    {
+                        return next;
                     }
                 }
                 return nullptr;
@@ -147,9 +250,14 @@ namespace args
                 children.emplace_back(&child);
             }
 
-            int MatchedChildren() const
+            const std::vector<Base *> Children() const
             {
-                int sum = 0;
+                return children;
+            }
+
+            std::vector<Base *>::size_type MatchedChildren() const
+            {
+                std::vector<Base *>::size_type sum = 0;
                 for (const Base * child: children)
                 {
                     if (child->Matched())
@@ -162,48 +270,67 @@ namespace args
 
             virtual bool Matched() const noexcept override
             {
-                return validator(children.size(), MatchedChildren());
+                return validator(*this);
             }
 
             struct Validators
             {
-                static bool Xor(int children, int matched)
+                static bool Xor(const Group &group)
                 {
-                    return matched == 1;
+                    return group.MatchedChildren() == 1;
                 }
 
-                static bool AtLeastOne(int children, int matched)
+                static bool AtLeastOne(const Group &group)
                 {
-                    return matched >= 1;
+                    return group.MatchedChildren() >= 1;
                 }
 
-                static bool AtMostOne(int children, int matched)
+                static bool AtMostOne(const Group &group)
                 {
-                    return matched <= 1;
+                    return group.MatchedChildren() <= 1;
                 }
 
-                static bool All(int children, int matched)
+                static bool All(const Group &group)
                 {
-                    return children == matched;
+                    return group.Children().size() == group.MatchedChildren();
                 }
 
-                static bool DontCare(int children, int matched)
+                static bool AllOrNone(const Group &group)
+                {
+                    return (All(group) || None(group));
+                }
+
+                static bool AllChildGroups(const Group &group)
+                {
+                    for (const auto child: group.Children())
+                    {
+                        const Group *group = dynamic_cast<Group *>(child);
+                        if (group && (!group->Matched()))
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+                static bool DontCare(const Group &group)
                 {
                     return true;
                 }
 
-                static bool CareTooMuch(int children, int matched)
+                static bool CareTooMuch(const Group &group)
                 {
                     return false;
                 }
 
-                static bool None(int children, int matched)
+                static bool None(const Group &group)
                 {
-                    return matched == 0;
+                    return group.MatchedChildren() == 0;
                 }
             };
     };
 
+    // Command line argument parser
     class ArgumentParser
     {
         private:
@@ -238,7 +365,12 @@ namespace args
                     longprefix(longprefix),
                     shortprefix(shortprefix),
                     longseparator(longseparator),
-                    group("arguments", Group::Validators::DontCare) {}
+                    group("arguments", Group::Validators::AllChildGroups) {}
+
+            void Add(Base &child)
+            {
+                group.Add(child);
+            }
 
             void ParseArgs(const std::vector<std::string> &args)
             {
@@ -257,15 +389,15 @@ namespace args
                             std::string(argchunk, 0, separator)
                             : argchunk);
 
-                        Base *base = group.Match(arg);
+                        FlagBase *base = group.Match(arg);
                         if (base)
                         {
-                            ArgBase *argbase = dynamic_cast<ArgBase *>(base);
+                            ArgFlagBase *argbase = dynamic_cast<ArgFlagBase *>(base);
                             if (argbase)
                             {
                                 if (separator != argchunk.npos)
                                 {
-                                    argbase->ParseArg(arg, argchunk.substr(separator + longseparator.size()));
+                                    argbase->ParseArg(argchunk.substr(separator + longseparator.size()));
                                 } else
                                 {
                                     ++it;
@@ -276,7 +408,7 @@ namespace args
                                         throw ParseError(problem.str().c_str());
                                     } else
                                     {
-                                        argbase->ParseArg(arg, *it);
+                                        argbase->ParseArg(*it);
                                     }
                                 }
                             } else if (separator != argchunk.npos)
@@ -288,9 +420,10 @@ namespace args
                         } else
                         {
                             std::ostringstream problem;
-                            problem << "Argument could not be matched: " << chunk;
+                            problem << "Argument could not be matched: " << arg;
                             throw ParseError(problem.str().c_str());
                         }
+                        // Check short args
                     } else if (chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
                     {
                         std::string argchunk(chunk.substr(shortprefix.size()));
@@ -301,24 +434,24 @@ namespace args
                             Base *base = group.Match(arg);
                             if (base)
                             {
-                                ArgBase *argbase = dynamic_cast<ArgBase *>(base);
+                                ArgFlagBase *argbase = dynamic_cast<ArgFlagBase *>(base);
                                 if (argbase)
                                 {
                                     argchunk.erase(std::begin(argchunk), ++argit);
                                     if (!argchunk.empty())
                                     {
-                                        argbase->ParseArg(std::string(1, arg), argchunk);
+                                        argbase->ParseArg(argchunk);
                                     } else
                                     {
                                         ++it;
                                         if (it == std::end(args))
                                         {
                                             std::ostringstream problem;
-                                            problem << "Argument " << arg << " requires an argument but received none";
+                                            problem << "Flag '" << arg << "' requires an argument but received none";
                                             throw ParseError(problem.str().c_str());
                                         } else
                                         {
-                                            argbase->ParseArg(std::string(1, arg), *it);
+                                            argbase->ParseArg(*it);
                                         }
                                     }
                                     // Because this argchunk is done regardless
@@ -327,11 +460,34 @@ namespace args
                             } else
                             {
                                 std::ostringstream problem;
-                                problem << "Argument could not be matched: " << arg;
+                                problem << "Argument could not be matched: '" << arg << "'";
                                 throw ParseError(problem.str().c_str());
                             }
                         }
+                    } else
+                    {
+                        SetNextPositional(chunk);
                     }
+                }
+                if (!group.Matched())
+                {
+                    std::ostringstream problem;
+                    problem << "Group validation failed somewhere!";
+                    throw ParseError(problem.str().c_str());
+                }
+            }
+
+            void SetNextPositional(const std::string &arg)
+            {
+                PosBase *pos = group.GetNextPos();
+                if (pos)
+                {
+                    pos->ParseArg(arg);
+                } else
+                {
+                    std::ostringstream problem;
+                    problem << "Passed in argument, but no positional arguments were ready to receive it" << arg;
+                    throw ParseError(problem.str().c_str());
                 }
             }
 
@@ -351,85 +507,60 @@ namespace args
     };
 
     // Boolean argument matcher
-    class Flag : public Base
+    class Flag : public FlagBase
     {
-        private:
-            const Matcher matcher;
-
         public:
-            Flag(Group &group, const std::string &help, const Matcher &matcher): Base(help), matcher(matcher)
+            Flag(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): FlagBase(name, help, matcher)
             {
                 group.Add(*this);
             }
 
-            Flag(Group &group, const std::string &help, Matcher &&matcher): Base(help), matcher(std::move(matcher))
+            Flag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): FlagBase(name, help, std::move(matcher))
             {
                 group.Add(*this);
             }
 
             virtual ~Flag() {}
 
-            virtual Base *Match(const std::string &arg) override
-            {
-                if (matcher.Match(arg))
-                {
-                    matched = true;
-                    return this;
-                }
-                return nullptr;
-            }
-
-            virtual Base *Match(const char arg) override
-            {
-                if (matcher.Match(arg))
-                {
-                    matched = true;
-                    return this;
-                }
-                return nullptr;
-            }
     };
 
     // Count matches
-    class Counter : public Base
+    class Counter : public FlagBase
     {
         private:
-            const Matcher matcher;
             unsigned int count;
 
         public:
-            Counter(Group &group, const std::string &help, const Matcher &matcher, const unsigned int startcount = 0): Base(help), matcher(matcher), count(startcount)
+            Counter(Group &group, const std::string &name, const std::string &help, const Matcher &matcher, const unsigned int startcount = 0): FlagBase(name, help, matcher), count(startcount)
             {
                 group.Add(*this);
             }
 
-            Counter(Group &group, const std::string &help, Matcher &&matcher, const unsigned int startcount = 0): Base(help), matcher(std::move(matcher)), count(startcount)
+            Counter(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const unsigned int startcount = 0): FlagBase(name, help, std::move(matcher)), count(startcount)
             {
                 group.Add(*this);
             }
 
             virtual ~Counter() {}
 
-            virtual Base *Match(const std::string &arg) override
+            virtual FlagBase *Match(const std::string &arg) override
             {
-                if (matcher.Match(arg))
+                FlagBase *me = FlagBase::Match(arg);
+                if (me)
                 {
-                    matched = true;
                     ++count;
-                    return this;
                 }
-                return nullptr;
+                return me;
             }
 
-            virtual Base *Match(const char arg) override
+            virtual FlagBase *Match(const char arg) override
             {
-                if (matcher.Match(arg))
+                FlagBase *me = FlagBase::Match(arg);
+                if (me)
                 {
-                    matched = true;
                     ++count;
-                    return this;
                 }
-                return nullptr;
+                return me;
             }
 
             unsigned int Count()
@@ -439,7 +570,7 @@ namespace args
     };
 
     template <typename T>
-    void ArgReader(const std::string &arg, const std::string &value, T &destination)
+    void ArgReader(const std::string &name, const std::string &value, T &destination)
     {
         std::istringstream ss(value);
         ss >> destination;
@@ -447,60 +578,39 @@ namespace args
         if (ss.rdbuf()->in_avail() > 0)
         {
             std::ostringstream problem;
-            problem << "Argument " << arg << " received invalid value type " << value;
+            problem << "Argument '" << name << "' received invalid value type '" << value << "'";
             throw ParseError(problem.str().c_str());
         }
     }
 
     template <>
-    void ArgReader<std::string>(const std::string &arg, const std::string &value, std::string &destination)
+    void ArgReader<std::string>(const std::string &name, const std::string &value, std::string &destination)
     {
         destination.assign(value);
     }
 
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
-    class ArgFlag : public ArgBase
+    class ArgFlag : public ArgFlagBase
     {
         private:
-            const Matcher matcher;
             T value;
 
         public:
-            ArgFlag(Group &group, const std::string &help, const Matcher &matcher): ArgBase(help), matcher(matcher)
+            ArgFlag(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): ArgFlagBase(name, help, matcher)
             {
                 group.Add(*this);
             }
 
-            ArgFlag(Group &group, const std::string &help, Matcher &&matcher): ArgBase(help), matcher(std::move(matcher))
+            ArgFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): ArgFlagBase(name, help, std::move(matcher))
             {
                 group.Add(*this);
             }
 
             virtual ~ArgFlag() {}
 
-            virtual Base *Match(const std::string &arg) override
+            virtual void ParseArg(const std::string &value) override
             {
-                if (matcher.Match(arg))
-                {
-                    matched = true;
-                    return this;
-                }
-                return nullptr;
-            }
-
-            virtual Base *Match(const char arg) override
-            {
-                if (matcher.Match(arg))
-                {
-                    matched = true;
-                    return this;
-                }
-                return nullptr;
-            }
-
-            virtual void ParseArg(const std::string &arg, const std::string &value) override
-            {
-                Reader(arg, value, this->value);
+                Reader(name, value, this->value);
             }
 
             const T &Value()
@@ -509,50 +619,89 @@ namespace args
             }
     };
 
-    template <typename T, typename List = std::vector<T>, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
-    class ArgFlagList : public ArgBase
+    template <
+        typename T,
+        typename List = std::vector<T>,
+        void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
+    class ArgFlagList : public ArgFlagBase
     {
         private:
-            const Matcher matcher;
             List values;
 
         public:
-            ArgFlagList(Group &group, const std::string &help, const Matcher &matcher): ArgBase(help), matcher(matcher)
+            ArgFlagList(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): ArgFlagBase(name, help, matcher)
             {
                 group.Add(*this);
             }
 
-            ArgFlagList(Group &group, const std::string &help, Matcher &&matcher): ArgBase(help), matcher(std::move(matcher))
+            ArgFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): ArgFlagBase(name, help, std::move(matcher))
             {
                 group.Add(*this);
             }
 
             virtual ~ArgFlagList() {}
 
-            virtual Base *Match(const std::string &arg) override
-            {
-                if (matcher.Match(arg))
-                {
-                    matched = true;
-                    return this;
-                }
-                return nullptr;
-            }
-
-            virtual Base *Match(const char arg) override
-            {
-                if (matcher.Match(arg))
-                {
-                    matched = true;
-                    return this;
-                }
-                return nullptr;
-            }
-
-            virtual void ParseArg(const std::string &arg, const std::string &value) override
+            virtual void ParseArg(const std::string &value) override
             {
                 values.emplace_back();
-                Reader(arg, value, values.back());
+                Reader(name, value, values.back());
+            }
+
+            const List &Values()
+            {
+                return values;
+            }
+    };
+
+    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
+    class PosArg : public PosBase
+    {
+        private:
+            T value;
+
+        public:
+            PosArg(Group &group, const std::string &name, const std::string &help): PosBase(name, help)
+            {
+                group.Add(*this);
+            }
+
+            virtual ~PosArg() {}
+
+            virtual void ParseArg(const std::string &value) override
+            {
+                Reader(name, value, this->value);
+                ready = false;
+                matched = true;
+            }
+
+            const T &Value()
+            {
+                return value;
+            }
+    };
+
+    template <
+        typename T,
+        typename List = std::vector<T>,
+        void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
+    class PosArgList : public PosBase
+    {
+        private:
+            List values;
+
+        public:
+            PosArgList(Group &group, const std::string &name, const std::string &help): PosBase(name, help)
+            {
+                group.Add(*this);
+            }
+
+            virtual ~PosArgList() {}
+
+            virtual void ParseArg(const std::string &value) override
+            {
+                values.emplace_back();
+                Reader(name, value, values.back());
+                matched = true;
             }
 
             const List &Values()
