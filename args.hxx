@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <list>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -17,6 +16,27 @@ namespace args
         public:
             ParseError(const char *problem) : std::runtime_error(problem) {}
             virtual ~ParseError() {};
+    };
+
+    class ValidationError : public std::runtime_error
+    {
+        public:
+            ValidationError(const char *problem) : std::runtime_error(problem) {}
+            virtual ~ValidationError() {};
+    };
+
+    class Help : public std::exception
+    {
+        private:
+            const std::string flag;
+        public:
+            Help(const std::string &flag) : flag(flag) {}
+            virtual ~Help() {};
+
+            virtual const char *what() const noexcept override
+            {
+                return flag.c_str();
+            }
     };
 
     // A class of "matchers", specifying short and long options that can possibly be matched
@@ -473,7 +493,7 @@ namespace args
                 {
                     std::ostringstream problem;
                     problem << "Group validation failed somewhere!";
-                    throw ParseError(problem.str().c_str());
+                    throw ValidationError(problem.str().c_str());
                 }
             }
 
@@ -522,6 +542,34 @@ namespace args
 
             virtual ~Flag() {}
 
+    };
+
+    // Help flag class
+    class HelpFlag : public Flag
+    {
+        public:
+            HelpFlag(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): Flag(group, name, help, matcher) {}
+            HelpFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): Flag(group, name, help, std::move(matcher)) {}
+
+            virtual ~HelpFlag() {}
+
+            virtual FlagBase *Match(const std::string &arg) override
+            {
+                if (FlagBase::Match(arg))
+                {
+                    throw Help(arg);
+                }
+                return nullptr;
+            }
+
+            virtual FlagBase *Match(const char arg) override
+            {
+                if (FlagBase::Match(arg))
+                {
+                    throw Help(std::string(1, arg));
+                }
+                return nullptr;
+            }
     };
 
     // Count matches
