@@ -11,6 +11,45 @@
 
 namespace args
 {
+    // Wrap a string into a vector of string lines
+    std::vector<std::string> Wrap(const std::string &in, const size_t width)
+    {
+        // Preserve existing line breaks
+        const size_t newlineloc = in.find('\n');
+        if (newlineloc != in.npos)
+        {
+            std::vector<std::string> first(Wrap(std::string(in, 0, newlineloc), width));
+            const std::vector<std::string> second(Wrap(std::string(in, newlineloc + 1), width));
+            first.insert(std::end(first), std::begin(second), std::end(second));
+            return first;
+        }
+        std::istringstream stream(in);
+        std::vector<std::string> output;
+        std::ostringstream line;
+        while (stream)
+        {
+            std::string item;
+            stream >> item;
+            if ((size_t(line.tellp()) + 1 + item.size()) > width)
+            {
+                if (line.tellp() > 0)
+                {
+                    output.push_back(line.str());
+                    line.str(std::string());
+                }
+            }
+            if (line.tellp() > 0)
+            {
+                line << " ";
+            }
+            line << item;
+        }
+        if (line.tellp() > 0)
+        {
+            output.push_back(line.str());
+        }
+        return output;
+    }
     class ParseError : public std::runtime_error
     {
         public:
@@ -366,26 +405,43 @@ namespace args
             Group group;
 
         public:
-            operator Group&()
-            {
-                return group;
-            }
-
-            ArgumentParser(
-                const std::string &description,
-                const std::string &longprefix = "--",
-                const std::string &shortprefix = "-",
-                const std::string &longseparator = "=",
-                const std::string &prog = std::string(),
-                const std::string &epilog = std::string()
-                ) :
-                    prog(prog),
+            ArgumentParser(const std::string &description) :
                     description(description),
-                    epilog(epilog),
-                    longprefix(longprefix),
-                    shortprefix(shortprefix),
-                    longseparator(longseparator),
+                    longprefix("--"),
+                    shortprefix("-"),
+                    longseparator("="),
                     group("arguments", Group::Validators::AllChildGroups) {}
+
+            // Ugly getter/setter section
+            const std::string &Prog() const
+            { return prog; }
+            void Prog(const std::string &prog)
+            { this->prog = prog; }
+
+            const std::string &Description() const
+            { return description; }
+            void Description(const std::string &description)
+            { this->description = description; }
+            
+            const std::string &Epilog() const
+            { return epilog; }
+            void Epilog(const std::string &epilog)
+            { this->epilog = epilog; }
+
+            const std::string &LongPrefix() const
+            { return longprefix; }
+            void LongPrefix(const std::string &longprefix)
+            { this->longprefix = longprefix; }
+
+            const std::string &ShortPrefix() const
+            { return shortprefix; }
+            void ShortPrefix(const std::string &shortprefix)
+            { this->shortprefix = shortprefix; }
+
+            const std::string &LongSeparator() const
+            { return longseparator; }
+            void LongSeparator(const std::string &longseparator)
+            { this->longseparator = longseparator; }
 
             void Add(Base &child)
             {
@@ -523,6 +579,11 @@ namespace args
                     args.emplace_back(argv[i]);
                 }
                 ParseArgs(args);
+            }
+
+            operator Group&()
+            {
+                return group;
             }
     };
 
