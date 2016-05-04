@@ -40,10 +40,16 @@ namespace args
                 shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
             {}
 
-            // Specify short and long opts as initializer lists
-            template <typename Short, typename Long>
-            Matcher(const std::initializer_list<Short> &shortIn, const std::initializer_list<Long> &longIn) :
+            Matcher(const std::initializer_list<char> &shortIn, const std::initializer_list<std::string> &longIn) :
                 shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
+            {}
+
+            Matcher(const std::initializer_list<char> &shortIn) :
+                shortOpts(std::begin(shortIn), std::end(shortIn))
+            {}
+
+            Matcher(const std::initializer_list<std::string> &longIn) :
+                longOpts(std::begin(longIn), std::end(longIn))
             {}
 
             Matcher(const Matcher &other) : shortOpts(other.shortOpts), longOpts(other.longOpts)
@@ -56,12 +62,12 @@ namespace args
 
             bool Match(const char opt) const
             {
-                return std::find(shortOpts.begin(), shortOpts.end(), opt) != shortOpts.end();
+                return std::find(std::begin(shortOpts), std::end(shortOpts), opt) != shortOpts.end();
             }
 
             bool Match(const std::string &opt) const
             {
-                return std::find(longOpts.begin(), longOpts.end(), opt) != longOpts.end();
+                return std::find(std::begin(longOpts), std::end(longOpts), opt) != longOpts.end();
             }
     };
 
@@ -70,9 +76,10 @@ namespace args
     {
         protected:
             bool matched;
+            const std::string help;
 
         public:
-            Base() : matched(false) {}
+            Base(const std::string &help) : matched(false), help(help) {}
             virtual ~Base() {}
 
             virtual Base *Match(const std::string &arg) = 0;
@@ -93,7 +100,9 @@ namespace args
     class ArgBase : public Base
     {
         public:
+            ArgBase(const std::string &help) : Base(help) {}
             virtual ~ArgBase() {}
+            virtual void ParseArg(const std::string &arg, const std::string &value) = 0;
     };
 
     class Group : public Base
@@ -104,7 +113,7 @@ namespace args
 
         public:
 
-            Group(const std::function<bool(int, int)> &validator = Validators::DontCare) : validator(validator) {}
+            Group(const std::string &help, const std::function<bool(int, int)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
             virtual ~Group() {}
 
             virtual Base *Match(const std::string &arg) override
@@ -205,13 +214,21 @@ namespace args
             std::string longprefix;
             std::string shortprefix;
 
+            std::string longseparator;
+
             Group group;
 
         public:
+            operator Group&()
+            {
+                return group;
+            }
+
             ArgumentParser(
                 const std::string &description,
                 const std::string &longprefix = "--",
                 const std::string &shortprefix = "-",
+                const std::string &longseparator = "=",
                 const std::string &prog = std::string(),
                 const std::string &epilog = std::string()
                 ) :
@@ -220,27 +237,54 @@ namespace args
                     epilog(epilog),
                     longprefix(longprefix),
                     shortprefix(shortprefix),
-                    group(Group::Validators::DontCare) {}
-
-            void Add(Base &item)
-            {
-                group.Add(item);
-            }
+                    longseparator(longseparator),
+                    group("arguments", Group::Validators::DontCare) {}
 
             void ParseArgs(const std::vector<std::string> &args)
             {
+                // Check all arg chunks
                 for (auto it = std::begin(args); it != std::end(args); ++it)
                 {
                     const std::string &chunk = *it;
+
+                    // If a long arg was found
                     if (chunk.find(longprefix) == 0 && chunk.size() > longprefix.size())
                     {
                         const std::string argchunk(chunk.substr(longprefix.size()));
-                        Base *base = group.Match(argchunk);
+                        // Try to separate it, in case of a separator:
+                        const auto separator = argchunk.find(longseparator);
+                        const std::string arg = (separator != argchunk.npos ?
+                            std::string(argchunk, 0, separator)
+                            : argchunk);
+
+                        Base *base = group.Match(arg);
                         if (base)
                         {
-                            // Do match logic here, specifically passing an
-                            // argument, if necessary, to the base.  Query the
-                            // base and see if it takes an argument
+                            ArgBase *argbase = dynamic_cast<ArgBase *>(base);
+                            if (argbase)
+                            {
+                                if (separator != argchunk.npos)
+                                {
+                                    argbase->ParseArg(arg, argchunk.substr(separator + longseparator.size()));
+                                } else
+                                {
+                                    ++it;
+                                    if (it == std::end(args))
+                                    {
+                                        std::ostringstream problem;
+                                        problem << "Argument " << arg << " requires an argument but received none";
+                                        throw ParseError(problem.str().c_str());
+                                    } else
+                                    {
+                                        argbase->ParseArg(arg, *it);
+                                    }
+                                }
+                            } else if (separator != argchunk.npos)
+                            {
+                                std::ostringstream problem;
+                                problem << "Passed an argument into a non-argument flag: " << chunk;
+                                throw ParseError(problem.str().c_str());
+                            }
                         } else
                         {
                             std::ostringstream problem;
@@ -249,15 +293,37 @@ namespace args
                         }
                     } else if (chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
                     {
-                        const std::string argchunk(chunk.substr(shortprefix.size()));
-                        for (const char &arg: argchunk)
+                        std::string argchunk(chunk.substr(shortprefix.size()));
+                        for (auto argit = std::begin(argchunk); argit != std::end(argchunk); ++argit)
                         {
+                            const char arg = *argit;
+
                             Base *base = group.Match(arg);
                             if (base)
                             {
-                                // Do match logic here, specifically passing an
-                                // argument, if necessary, to the base.  Query the
-                                // base and see if it takes an argument
+                                ArgBase *argbase = dynamic_cast<ArgBase *>(base);
+                                if (argbase)
+                                {
+                                    argchunk.erase(std::begin(argchunk), ++argit);
+                                    if (!argchunk.empty())
+                                    {
+                                        argbase->ParseArg(std::string(1, arg), argchunk);
+                                    } else
+                                    {
+                                        ++it;
+                                        if (it == std::end(args))
+                                        {
+                                            std::ostringstream problem;
+                                            problem << "Argument " << arg << " requires an argument but received none";
+                                            throw ParseError(problem.str().c_str());
+                                        } else
+                                        {
+                                            argbase->ParseArg(std::string(1, arg), *it);
+                                        }
+                                    }
+                                    // Because this argchunk is done regardless
+                                    break;
+                                }
                             } else
                             {
                                 std::ostringstream problem;
@@ -291,14 +357,14 @@ namespace args
             const Matcher matcher;
 
         public:
-            Flag(ArgumentParser &parser, std::string help, const Matcher &matcher): matcher(matcher)
+            Flag(Group &group, const std::string &help, const Matcher &matcher): Base(help), matcher(matcher)
             {
-                parser.Add(*this);
+                group.Add(*this);
             }
 
-            Flag(ArgumentParser &parser, std::string help, Matcher &&matcher): matcher(std::move(matcher))
+            Flag(Group &group, const std::string &help, Matcher &&matcher): Base(help), matcher(std::move(matcher))
             {
-                parser.Add(*this);
+                group.Add(*this);
             }
 
             virtual ~Flag() {}
@@ -324,4 +390,174 @@ namespace args
             }
     };
 
+    // Count matches
+    class Counter : public Base
+    {
+        private:
+            const Matcher matcher;
+            unsigned int count;
+
+        public:
+            Counter(Group &group, const std::string &help, const Matcher &matcher, const unsigned int startcount = 0): Base(help), matcher(matcher), count(startcount)
+            {
+                group.Add(*this);
+            }
+
+            Counter(Group &group, const std::string &help, Matcher &&matcher, const unsigned int startcount = 0): Base(help), matcher(std::move(matcher)), count(startcount)
+            {
+                group.Add(*this);
+            }
+
+            virtual ~Counter() {}
+
+            virtual Base *Match(const std::string &arg) override
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    ++count;
+                    return this;
+                }
+                return nullptr;
+            }
+
+            virtual Base *Match(const char arg) override
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    ++count;
+                    return this;
+                }
+                return nullptr;
+            }
+
+            unsigned int Count()
+            {
+                return count;
+            }
+    };
+
+    template <typename T>
+    void ArgReader(const std::string &arg, const std::string &value, T &destination)
+    {
+        std::istringstream ss(value);
+        ss >> destination;
+
+        if (ss.rdbuf()->in_avail() > 0)
+        {
+            std::ostringstream problem;
+            problem << "Argument " << arg << " received invalid value type " << value;
+            throw ParseError(problem.str().c_str());
+        }
+    }
+
+    template <>
+    void ArgReader<std::string>(const std::string &arg, const std::string &value, std::string &destination)
+    {
+        destination.assign(value);
+    }
+
+    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
+    class ArgFlag : public ArgBase
+    {
+        private:
+            const Matcher matcher;
+            T value;
+
+        public:
+            ArgFlag(Group &group, const std::string &help, const Matcher &matcher): ArgBase(help), matcher(matcher)
+            {
+                group.Add(*this);
+            }
+
+            ArgFlag(Group &group, const std::string &help, Matcher &&matcher): ArgBase(help), matcher(std::move(matcher))
+            {
+                group.Add(*this);
+            }
+
+            virtual ~ArgFlag() {}
+
+            virtual Base *Match(const std::string &arg) override
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    return this;
+                }
+                return nullptr;
+            }
+
+            virtual Base *Match(const char arg) override
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    return this;
+                }
+                return nullptr;
+            }
+
+            virtual void ParseArg(const std::string &arg, const std::string &value) override
+            {
+                Reader(arg, value, this->value);
+            }
+
+            const T &Value()
+            {
+                return value;
+            }
+    };
+
+    template <typename T, typename List = std::vector<T>, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
+    class ArgFlagList : public ArgBase
+    {
+        private:
+            const Matcher matcher;
+            List values;
+
+        public:
+            ArgFlagList(Group &group, const std::string &help, const Matcher &matcher): ArgBase(help), matcher(matcher)
+            {
+                group.Add(*this);
+            }
+
+            ArgFlagList(Group &group, const std::string &help, Matcher &&matcher): ArgBase(help), matcher(std::move(matcher))
+            {
+                group.Add(*this);
+            }
+
+            virtual ~ArgFlagList() {}
+
+            virtual Base *Match(const std::string &arg) override
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    return this;
+                }
+                return nullptr;
+            }
+
+            virtual Base *Match(const char arg) override
+            {
+                if (matcher.Match(arg))
+                {
+                    matched = true;
+                    return this;
+                }
+                return nullptr;
+            }
+
+            virtual void ParseArg(const std::string &arg, const std::string &value) override
+            {
+                values.emplace_back();
+                Reader(arg, value, values.back());
+            }
+
+            const List &Values()
+            {
+                return values;
+            }
+    };
 }
