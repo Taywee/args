@@ -3,11 +3,13 @@
  */
 
 #include <algorithm>
+#include <exception>
 #include <functional>
+#include <locale>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
-#include <exception>
 
 namespace args
 {
@@ -19,8 +21,11 @@ namespace args
         if (newlineloc != in.npos)
         {
             std::vector<std::string> first(Wrap(std::string(in, 0, newlineloc), width));
-            const std::vector<std::string> second(Wrap(std::string(in, newlineloc + 1), width));
-            first.insert(std::end(first), std::begin(second), std::end(second));
+            std::vector<std::string> second(Wrap(std::string(in, newlineloc + 1), width));
+            first.insert(
+                std::end(first),
+                std::make_move_iterator(std::begin(second)),
+                std::make_move_iterator(std::end(second)));
             return first;
         }
         std::istringstream stream(in);
@@ -50,6 +55,28 @@ namespace args
         }
         return output;
     }
+
+    std::string GetArgName(std::string string)
+    {
+        std::locale loc;
+        for (unsigned int i = 0; i < string.size(); ++i)
+        {
+            const char c = string[i];
+            switch (c)
+            {
+                case ' ':
+                case '-':
+                    string[i] = '_';
+                    break;
+
+                default:
+                    string[i] = std::toupper(string[i], loc);
+                    break;
+            }
+        }
+        return string;
+    }
+
     class ParseError : public std::runtime_error
     {
         public:
@@ -128,6 +155,21 @@ namespace args
             {
                 return std::find(std::begin(longOpts), std::end(longOpts), opt) != longOpts.end();
             }
+
+            std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix) const
+            {
+                std::vector<std::string> optStrings;
+                optStrings.reserve(shortOpts.size() + longOpts.size());
+                for (const char opt: shortOpts)
+                {
+                    optStrings.emplace_back(shortPrefix + std::string(1, opt));
+                }
+                for (const std::string &opt: longOpts)
+                {
+                    optStrings.emplace_back(longPrefix + opt);
+                }
+                return optStrings;
+            }
     };
 
     // Base class for groups and individual argument types
@@ -150,6 +192,13 @@ namespace args
             {
                 return Matched();
             }
+
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const
+            {
+                std::tuple<std::string, std::string> description;
+                std::get<1>(description) = help;
+                return description;
+            }
     };
 
     // Named arguments, not including groups
@@ -162,7 +211,14 @@ namespace args
             NamedBase(const std::string &name, const std::string &help) : Base(help), name(name) {}
             virtual ~NamedBase() {}
 
-            const std::string &Name();
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
+            {
+                std::tuple<std::string, std::string> description;
+                std::get<0>(description) = GetArgName(name);
+                std::get<1>(description) = help;
+                return description;
+            }
+
     };
 
     // Base class for flag arguments
@@ -196,6 +252,25 @@ namespace args
                 }
                 return nullptr;
             }
+
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
+            {
+                std::tuple<std::string, std::string> description;
+                const std::string upperName(GetArgName(name));
+                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
+                std::ostringstream flagstream;
+                for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
+                {
+                    if (it != std::begin(optStrings))
+                    {
+                        flagstream << ", ";
+                    }
+                    flagstream << *it;
+                }
+                std::get<0>(description) = flagstream.str();
+                std::get<1>(description) = help;
+                return description;
+            }
     };
 
     // Base class that takes arguments
@@ -206,6 +281,25 @@ namespace args
             ArgFlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : FlagBase(name, help, std::move(matcher)) {}
             virtual ~ArgFlagBase() {}
             virtual void ParseArg(const std::string &value) = 0;
+
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
+            {
+                std::tuple<std::string, std::string> description;
+                const std::string upperName(GetArgName(name));
+                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
+                std::ostringstream flagstream;
+                for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
+                {
+                    if (it != std::begin(optStrings))
+                    {
+                        flagstream << ", ";
+                    }
+                    flagstream << *it << ' ' << upperName;
+                }
+                std::get<0>(description) = flagstream.str();
+                std::get<1>(description) = help;
+                return description;
+            }
     };
 
     // Base class for positional arguments
@@ -234,6 +328,10 @@ namespace args
 
         public:
             Group(const std::string &help, const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
+            Group(Group &group, const std::string &help, const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator)
+            {
+                group.Add(*this);
+            }
             virtual ~Group() {}
 
             FlagBase *Match(const std::string &arg)
@@ -332,6 +430,28 @@ namespace args
                 return validator(*this);
             }
 
+            std::vector<std::tuple<std::string, std::string>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix) const
+            {
+                std::vector<std::tuple<std::string, std::string>> descriptions;
+                for (const auto &child: children)
+                {
+                    const Group *group = dynamic_cast<Group *>(child);
+                    const NamedBase *named = dynamic_cast<NamedBase *>(child);
+                    if (group)
+                    {
+                        std::vector<std::tuple<std::string, std::string>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix));
+                        descriptions.insert(
+                            std::end(descriptions),
+                            std::make_move_iterator(std::begin(groupDescriptions)),
+                            std::make_move_iterator(std::end(groupDescriptions)));
+                    } else if (named)
+                    {
+                        descriptions.emplace_back(named->GetDescription(shortPrefix, longPrefix));
+                    }
+                }
+                return descriptions;
+            }
+
             struct Validators
             {
                 static bool Xor(const Group &group)
@@ -390,7 +510,7 @@ namespace args
     };
 
     // Command line argument parser
-    class ArgumentParser
+    class ArgumentParser : public Group
     {
         private:
             std::string prog;
@@ -402,15 +522,13 @@ namespace args
 
             std::string longseparator;
 
-            Group group;
-
         public:
             ArgumentParser(const std::string &description) :
-                    description(description),
-                    longprefix("--"),
-                    shortprefix("-"),
-                    longseparator("="),
-                    group("arguments", Group::Validators::AllChildGroups) {}
+                Group("arguments", Group::Validators::AllChildGroups),
+                description(description),
+                longprefix("--"),
+                shortprefix("-"),
+                longseparator("=") {}
 
             // Ugly getter/setter section
             const std::string &Prog() const
@@ -442,10 +560,18 @@ namespace args
             { return longseparator; }
             void LongSeparator(const std::string &longseparator)
             { this->longseparator = longseparator; }
-
-            void Add(Base &child)
+            std::string Help() const
             {
-                group.Add(child);
+                std::ostringstream help;
+                help << prog << "\n";
+                help << "\t" << description << "\n";
+                help << "\tOPTIONS:\n";
+                for (const auto &description: GetChildDescriptions(shortprefix, longprefix))
+                {
+                    help << "\t\t" << std::get<0>(description) << "\n";
+                    help << "\t\t\t" << std::get<1>(description) << "\n";
+                }
+                return help.str();
             }
 
             void ParseArgs(const std::vector<std::string> &args)
@@ -465,7 +591,7 @@ namespace args
                             std::string(argchunk, 0, separator)
                             : argchunk);
 
-                        FlagBase *base = group.Match(arg);
+                        FlagBase *base = Match(arg);
                         if (base)
                         {
                             ArgFlagBase *argbase = dynamic_cast<ArgFlagBase *>(base);
@@ -507,7 +633,7 @@ namespace args
                         {
                             const char arg = *argit;
 
-                            Base *base = group.Match(arg);
+                            Base *base = Match(arg);
                             if (base)
                             {
                                 ArgFlagBase *argbase = dynamic_cast<ArgFlagBase *>(base);
@@ -545,7 +671,7 @@ namespace args
                         SetNextPositional(chunk);
                     }
                 }
-                if (!group.Matched())
+                if (!Matched())
                 {
                     std::ostringstream problem;
                     problem << "Group validation failed somewhere!";
@@ -555,7 +681,7 @@ namespace args
 
             void SetNextPositional(const std::string &arg)
             {
-                PosBase *pos = group.GetNextPos();
+                PosBase *pos = GetNextPos();
                 if (pos)
                 {
                     pos->ParseArg(arg);
@@ -579,11 +705,6 @@ namespace args
                     args.emplace_back(argv[i]);
                 }
                 ParseArgs(args);
-            }
-
-            operator Group&()
-            {
-                return group;
             }
     };
 
