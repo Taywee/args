@@ -22,7 +22,6 @@
 #include <algorithm>
 #include <exception>
 #include <functional>
-#include <locale>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -31,9 +30,17 @@
 
 namespace args
 {
-    size_t Glyphs(const std::string &string)
+    /** (INTERNAL) Count UTF-8 glyphs
+     *
+     * This is not reliable, and will fail for combinatory glyphs, but it's
+     * good enough here for now.
+     *
+     * \param string The string to count glyphs from
+     * \return The UTF-8 glyphs in the string
+     */
+    std::string::size_type Glyphs(const std::string &string)
     {
-        size_t length = 0;
+        std::string::size_type length = 0;
         for (const char c: string)
         {
             if ((c & 0xc0) != 0x80)
@@ -43,11 +50,20 @@ namespace args
         }
         return length;
     }
-    // Wrap a string into a vector of string lines
-    std::vector<std::string> Wrap(const std::string &in, const size_t width, size_t firstlinewidth = 0)
+
+    /** (INTERNAL) Wrap a string into a vector of lines
+     *
+     * This is quick and hacky, but works well enough.  You can specify a
+     * different width for the first line
+     *
+     * \param width The width of the body
+     * \param the widtho f the first line, defaults to the width of the body
+     * \return the vector of lines
+     */
+    std::vector<std::string> Wrap(const std::string &in, const std::string::size_type width, std::string::size_type firstlinewidth = 0)
     {
         // Preserve existing line breaks
-        const size_t newlineloc = in.find('\n');
+        const std::string::size_type newlineloc = in.find('\n');
         if (newlineloc != in.npos)
         {
             std::vector<std::string> first(Wrap(std::string(in, 0, newlineloc), width));
@@ -62,17 +78,17 @@ namespace args
         {
             firstlinewidth = width;
         }
-        size_t currentwidth = firstlinewidth;
+        std::string::size_type currentwidth = firstlinewidth;
 
         std::istringstream stream(in);
         std::vector<std::string> output;
         std::ostringstream line;
-        size_t linesize = 0;
+        std::string::size_type linesize = 0;
         while (stream)
         {
             std::string item;
             stream >> item;
-            size_t itemsize = Glyphs(item);
+            std::string::size_type itemsize = Glyphs(item);
             if ((linesize + 1 + itemsize) > currentwidth)
             {
                 if (linesize > 0)
@@ -98,26 +114,8 @@ namespace args
         return output;
     }
 
-    std::string GetArgName(std::string string)
-    {
-        std::locale loc;
-        for (unsigned int i = 0; i < string.size(); ++i)
-        {
-            const char c = string[i];
-            switch (c)
-            {
-                case ' ':
-                case '-':
-                    string[i] = '_';
-                    break;
-
-                default:
-                    break;
-            }
-        }
-        return string;
-    }
-
+    /** Errors that occur during regular parsing
+     */
     class ParseError : public std::runtime_error
     {
         public:
@@ -125,6 +123,8 @@ namespace args
             virtual ~ParseError() {};
     };
 
+    /** Errors that are detected from group validation after parsing finishes
+     */
     class ValidationError : public std::runtime_error
     {
         public:
@@ -132,6 +132,8 @@ namespace args
             virtual ~ValidationError() {};
     };
 
+    /** An exception that indicates that the user has requested help
+     */
     class Help : public std::exception
     {
         private:
@@ -146,7 +148,10 @@ namespace args
             }
     };
 
-    // A class of "matchers", specifying short and long options that can possibly be matched
+    /** A class of "matchers", specifying short and long options that can possibly be matched
+     *
+     * This is supposed to be constructed and then passed in, not used directly from user code.
+     */
     class Matcher
     {
         private:
@@ -154,27 +159,35 @@ namespace args
             const std::unordered_set<std::string> longOpts;
 
         public:
-            // Specify short and long opts separately as iterators
+            /** Specify short and long opts separately as iterators
+             */
             template <typename ShortIt, typename LongIt>
             Matcher(ShortIt shortOptsStart, ShortIt shortOptsEnd, LongIt longOptsStart, LongIt longOptsEnd) :
                 shortOpts(shortOptsStart, shortOptsEnd),
                 longOpts(longOptsStart, longOptsEnd)
             {}
 
-            // Specify short and long opts separately as iterables
+            /** Specify short and long opts separately as iterables
+             */
             template <typename Short, typename Long>
             Matcher(Short &&shortIn, Long &&longIn) :
                 shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
             {}
 
+            /** Specify short and long opts as initializer lists
+             */
             Matcher(const std::initializer_list<char> &shortIn, const std::initializer_list<std::string> &longIn) :
                 shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
             {}
 
+            /** Specify short opts only as initializer lists
+             */
             Matcher(const std::initializer_list<char> &shortIn) :
                 shortOpts(std::begin(shortIn), std::end(shortIn))
             {}
 
+            /** Specify long opts only as initializer lists
+             */
             Matcher(const std::initializer_list<std::string> &longIn) :
                 longOpts(std::begin(longIn), std::end(longIn))
             {}
@@ -184,16 +197,22 @@ namespace args
 
             ~Matcher() {}
 
+            /** (INTERNAL) Check if there is a match of a short opt
+             */
             bool Match(const char opt) const
             {
                 return shortOpts.find(opt) != shortOpts.end();
             }
 
+            /** (INTERNAL) Check if there is a match of a long opt
+             */
             bool Match(const std::string &opt) const
             {
                 return longOpts.find(opt) != longOpts.end();
             }
 
+            /** (INTERNAL) Get all option strings as a vector, with the prefixes embedded
+             */
             std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix) const
             {
                 std::vector<std::string> optStrings;
@@ -210,7 +229,8 @@ namespace args
             }
     };
 
-    // Base class for groups and individual argument types
+    /** Base class for all match types
+     */
     class Base
     {
         protected:
@@ -239,7 +259,8 @@ namespace args
             }
     };
 
-    // Named arguments, not including groups
+    /** Base class for all match types that have a name
+     */
     class NamedBase : public Base
     {
         protected:
@@ -252,14 +273,15 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 std::tuple<std::string, std::string> description;
-                std::get<0>(description) = GetArgName(name);
+                std::get<0>(description) = name;
                 std::get<1>(description) = help;
                 return description;
             }
 
     };
 
-    // Base class for flag arguments
+    /** Base class for all flag arguments
+     */
     class FlagBase : public NamedBase
     {
         protected:
@@ -293,7 +315,7 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::string upperName(GetArgName(name));
+                const std::string upperName(name);
                 const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
                 std::ostringstream flagstream;
                 for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
@@ -310,7 +332,8 @@ namespace args
             }
     };
 
-    // Base class that takes arguments
+    /** Base class for argument-accepting flag arguments
+     */
     class ArgFlagBase : public FlagBase
     {
         public:
@@ -321,7 +344,7 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::string upperName(GetArgName(name));
+                const std::string upperName(name);
                 const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
                 std::ostringstream flagstream;
                 for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
@@ -338,7 +361,8 @@ namespace args
             }
     };
 
-    // Base class for positional arguments
+    /** Base class for positional arguments
+     */
     class PosBase : public NamedBase
     {
         protected:
@@ -354,9 +378,14 @@ namespace args
             }
 
             virtual void ParseArg(const std::string &value) = 0;
-            virtual std::string ArgName() const = 0;
+            virtual std::string Name() const
+            {
+                return name;
+            }
     };
 
+    /** Class for all kinds of validating groups, including ArgumentParser
+     */
     class Group : public Base
     {
         private:
@@ -371,6 +400,11 @@ namespace args
             }
             virtual ~Group() {}
 
+            /** Return the first FlagBase that matches arg, or nullptr
+             *
+             * \param arg The argument with prefixes stripped
+             * \return the first matching FlagBase pointer, or nullptr if there is no match
+             */
             FlagBase *Match(const std::string &arg)
             {
                 for (Base *child: children)
@@ -396,6 +430,11 @@ namespace args
                 return nullptr;
             }
 
+            /** Return the first FlagBase that matches arg, or nullptr
+             *
+             * \param arg The argument with prefixes stripped
+             * \return the first matching FlagBase pointer, or nullptr if there is no match
+             */
             FlagBase *Match(const char arg)
             {
                 for (Base *child: children)
@@ -421,6 +460,10 @@ namespace args
                 return nullptr;
             }
 
+            /** Get the next ready positional parameter, or nullptr if there is none
+             *
+             * \return the first ready PosBase pointer, or nullptr if there is no match
+             */
             PosBase *GetNextPos()
             {
                 for (Base *child: children)
@@ -439,6 +482,10 @@ namespace args
                 return nullptr;
             }
 
+            /** Get whether this has any FlagBase children
+             *
+             * \return Whether or not there are any FlagBase children
+             */
             bool HasFlag() const
             {
                 for (Base *child: children)
@@ -460,16 +507,22 @@ namespace args
                 return false;
             }
 
+            /** Append a child to this Group.
+             */
             void Add(Base &child)
             {
                 children.emplace_back(&child);
             }
 
+            /** Get all this group's children
+             */
             const std::vector<Base *> Children() const
             {
                 return children;
             }
 
+            /** Count the number of matched children this group has
+             */
             std::vector<Base *>::size_type MatchedChildren() const
             {
                 std::vector<Base *>::size_type sum = 0;
@@ -483,11 +536,15 @@ namespace args
                 return sum;
             }
 
+            /** Whether or not this group matches validation
+             */
             virtual bool Matched() const noexcept override
             {
                 return validator(*this);
             }
 
+            /** Get all the child descriptions for help generation
+             */
             std::vector<std::tuple<std::string, std::string>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix) const
             {
                 std::vector<std::tuple<std::string, std::string>> descriptions;
@@ -510,6 +567,8 @@ namespace args
                 return descriptions;
             }
 
+            /** Get the names of positional parameters
+             */
             std::vector<std::string> GetPosNames() const
             {
                 std::vector <std::string> names;
@@ -526,12 +585,14 @@ namespace args
                             std::make_move_iterator(std::end(groupNames)));
                     } else if (pos)
                     {
-                        names.emplace_back(pos->ArgName());
+                        names.emplace_back(pos->Name());
                     }
                 }
                 return names;
             }
 
+            /** Default validators
+             */
             struct Validators
             {
                 static bool Xor(const Group &group)
@@ -589,7 +650,8 @@ namespace args
             };
     };
 
-    // Command line argument parser
+    /** The main user facing command line argument parser class
+     */
     class ArgumentParser : public Group
     {
         private:
@@ -614,42 +676,85 @@ namespace args
                 longseparator("="),
                 terminator("--") {}
 
-            // Ugly getter/setter section
+            /** The program name for help generation
+             */
             const std::string &Prog() const
             { return prog; }
+            /** The program name for help generation
+             */
             void Prog(const std::string &prog)
             { this->prog = prog; }
 
+            /** The description that appears above options
+             */
             const std::string &Description() const
             { return description; }
+            /** The description that appears above options
+             */
             void Description(const std::string &description)
             { this->description = description; }
             
+            /** The description that appears below options
+             */
             const std::string &Epilog() const
             { return epilog; }
+            /** The description that appears below options
+             */
             void Epilog(const std::string &epilog)
             { this->epilog = epilog; }
 
+            /** The prefix for long options
+             */
             const std::string &LongPrefix() const
             { return longprefix; }
+            /** The prefix for long options
+             */
             void LongPrefix(const std::string &longprefix)
             { this->longprefix = longprefix; }
 
+            /** The prefix for short options
+             */
             const std::string &ShortPrefix() const
             { return shortprefix; }
+            /** The prefix for short options
+             */
             void ShortPrefix(const std::string &shortprefix)
             { this->shortprefix = shortprefix; }
 
+            /** The separator for long options
+             */
             const std::string &LongSeparator() const
             { return longseparator; }
+            /** The separator for long options
+             */
             void LongSeparator(const std::string &longseparator)
-            { this->longseparator = longseparator; }
+            {
+                if (longseparator.empty())
+                {
+                    throw ParseError("The long separator may not be empty");
+                }
+                this->longseparator = longseparator;
+            }
 
+            /** The terminator that separates short options from long ones
+             */
             const std::string &Terminator() const
             { return terminator; }
+            /** The terminator that separates short options from long ones
+             */
             void Terminator(const std::string &terminator)
             { this->terminator = terminator; }
 
+            /** Generate a help menu as a string.
+             *
+             * \param width the width of the terminal
+             * \param progindent the indent of the program name line
+             * \param descriptionindent the indent of the description and epilog lines
+             * \param flagindent the indent of the flags themselves
+             * \param helpindent the indent of the flag help texts
+             * \param gutter the required minimum spacing between the flag text and the flag help
+             * \return the help text as a single string
+             */
             std::string Help(unsigned int width = 80, unsigned int progindent = 2, unsigned int descriptionindent = 4, unsigned int flagindent = 6, unsigned int helpindent = 25, unsigned int gutter = 1) const
             {
                 bool hasoptions = false;
@@ -696,7 +801,7 @@ namespace args
                     const std::vector<std::string> info(Wrap(std::get<1>(description), width - helpindent));
                     help << std::string(flagindent, ' ') << flags;
                     auto infoit = std::begin(info);
-                    const size_t flagssize = Glyphs(flags);
+                    const std::string::size_type flagssize = Glyphs(flags);
                     if ((flagindent + flagssize + gutter) > helpindent)
                     {
                         help << '\n';
@@ -726,7 +831,12 @@ namespace args
                 return help.str();
             }
 
-            void ParseArgs(const std::vector<std::string> &args)
+            /** Parse all arguments.
+             *
+             * \param args an iterable of the arguments
+             */
+            template <typename T>
+            void ParseArgs(const T &args)
             {
                 bool terminated = false;
 
@@ -825,7 +935,16 @@ namespace args
                         }
                     } else
                     {
-                        SetNextPositional(chunk);
+                        PosBase *pos = GetNextPos();
+                        if (pos)
+                        {
+                            pos->ParseArg(chunk);
+                        } else
+                        {
+                            std::ostringstream problem;
+                            problem << "Passed in argument, but no positional arguments were ready to receive it" << chunk;
+                            throw ParseError(problem.str().c_str());
+                        }
                     }
                 }
                 if (!Matched())
@@ -836,20 +955,10 @@ namespace args
                 }
             }
 
-            void SetNextPositional(const std::string &arg)
-            {
-                PosBase *pos = GetNextPos();
-                if (pos)
-                {
-                    pos->ParseArg(arg);
-                } else
-                {
-                    std::ostringstream problem;
-                    problem << "Passed in argument, but no positional arguments were ready to receive it" << arg;
-                    throw ParseError(problem.str().c_str());
-                }
-            }
-
+            /** Convenience function to parse the CLI from argc and argv
+             *
+             * Just assigns the program name and vectorizes arguments for passing into ParseArgs()
+             */
             void ParseCLI(const int argc, const char * const * const argv)
             {
                 if (prog.empty())
@@ -865,7 +974,8 @@ namespace args
             }
     };
 
-    // Boolean argument matcher
+    /** Boolean argument matcher
+     */
     class Flag : public FlagBase
     {
         public:
@@ -877,7 +987,10 @@ namespace args
             virtual ~Flag() {}
     };
 
-    // Help flag class
+    /** Help flag class
+     *
+     * Works like a regular flag, but throws an instance of Help when it is matched
+     */
     class HelpFlag : public Flag
     {
         public:
@@ -904,16 +1017,16 @@ namespace args
             }
     };
 
-    // Count matches
-    class Counter : public FlagBase
+    /** A flag class that simply counts the number of times it's matched
+     */
+    class Counter : public Flag
     {
         public:
-            unsigned int count;
+            /** The public count variable.  Can be changed at will, but probably shouldn't be.
+             */
+            int count;
 
-            Counter(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const unsigned int startcount = 0): FlagBase(name, help, std::move(matcher)), count(startcount)
-            {
-                group.Add(*this);
-            }
+            Counter(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const int startcount = 0): Flag(group, name, help, std::move(matcher)), count(startcount) {}
 
             virtual ~Counter() {}
 
@@ -938,6 +1051,11 @@ namespace args
             }
     };
 
+    /** A default Reader function for argument classes
+     *
+     * Simply uses a std::istringstream to read into the destination type, and
+     * raises a ParseError if there are any characters left.
+     */
     template <typename T>
     void ArgReader(const std::string &name, const std::string &value, T &destination)
     {
@@ -952,16 +1070,30 @@ namespace args
         }
     }
 
+    /** std::string specialization for ArgReader
+     *
+     * By default, stream extraction into a string splits on white spaces, and
+     * it is more efficient to ust copy a string into the destination.
+     */
     template <>
     void ArgReader<std::string>(const std::string &name, const std::string &value, std::string &destination)
     {
         destination.assign(value);
     }
 
+    /** An argument-accepting flag class
+     * 
+     * \tparam T the type to extract the argument as
+     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     */
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class ArgFlag : public ArgFlagBase
     {
         public:
+            /** The publicly accessible value member
+             *
+             * You can change this, but you probably shouldn't.
+             */
             T value;
 
             ArgFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T()): ArgFlagBase(name, help, std::move(matcher)), value(defaultValue)
@@ -977,6 +1109,12 @@ namespace args
             }
     };
 
+    /** An argument-accepting flag class that pushes the found values into a list
+     * 
+     * \tparam T the type to extract the argument as
+     * \tparam List the list type that houses the values
+     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     */
     template <
         typename T,
         typename List = std::vector<T>,
@@ -984,6 +1122,10 @@ namespace args
     class ArgFlagList : public ArgFlagBase
     {
         public:
+            /** The publicly accessible value member list
+             *
+             * You can change this, but you probably shouldn't.
+             */
             List values;
 
             ArgFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ArgFlagBase(name, help, std::move(matcher)), values(defaultValues)
@@ -1000,10 +1142,19 @@ namespace args
             }
     };
 
+    /** A positional argument class
+     *
+     * \tparam T the type to extract the argument as
+     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     */
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class PosArg : public PosBase
     {
         public:
+            /** The publicly accessible value member
+             *
+             * You can change this, but you probably shouldn't.
+             */
             T value;
 
             PosArg(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PosBase(name, help), value(defaultValue)
@@ -1019,13 +1170,14 @@ namespace args
                 ready = false;
                 matched = true;
             }
-
-            virtual std::string ArgName() const override
-            {
-                return GetArgName(name);
-            }
     };
 
+    /** A positional argument class that pushes the found values into a list
+     * 
+     * \tparam T the type to extract the argument as
+     * \tparam List the list type that houses the values
+     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     */
     template <
         typename T,
         typename List = std::vector<T>,
@@ -1033,6 +1185,10 @@ namespace args
     class PosArgList : public PosBase
     {
         public:
+            /** The publicly accessible value member list
+             *
+             * You can change this, but you probably shouldn't.
+             */
             List values;
 
             PosArgList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PosBase(name, help), values(defaultValues)
@@ -1049,9 +1205,9 @@ namespace args
                 matched = true;
             }
 
-            virtual std::string ArgName() const override
+            virtual std::string Name() const override
             {
-                return GetArgName(name) + std::string("...");
+                return name + std::string("...");
             }
     };
 }

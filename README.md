@@ -1,5 +1,7 @@
 # args
-A simple, small, flexible, single-header C++11 argument parsing library
+
+A simple, small, flexible, single-header C++11 argument parsing library, in
+fewer than 1024 lines of code.
 
 This is designed to somewhat replicate the behavior of Python's argparse, but
 in C++, with static type checking, and hopefully a lot faster.
@@ -43,13 +45,6 @@ There are tons of things this library does not do!
 
 ## It does not yet:
 
-* Allow you to use a positional argument list before any other positional
-	arguments (the last argument list will slurp all subsequent positional
-	arguments).  The logic for allowing this would be a lot more code than I'd
-	like, and would make static checking much more difficult, requiring us to
-	sort std::string arguments and pair them to positional arguments before
-	assigning them, rather than what we currently do, which is assiging them as
-	we go for better simplicity and speed.
 * Let you decide not to allow separate-argument argument flags or joined ones
 	(like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
 	same for short options).
@@ -64,6 +59,14 @@ There are tons of things this library does not do!
 * Allow you to intermix multiple different prefix types (eg. `++foo` and
 	`--foo` in the same parser), though shortopt and longopt prefixes can be
 	different.
+* Allow you to have argument flags only optionally accept arguments
+* Allow you to use a positional argument list before any other positional
+	arguments (the last argument list will slurp all subsequent positional
+	arguments).  The logic for allowing this would be a lot more code than I'd
+	like, and would make static checking much more difficult, requiring us to
+	sort std::string arguments and pair them to positional arguments before
+	assigning them, rather than what we currently do, which is assiging them as
+	we go for better simplicity and speed.
 
 # How do I use it?
 
