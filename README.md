@@ -1,7 +1,7 @@
 # args
 
 A simple, small, flexible, single-header C++11 argument parsing library, in
-fewer than 1024 lines of code.
+about 1.2K lines of code.
 
 This is designed to somewhat replicate the behavior of Python's argparse, but
 in C++, with static type checking, and hopefully a lot faster.
@@ -18,6 +18,9 @@ redistributions (ie. don't pretend that you wrote it).  I do welcome additions
 and updates wherever you feel like contributing code.
 
 The API documentation can be found at https://taywee.github.io/args
+
+I'd also host the documentation at gitgud.io, but they don't offer pages at the
+moment.
 
 There are also somewhat extensive examples below.
 
