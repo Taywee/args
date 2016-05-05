@@ -42,7 +42,7 @@ It:
 
 There are tons of things this library does not do!
 
-It does not yet:
+## It does not yet:
 
 * Allow you to use a positional argument list before any other positional
 	arguments (the last argument list will slurp all subsequent positional
@@ -51,8 +51,11 @@ It does not yet:
 	sort std::string arguments and pair them to positional arguments before
 	assigning them, rather than what we currently do, which is assiging them as
 	we go for better simplicity and speed.
+* Let you decide not to allow separate-argument argument flags or joined ones
+	(like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
+	same for short options).
 
-It will not ever:
+## It will not ever:
 
 * Allow you to create subparsers like argparse
 * Allow one argument flag to take a specific number of arguments
@@ -110,9 +113,7 @@ All the code examples here will be complete code examples, with some output.
 
 ```c++
 #include <iostream>
-
 #include <args.hxx>
-
 int main(int argc, char **argv)
 {
 	args::ArgumentParser parser("This is a test program.", "This goes after the options.");
@@ -240,9 +241,7 @@ Argument 'numbers' received invalid value type 'a'
 ```c++
 #include <iostream>
 #include <tuple>
-
 #include <args.hxx>
-
 std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
 {
     is >> std::get<0>(ints);
@@ -329,3 +328,203 @@ As you can see, with your own types, validation can get a little weird.  Make
 sure to check and throw a parsing error (or whatever error you want to catch)
 if you can't fully deduce your type.  The built-in validator will only throw if
 there are unextracted characters left in the stream.
+
+## Long descriptions and proper wrapping and listing
+
+```c++
+#include <iostream>
+#include <args.hxx>
+int main(int argc, char **argv)
+{
+	args::ArgumentParser parser("This is a test program with a really long description that is probably going to have to be wrapped across multiple different lines.  This is a test to see how the line wrapping works", "This goes after the options.  This epilog is also long enough that it will have to be properly wrapped to display correctly on the screen");
+	args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({'h'}, {"help"}));
+	args::ArgFlag<std::string> foo(parser, "FOO", "The foo flag.", args::Matcher({'a', 'b', 'c'}, {"a", "b", "c", "the-foo-flag"}));
+	args::ArgFlag<std::string> bar(parser, "BAR", "The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.", args::Matcher({'d', 'e', 'f'}, {"d", "e", "f"}));
+	args::ArgFlag<std::string> baz(parser, "FOO", "The baz flag.  This one has a lot of options, and will need wrapping in the description, even with its short flag list.", args::Matcher({"baz"}));
+	args::PosArg<std::string> pos1(parser, "POS1", "The pos1 argument.");
+	args::PosArgList<std::string> poslist1(parser, "POSLIST1", "The poslist1 argument.");
+	args::PosArg<std::string> pos2(parser, "POS2", "The pos2 argument.");
+	args::PosArgList<std::string> poslist2(parser, "POSLIST2", "The poslist2 argument.");
+	args::PosArg<std::string> pos3(parser, "POS3", "The pos3 argument.");
+	args::PosArgList<std::string> poslist3(parser, "POSLIST3", "The poslist3 argument.");
+	args::PosArg<std::string> pos4(parser, "POS4", "The pos4 argument.");
+	args::PosArgList<std::string> poslist4(parser, "POSLIST4", "The poslist4 argument.");
+	args::PosArg<std::string> pos5(parser, "POS5", "The pos5 argument.");
+	args::PosArgList<std::string> poslist5(parser, "POSLIST5", "The poslist5 argument.");
+	args::PosArg<std::string> pos6(parser, "POS6", "The pos6 argument.");
+	args::PosArgList<std::string> poslist6(parser, "POSLIST6", "The poslist6 argument.");
+	args::PosArg<std::string> pos7(parser, "POS7", "The pos7 argument.");
+	args::PosArgList<std::string> poslist7(parser, "POSLIST7", "The poslist7 argument.");
+	args::PosArg<std::string> pos8(parser, "POS8", "The pos8 argument.");
+	args::PosArgList<std::string> poslist8(parser, "POSLIST8", "The poslist8 argument.");
+	args::PosArg<std::string> pos9(parser, "POS9", "The pos9 argument.");
+	args::PosArgList<std::string> poslist9(parser, "POSLIST9", "The poslist9 argument.");
+	try
+	{
+		parser.ParseCLI(argc, argv);
+	}
+	catch (args::Help)
+	{
+		std::cout << parser.Help();
+		return 0;
+	}
+	catch (args::ParseError e)
+	{
+		std::cerr << e.what() << std::endl;
+		std::cerr << parser.Help();
+		return 1;
+	}
+	catch (args::ValidationError e)
+	{
+		std::cerr << e.what() << std::endl;
+		std::cerr << parser.Help();
+		return 1;
+	}
+	return 0;
+}
+```
+
+```shell
+ % ./test -h
+  ./test {OPTIONS} [POS1] [POSLIST1...] [POS2] [POSLIST2...] [POS3]
+      [POSLIST3...] [POS4] [POSLIST4...] [POS5] [POSLIST5...] [POS6]
+      [POSLIST6...] [POS7] [POSLIST7...] [POS8] [POSLIST8...] [POS9]
+      [POSLIST9...] 
+
+    This is a test program with a really long description that is probably going
+    to have to be wrapped across multiple different lines. This is a test to see
+    how the line wrapping works 
+
+  OPTIONS:
+
+      -h, --help         Show this help menu. 
+      -a FOO, -b FOO, -c FOO, --a FOO, --b FOO, --c FOO, --the-foo-flag FOO
+                         The foo flag. 
+      -d BAR, -e BAR, -f BAR, --d BAR, --e BAR, --f BAR
+                         The bar flag. This one has a lot of options, and will
+                         need wrapping in the description, along with its long
+                         flag list. 
+      --baz FOO          The baz flag. This one has a lot of options, and will
+                         need wrapping in the description, even with its short
+                         flag list. 
+      POS1               The pos1 argument. 
+      POSLIST1           The poslist1 argument. 
+      POS2               The pos2 argument. 
+      POSLIST2           The poslist2 argument. 
+      POS3               The pos3 argument. 
+      POSLIST3           The poslist3 argument. 
+      POS4               The pos4 argument. 
+      POSLIST4           The poslist4 argument. 
+      POS5               The pos5 argument. 
+      POSLIST5           The poslist5 argument. 
+      POS6               The pos6 argument. 
+      POSLIST6           The poslist6 argument. 
+      POS7               The pos7 argument. 
+      POSLIST7           The poslist7 argument. 
+      POS8               The pos8 argument. 
+      POSLIST8           The poslist8 argument. 
+      POS9               The pos9 argument. 
+      POSLIST9           The poslist9 argument. 
+      "--" can be used to terminate flag options and force all following
+      arguments to be treated as positional options 
+
+    This goes after the options. This epilog is also long enough that it will
+    have to be properly wrapped to display correctly on the screen 
+ %
+```
+
+## Customizing parser prefixes
+
+### dd-style
+
+```c++
+#include <iostream>
+#include <args.hxx>
+int main(int argc, char **argv)
+{
+	args::ArgumentParser parser("This command likes to break your disks");
+	parser.LongPrefix("");
+	parser.LongSeparator("=");
+	args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
+	args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
+	args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
+	args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
+	args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+	try
+	{
+		parser.ParseCLI(argc, argv);
+	}
+	catch (args::Help)
+	{
+		std::cout << parser.Help();
+		return 0;
+	}
+	catch (args::ParseError e)
+	{
+		std::cerr << e.what() << std::endl;
+		std::cerr << parser.Help();
+		return 1;
+	}
+	catch (args::ValidationError e)
+	{
+		std::cerr << e.what() << std::endl;
+		std::cerr << parser.Help();
+		return 1;
+	}
+	std::cout << "bs = " << bs.value << std::endl;
+	std::cout << "skip = " << skip.value << std::endl;
+	if (input) { std::cout << "if = " << input.value << std::endl; }
+	if (output) { std::cout << "of = " << output.value << std::endl; }
+	return 0;
+}
+```
+
+```shell
+ % ./test help
+  ./test {OPTIONS} 
+
+    This command likes to break your disks 
+
+  OPTIONS:
+
+      help               Show this help menu. 
+      bs BYTES           Block size 
+      skip BYTES         Bytes to skip 
+      if BLOCK_SIZE      Block size 
+      of BLOCK_SIZE      Block size 
+
+ % ./test bs=1024 skip=7 if=/tmp/input
+bs = 1024
+skip = 7
+if = /tmp/input
+```
+
+### Windows style
+
+The code is the same as above, but the two lines are replaced out:
+
+```c++
+parser.LongPrefix("/");
+parser.LongSeparator(":");
+```
+
+```shell
+ % ./test /help     
+  ./test {OPTIONS} 
+
+    This command likes to break your disks 
+
+  OPTIONS:
+
+      /help              Show this help menu. 
+      /bs BYTES          Block size 
+      /skip BYTES        Bytes to skip 
+      /if BLOCK_SIZE     Block size 
+      /of BLOCK_SIZE     Block size 
+
+ % ./test /bs:72 /skip:87 /if:/tmp/test.txt
+bs = 72
+skip = 87
+if = /tmp/test.txt
+ % 
+```

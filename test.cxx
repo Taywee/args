@@ -3,30 +3,19 @@
  */
 
 #include <iostream>
-#include <tuple>
 
 #include <args.hxx>
 
-std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
-{
-    is >> std::get<0>(ints);
-    is.get();
-    is >> std::get<1>(ints);
-    return is;
-}
-
-void DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
-{
-    size_t commapos = 0;
-    std::get<0>(destination) = std::stod(value, &commapos);
-    std::get<1>(destination) = std::stod(std::string(value, commapos + 1));
-}
-
 int main(int argc, char **argv)
 {
-    args::ArgumentParser parser("This is a test program.");
-    args::PosArg<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
-    args::PosArg<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
+    args::ArgumentParser parser("This command likes to break your disks");
+    parser.LongPrefix("/");
+    parser.LongSeparator(":");
+    args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
+    args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
+    args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
+    args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
+    args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
     try
     {
         parser.ParseCLI(argc, argv);
@@ -42,13 +31,15 @@ int main(int argc, char **argv)
         std::cerr << parser.Help();
         return 1;
     }
-    if (ints)
+    catch (args::ValidationError e)
     {
-        std::cout << "ints found: " << std::get<0>(ints.value) << " and " << std::get<1>(ints.value) << std::endl;
+        std::cerr << e.what() << std::endl;
+        std::cerr << parser.Help();
+        return 1;
     }
-    if (doubles)
-    {
-        std::cout << "doubles found: " << std::get<0>(doubles.value) << " and " << std::get<1>(doubles.value) << std::endl;
-    }
+    std::cout << "bs = " << bs.value << std::endl;
+    std::cout << "skip = " << skip.value << std::endl;
+    if (input) { std::cout << "if = " << input.value << std::endl; }
+    if (output) { std::cout << "of = " << output.value << std::endl; }
     return 0;
 }
