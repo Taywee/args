@@ -585,6 +585,8 @@ namespace args
 
             std::string longseparator;
 
+            std::string terminator;
+
         public:
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
                 Group("arguments", Group::Validators::AllChildGroups),
@@ -592,7 +594,8 @@ namespace args
                 epilog(epilog),
                 longprefix("--"),
                 shortprefix("-"),
-                longseparator("=") {}
+                longseparator("="),
+                terminator("--") {}
 
             // Ugly getter/setter section
             const std::string &Prog() const
@@ -624,8 +627,17 @@ namespace args
             { return longseparator; }
             void LongSeparator(const std::string &longseparator)
             { this->longseparator = longseparator; }
-            std::string Help(unsigned int width = 80, unsigned int progindent = 2, unsigned int descriptionindent = 4, unsigned int flagindent = 6, unsigned int helpindent = 40, unsigned int gutter = 1) const
+
+            const std::string &Terminator() const
+            { return terminator; }
+            void Terminator(const std::string &terminator)
+            { this->terminator = terminator; }
+
+            std::string Help(unsigned int width = 80, unsigned int progindent = 2, unsigned int descriptionindent = 4, unsigned int flagindent = 6, unsigned int helpindent = 25, unsigned int gutter = 1) const
             {
+                bool hasoptions = false;
+                bool hasarguments = false;
+
                 const std::vector<std::string> description(Wrap(this->description, width - descriptionindent));
                 const std::vector<std::string> epilog(Wrap(this->epilog, width - descriptionindent));
                 std::ostringstream help;
@@ -633,10 +645,12 @@ namespace args
                 prognameline << prog;
                 if (HasFlag())
                 {
+                    hasoptions = true;
                     prognameline << " {OPTIONS}";
                 }
                 for (const std::string &posname: GetPosNames())
                 {
+                    hasarguments = true;
                     prognameline << " [" << posname << ']';
                 }
                 const std::vector<std::string> proglines(Wrap(prognameline.str(), width - (progindent + 4), width - progindent));
@@ -676,7 +690,14 @@ namespace args
                     }
                     for (; infoit != std::end(info); ++infoit)
                     {
-                        help << std::string(helpindent, ' ') << *infoit << "\n";
+                        help << std::string(helpindent, ' ') << *infoit << '\n';
+                    }
+                }
+                if (hasoptions && hasarguments)
+                {
+                    for (const std::string &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", width - flagindent))
+                    {
+                        help << std::string(flagindent, ' ') << item << '\n';
                     }
                 }
 
@@ -690,13 +711,18 @@ namespace args
 
             void ParseArgs(const std::vector<std::string> &args)
             {
+                bool terminated = false;
+
                 // Check all arg chunks
                 for (auto it = std::begin(args); it != std::end(args); ++it)
                 {
                     const std::string &chunk = *it;
 
+                    if (!terminated and chunk == terminator)
+                    {
+                        terminated = true;
                     // If a long arg was found
-                    if (chunk.find(longprefix) == 0 && chunk.size() > longprefix.size())
+                    } else if (!terminated && chunk.find(longprefix) == 0 && chunk.size() > longprefix.size())
                     {
                         const std::string argchunk(chunk.substr(longprefix.size()));
                         // Try to separate it, in case of a separator:
@@ -740,7 +766,7 @@ namespace args
                             throw ParseError(problem.str().c_str());
                         }
                         // Check short args
-                    } else if (chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
+                    } else if (!terminated && chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
                     {
                         std::string argchunk(chunk.substr(shortprefix.size()));
                         for (auto argit = std::begin(argchunk); argit != std::end(argchunk); ++argit)
@@ -864,10 +890,9 @@ namespace args
     // Count matches
     class Counter : public FlagBase
     {
-        private:
+        public:
             unsigned int count;
 
-        public:
             Counter(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const unsigned int startcount = 0): FlagBase(name, help, std::move(matcher)), count(startcount)
             {
                 group.Add(*this);
@@ -894,11 +919,6 @@ namespace args
                 }
                 return me;
             }
-
-            unsigned int Count()
-            {
-                return count;
-            }
     };
 
     template <typename T>
@@ -924,10 +944,9 @@ namespace args
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class ArgFlag : public ArgFlagBase
     {
-        private:
+        public:
             T value;
 
-        public:
             ArgFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T()): ArgFlagBase(name, help, std::move(matcher)), value(defaultValue)
             {
                 group.Add(*this);
@@ -939,11 +958,6 @@ namespace args
             {
                 Reader(name, value, this->value);
             }
-
-            const T &Value()
-            {
-                return value;
-            }
     };
 
     template <
@@ -952,10 +966,9 @@ namespace args
         void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class ArgFlagList : public ArgFlagBase
     {
-        private:
+        public:
             List values;
 
-        public:
             ArgFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ArgFlagBase(name, help, std::move(matcher)), values(defaultValues)
             {
                 group.Add(*this);
@@ -968,20 +981,14 @@ namespace args
                 values.emplace_back();
                 Reader(name, value, values.back());
             }
-
-            const List &Values()
-            {
-                return values;
-            }
     };
 
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class PosArg : public PosBase
     {
-        private:
+        public:
             T value;
 
-        public:
             PosArg(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PosBase(name, help), value(defaultValue)
             {
                 group.Add(*this);
@@ -996,11 +1003,6 @@ namespace args
                 matched = true;
             }
 
-            const T &Value()
-            {
-                return value;
-            }
-
             virtual std::string ArgName() const override
             {
                 return GetArgName(name);
@@ -1013,10 +1015,9 @@ namespace args
         void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class PosArgList : public PosBase
     {
-        private:
+        public:
             List values;
 
-        public:
             PosArgList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PosBase(name, help), values(defaultValues)
             {
                 group.Add(*this);
@@ -1029,11 +1030,6 @@ namespace args
                 values.emplace_back();
                 Reader(name, value, values.back());
                 matched = true;
-            }
-
-            const List &Values()
-            {
-                return values;
             }
 
             virtual std::string ArgName() const override

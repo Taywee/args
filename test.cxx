@@ -19,10 +19,11 @@ int main(int argc, char **argv)
     args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
     args::Flag fooflag(parser, "foo", "This is a foo flag", args::Matcher({'f', 'F'}, {"Foo", "foo"}));
     args::ArgFlag<std::string> bararg(parser, "bar", "This is a bar flag", args::Matcher({'b', 'B'}, {"Bar", "bar"}));
-    args::ArgFlag<double> baz(parser, "baz", "This is a baz flag", args::Matcher({'z', 'Z'}, {"Baz", "baz"}));
+    args::ArgFlag<double> baz(parser, "baz", "This is a baz flag, and it is long enough that it needs to be wrapped.", args::Matcher({'z', 'Z'}, {"Baz", "baz"}));
     args::ArgFlagList<double> list(parser, "flaglist", "This is a list flag", args::Matcher({'l'}, {"list"}));
-    args::PosArg<double> pos(parser, "Position", "This is a position arg");
-    args::PosArg<double> pos2(parser, "Position", "This is a position arg");
+    args::PosArg<std::string> pos(parser, "Position", "This is a position arg");
+    args::PosArgList<double> poslist(parser, "Position list", "This is a position list arg");
+    args::PosArg<double> pos2(parser, "Position", "This is a position arg which has a long enough description to probably necessitate wrapping");
     args::PosArg<double> pos3(parser, "Position", "This is a position arg");
     args::PosArg<double> pos4(parser, "Pösitiön", "This is a position arg");
     args::PosArg<double> pos5(parser, "Position", "This is a position arg");
@@ -34,7 +35,6 @@ int main(int argc, char **argv)
     args::PosArg<double> pos8(parser, "Position", "This is a position arg");
     args::PosArgList<double> poslist4(parser, "Position list", "This is a position list arg");
     args::PosArg<double> pos9(parser, "Position", "This is a position arg");
-    args::PosArgList<double> poslist(parser, "Position list", "This is a position list arg");
     args::Counter counter(parser, "counter", "This is a counter flag", args::Matcher({'c'}));
     try
     {
@@ -69,32 +69,32 @@ int main(int argc, char **argv)
     }
     if (bararg)
     {
-        std::cout << "Bar arg found: " << bararg.Value() << std::endl;
+        std::cout << "Bar arg found: " << bararg.value << std::endl;
     }
     if (baz)
     {
-        std::cout << "Baz arg found: " << baz.Value() << std::endl;
+        std::cout << "Baz arg found: " << baz.value << std::endl;
     }
     if (counter)
     {
-        std::cout << "counter found: " << counter.Count() << std::endl;
+        std::cout << "counter found: " << counter.count << std::endl;
     }
     if (list)
     {
         std::cout << "list found: " << std::endl;
-        for (const auto &item: list.Values())
+        for (const auto &item: list.values)
         {
         std::cout << "- " << item << std::endl;
         }
     }
     if (pos)
     {
-        std::cout << "pos found: " << pos.Value() << std::endl;
+        std::cout << "pos found: " << pos.value << std::endl;
     }
     if (poslist)
     {
         std::cout << "poslist found: " << std::endl;
-        for (const auto &item: poslist.Values())
+        for (const auto &item: poslist.values)
         {
         std::cout << "- " << item << std::endl;
         }
