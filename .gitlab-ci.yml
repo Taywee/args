@@ -1,0 +1,8 @@
+pages:
+  script:
+    - doxygen Doxyfile
+  artifacts:
+    paths:
+      - public
+    only:
+      - master
