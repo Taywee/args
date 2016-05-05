@@ -22,7 +22,7 @@ OBJECTS		= 	$(SOURCES:.cxx=.o)
 DEPENDENCIES=	$(SOURCES:.cxx=.d)
 EXECUTABLE	=	test
 
-.PHONY: all clean
+.PHONY: all clean pages
 
 all: $(EXECUTABLE)
 
@@ -31,8 +31,14 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
 
-clean :
+clean:
 	rm $(EXECUTABLE) $(OBJECTS) $(DEPENDENCIES)
 
 %.o: %.cxx
 	$(CXX) $< -o $@ $(CFLAGS)
+
+pages:
+	doxygen Doxyfile
+	mv html/* .
+	rmdir html
+
