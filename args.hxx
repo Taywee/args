@@ -138,9 +138,6 @@ namespace args
                 longOpts(std::begin(longIn), std::end(longIn))
             {}
 
-            Matcher(const Matcher &other) : shortOpts(other.shortOpts), longOpts(other.longOpts)
-            {}
-
             Matcher(Matcher &&other) : shortOpts(std::move(other.shortOpts)), longOpts(std::move(other.longOpts))
             {}
 
@@ -228,7 +225,6 @@ namespace args
             const Matcher matcher;
 
         public:
-            FlagBase(const std::string &name, const std::string &help, const Matcher &matcher) : NamedBase(name, help), matcher(matcher) {}
             FlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : NamedBase(name, help), matcher(std::move(matcher)) {}
 
             virtual ~FlagBase() {}
@@ -277,7 +273,6 @@ namespace args
     class ArgFlagBase : public FlagBase
     {
         public:
-            ArgFlagBase(const std::string &name, const std::string &help, const Matcher &matcher) : FlagBase(name, help, matcher) {}
             ArgFlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : FlagBase(name, help, std::move(matcher)) {}
             virtual ~ArgFlagBase() {}
             virtual void ParseArg(const std::string &value) = 0;
@@ -523,9 +518,10 @@ namespace args
             std::string longseparator;
 
         public:
-            ArgumentParser(const std::string &description) :
+            ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
                 Group("arguments", Group::Validators::AllChildGroups),
                 description(description),
+                epilog(epilog),
                 longprefix("--"),
                 shortprefix("-"),
                 longseparator("=") {}
@@ -560,16 +556,42 @@ namespace args
             { return longseparator; }
             void LongSeparator(const std::string &longseparator)
             { this->longseparator = longseparator; }
-            std::string Help() const
+            std::string Help(unsigned int width = 80, unsigned int progindent = 2, unsigned int descriptionindent = 4, unsigned int flagindent = 6, unsigned int helpindent = 40, unsigned int gutter = 1) const
             {
+                const std::vector<std::string> description(Wrap(this->description, width - descriptionindent));
+                const std::vector<std::string> epilog(Wrap(this->epilog, width - descriptionindent));
                 std::ostringstream help;
-                help << prog << "\n";
-                help << "\t" << description << "\n";
-                help << "\tOPTIONS:\n";
+                help << std::string(progindent, ' ') << prog << "\n\n";
+                for (const std::string &line: description)
+                {
+                    help << std::string(descriptionindent, ' ') << line << "\n";
+                }
+                help << "\n";
+                help << std::string(progindent, ' ') << "OPTIONS:\n\n";
                 for (const auto &description: GetChildDescriptions(shortprefix, longprefix))
                 {
-                    help << "\t\t" << std::get<0>(description) << "\n";
-                    help << "\t\t\t" << std::get<1>(description) << "\n";
+                    const std::string &flags = std::get<0>(description);
+                    const std::vector<std::string> info(Wrap(std::get<1>(description), width - helpindent));
+                    help << std::string(flagindent, ' ') << flags;
+                    auto infoit = std::begin(info);
+                    if ((flagindent + flags.size() + gutter) > helpindent)
+                    {
+                        help << '\n';
+                    } else if (infoit != std::end(info))
+                    {
+                        help << std::string(helpindent - (flagindent + flags.size()), ' ') << *infoit << '\n';
+                        ++infoit;
+                    }
+                    for (; infoit != std::end(info); ++infoit)
+                    {
+                        help << std::string(helpindent, ' ') << *infoit << "\n";
+                    }
+                }
+
+                help << "\n";
+                for (const std::string &line: epilog)
+                {
+                    help << std::string(descriptionindent, ' ') << line << "\n";
                 }
                 return help.str();
             }
@@ -712,25 +734,18 @@ namespace args
     class Flag : public FlagBase
     {
         public:
-            Flag(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): FlagBase(name, help, matcher)
-            {
-                group.Add(*this);
-            }
-
             Flag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): FlagBase(name, help, std::move(matcher))
             {
                 group.Add(*this);
             }
 
             virtual ~Flag() {}
-
     };
 
     // Help flag class
     class HelpFlag : public Flag
     {
         public:
-            HelpFlag(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): Flag(group, name, help, matcher) {}
             HelpFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): Flag(group, name, help, std::move(matcher)) {}
 
             virtual ~HelpFlag() {}
@@ -761,11 +776,6 @@ namespace args
             unsigned int count;
 
         public:
-            Counter(Group &group, const std::string &name, const std::string &help, const Matcher &matcher, const unsigned int startcount = 0): FlagBase(name, help, matcher), count(startcount)
-            {
-                group.Add(*this);
-            }
-
             Counter(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const unsigned int startcount = 0): FlagBase(name, help, std::move(matcher)), count(startcount)
             {
                 group.Add(*this);
@@ -826,12 +836,7 @@ namespace args
             T value;
 
         public:
-            ArgFlag(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): ArgFlagBase(name, help, matcher)
-            {
-                group.Add(*this);
-            }
-
-            ArgFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): ArgFlagBase(name, help, std::move(matcher))
+            ArgFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T()): ArgFlagBase(name, help, std::move(matcher)), value(defaultValue)
             {
                 group.Add(*this);
             }
@@ -859,12 +864,7 @@ namespace args
             List values;
 
         public:
-            ArgFlagList(Group &group, const std::string &name, const std::string &help, const Matcher &matcher): ArgFlagBase(name, help, matcher)
-            {
-                group.Add(*this);
-            }
-
-            ArgFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): ArgFlagBase(name, help, std::move(matcher))
+            ArgFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ArgFlagBase(name, help, std::move(matcher)), values(defaultValues)
             {
                 group.Add(*this);
             }
@@ -890,7 +890,7 @@ namespace args
             T value;
 
         public:
-            PosArg(Group &group, const std::string &name, const std::string &help): PosBase(name, help)
+            PosArg(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PosBase(name, help), value(defaultValue)
             {
                 group.Add(*this);
             }
@@ -920,7 +920,7 @@ namespace args
             List values;
 
         public:
-            PosArgList(Group &group, const std::string &name, const std::string &help): PosBase(name, help)
+            PosArgList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PosBase(name, help), values(defaultValues)
             {
                 group.Add(*this);
             }
