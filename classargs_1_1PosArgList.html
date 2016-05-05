@@ -40,7 +40,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -66,6 +65,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -96,15 +96,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">args::PosArgList&lt; T, List, Reader &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A positional argument class that pushes the found values into a list.  
+ <a href="classargs_1_1PosArgList.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="args_8hxx_source.html">args.hxx</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for args::PosArgList&lt; T, List, Reader &gt;:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="classargs_1_1PosArgList.png" usemap="#args::PosArgList&lt; T, List, Reader &gt;_map" alt=""/>
   <map id="args::PosArgList&lt; T, List, Reader &gt;_map" name="args::PosArgList&lt; T, List, Reader &gt;_map">
-<area href="classargs_1_1PosBase.html" alt="args::PosBase" shape="rect" coords="0,112,213,136"/>
-<area href="classargs_1_1NamedBase.html" alt="args::NamedBase" shape="rect" coords="0,56,213,80"/>
-<area href="classargs_1_1Base.html" alt="args::Base" shape="rect" coords="0,0,213,24"/>
+<area href="classargs_1_1PosBase.html" title="Base class for positional arguments. " alt="args::PosBase" shape="rect" coords="0,112,213,136"/>
+<area href="classargs_1_1NamedBase.html" title="Base class for all match types that have a name. " alt="args::NamedBase" shape="rect" coords="0,56,213,80"/>
+<area href="classargs_1_1Base.html" title="Base class for all match types. " alt="args::Base" shape="rect" coords="0,0,213,24"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -116,9 +121,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2cd6174bd9162ea01bff4aa1a6977e14"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2cd6174bd9162ea01bff4aa1a6977e14"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseArg</b> (const std::string &amp;value) override</td></tr>
 <tr class="separator:a2cd6174bd9162ea01bff4aa1a6977e14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34a0231d9f23d694d4ca90e65c85982b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a34a0231d9f23d694d4ca90e65c85982b"></a>
-virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>ArgName</b> () const  override</td></tr>
-<tr class="separator:a34a0231d9f23d694d4ca90e65c85982b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64801bad7d839403897dd9f3c48ad059"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a64801bad7d839403897dd9f3c48ad059"></a>
+virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>Name</b> () const  override</td></tr>
+<tr class="separator:a64801bad7d839403897dd9f3c48ad059"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classargs_1_1PosBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classargs_1_1PosBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classargs_1_1PosBase.html">args::PosBase</a></td></tr>
 <tr class="memitem:a75da9f58ece76b71e27398110164953d inherit pub_methods_classargs_1_1PosBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a75da9f58ece76b71e27398110164953d"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>PosBase</b> (const std::string &amp;name, const std::string &amp;help)</td></tr>
@@ -146,8 +151,8 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>Matched</b> (
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a2763a3aa62406b031d6003c6b08cf9ca"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2763a3aa62406b031d6003c6b08cf9ca"></a>
-List&#160;</td><td class="memItemRight" valign="bottom"><b>values</b></td></tr>
+<tr class="memitem:a2763a3aa62406b031d6003c6b08cf9ca"><td class="memItemLeft" align="right" valign="top">List&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1PosArgList.html#a2763a3aa62406b031d6003c6b08cf9ca">values</a></td></tr>
+<tr class="memdesc:a2763a3aa62406b031d6003c6b08cf9ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">The publicly accessible value member list.  <a href="#a2763a3aa62406b031d6003c6b08cf9ca">More...</a><br /></td></tr>
 <tr class="separator:a2763a3aa62406b031d6003c6b08cf9ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
@@ -168,6 +173,37 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>matched</b></td></tr>
 const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b></td></tr>
 <tr class="separator:a9cdbbcdfa8e764c25f94dfe2c99c3b24 inherit pro_attribs_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><h3>template&lt;typename T, typename List = std::vector&lt;T&gt;, void(*)(const std::string &amp;, const std::string &amp;, T &amp;) Reader = ArgReader&lt;T&gt;&gt;<br />
+class args::PosArgList&lt; T, List, Reader &gt;</h3>
+
+<p>A positional argument class that pushes the found values into a list. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>the type to extract the argument as </td></tr>
+    <tr><td class="paramname">List</td><td>the list type that houses the values </td></tr>
+    <tr><td class="paramname">Reader</td><td>The function used to read the argument, taking the name, value, and destination reference </td></tr>
+  </table>
+  </dd>
+</dl>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="a2763a3aa62406b031d6003c6b08cf9ca"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename List  = std::vector&lt;T&gt;, void(*)(const std::string &amp;, const std::string &amp;, T &amp;) Reader = ArgReader&lt;T&gt;&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">List <a class="el" href="classargs_1_1PosArgList.html">args::PosArgList</a>&lt; T, List, Reader &gt;::values</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The publicly accessible value member list. </p>
+<p>You can change this, but you probably shouldn't. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="args_8hxx_source.html">args.hxx</a></li>
 </ul>

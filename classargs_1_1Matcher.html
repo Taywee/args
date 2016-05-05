@@ -40,7 +40,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -66,6 +65,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -95,40 +95,56 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">args::Matcher Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A class of "matchers", specifying short and long options that can possibly be matched.  
+ <a href="classargs_1_1Matcher.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="args_8hxx_source.html">args.hxx</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="memTemplParams" colspan="2"><a class="anchor" id="ae987e1bb6aeae36ed66da02c5c2846ac"></a>
 template&lt;typename ShortIt , typename LongIt &gt; </td></tr>
-<tr class="memitem:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Matcher</b> (ShortIt shortOptsStart, ShortIt shortOptsEnd, LongIt longOptsStart, LongIt longOptsEnd)</td></tr>
+<tr class="memitem:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#ae987e1bb6aeae36ed66da02c5c2846ac">Matcher</a> (ShortIt shortOptsStart, ShortIt shortOptsEnd, LongIt longOptsStart, LongIt longOptsEnd)</td></tr>
+<tr class="memdesc:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short and long opts separately as iterators. <br /></td></tr>
 <tr class="separator:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62cfbb3db70f623153f8317abb5421dc"><td class="memTemplParams" colspan="2"><a class="anchor" id="a62cfbb3db70f623153f8317abb5421dc"></a>
 template&lt;typename Short , typename Long &gt; </td></tr>
-<tr class="memitem:a62cfbb3db70f623153f8317abb5421dc"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Matcher</b> (Short &amp;&amp;shortIn, Long &amp;&amp;longIn)</td></tr>
+<tr class="memitem:a62cfbb3db70f623153f8317abb5421dc"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a62cfbb3db70f623153f8317abb5421dc">Matcher</a> (Short &amp;&amp;shortIn, Long &amp;&amp;longIn)</td></tr>
+<tr class="memdesc:a62cfbb3db70f623153f8317abb5421dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short and long opts separately as iterables. <br /></td></tr>
 <tr class="separator:a62cfbb3db70f623153f8317abb5421dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac64f4dd70a4f60154980613d9283e0e2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac64f4dd70a4f60154980613d9283e0e2"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Matcher</b> (const std::initializer_list&lt; char &gt; &amp;shortIn, const std::initializer_list&lt; std::string &gt; &amp;longIn)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#ac64f4dd70a4f60154980613d9283e0e2">Matcher</a> (const std::initializer_list&lt; char &gt; &amp;shortIn, const std::initializer_list&lt; std::string &gt; &amp;longIn)</td></tr>
+<tr class="memdesc:ac64f4dd70a4f60154980613d9283e0e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short and long opts as initializer lists. <br /></td></tr>
 <tr class="separator:ac64f4dd70a4f60154980613d9283e0e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b9f19fdfbf2b2bf6dd0f8557a9f5130"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1b9f19fdfbf2b2bf6dd0f8557a9f5130"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Matcher</b> (const std::initializer_list&lt; char &gt; &amp;shortIn)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a1b9f19fdfbf2b2bf6dd0f8557a9f5130">Matcher</a> (const std::initializer_list&lt; char &gt; &amp;shortIn)</td></tr>
+<tr class="memdesc:a1b9f19fdfbf2b2bf6dd0f8557a9f5130"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short opts only as initializer lists. <br /></td></tr>
 <tr class="separator:a1b9f19fdfbf2b2bf6dd0f8557a9f5130"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f03d616f956b27ab961a3358a26f1ea"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7f03d616f956b27ab961a3358a26f1ea"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Matcher</b> (const std::initializer_list&lt; std::string &gt; &amp;longIn)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a7f03d616f956b27ab961a3358a26f1ea">Matcher</a> (const std::initializer_list&lt; std::string &gt; &amp;longIn)</td></tr>
+<tr class="memdesc:a7f03d616f956b27ab961a3358a26f1ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify long opts only as initializer lists. <br /></td></tr>
 <tr class="separator:a7f03d616f956b27ab961a3358a26f1ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29ef34a8f70f00dfb52c9d5d15886625"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a29ef34a8f70f00dfb52c9d5d15886625"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Matcher</b> (<a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;other)</td></tr>
 <tr class="separator:a29ef34a8f70f00dfb52c9d5d15886625"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0795d7ad361fc3f50974390a76ae7db1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0795d7ad361fc3f50974390a76ae7db1"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>Match</b> (const char opt) const </td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a0795d7ad361fc3f50974390a76ae7db1">Match</a> (const char opt) const </td></tr>
+<tr class="memdesc:a0795d7ad361fc3f50974390a76ae7db1"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Check if there is a match of a short opt <br /></td></tr>
 <tr class="separator:a0795d7ad361fc3f50974390a76ae7db1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5add523db9b61489783443f677dc1d4e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5add523db9b61489783443f677dc1d4e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>Match</b> (const std::string &amp;opt) const </td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a5add523db9b61489783443f677dc1d4e">Match</a> (const std::string &amp;opt) const </td></tr>
+<tr class="memdesc:a5add523db9b61489783443f677dc1d4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Check if there is a match of a long opt <br /></td></tr>
 <tr class="separator:a5add523db9b61489783443f677dc1d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa568c30ccb60200be5f0a0549b222ecc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa568c30ccb60200be5f0a0549b222ecc"></a>
-std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetOptionStrings</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const </td></tr>
+std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#aa568c30ccb60200be5f0a0549b222ecc">GetOptionStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const </td></tr>
+<tr class="memdesc:aa568c30ccb60200be5f0a0549b222ecc"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all option strings as a vector, with the prefixes embedded <br /></td></tr>
 <tr class="separator:aa568c30ccb60200be5f0a0549b222ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A class of "matchers", specifying short and long options that can possibly be matched. </p>
+<p>This is supposed to be constructed and then passed in, not used directly from user code. </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="args_8hxx_source.html">args.hxx</a></li>
 </ul>
 </div><!-- contents -->

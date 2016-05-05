@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['help',['Help',['../classargs_1_1Help.html',1,'args']]],
-  ['helpflag',['HelpFlag',['../classargs_1_1HelpFlag.html',1,'args']]]
+  ['flag',['Flag',['../classargs_1_1Flag.html',1,'args']]],
+  ['flagbase',['FlagBase',['../classargs_1_1FlagBase.html',1,'args']]]
 ];

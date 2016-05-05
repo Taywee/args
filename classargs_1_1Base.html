@@ -40,7 +40,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -66,6 +65,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -96,25 +96,30 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">args::Base Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><a class="el" href="classargs_1_1Base.html" title="Base class for all match types. ">Base</a> class for all match types.  
+ <a href="classargs_1_1Base.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="args_8hxx_source.html">args.hxx</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for args::Base:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="classargs_1_1Base.png" usemap="#args::Base_map" alt=""/>
   <map id="args::Base_map" name="args::Base_map">
-<area href="classargs_1_1Group.html" alt="args::Group" shape="rect" coords="0,56,217,80"/>
-<area href="classargs_1_1NamedBase.html" alt="args::NamedBase" shape="rect" coords="624,56,841,80"/>
-<area href="classargs_1_1ArgumentParser.html" alt="args::ArgumentParser" shape="rect" coords="0,112,217,136"/>
-<area href="classargs_1_1FlagBase.html" alt="args::FlagBase" shape="rect" coords="340,112,557,136"/>
-<area href="classargs_1_1PosBase.html" alt="args::PosBase" shape="rect" coords="908,112,1125,136"/>
-<area href="classargs_1_1ArgFlagBase.html" alt="args::ArgFlagBase" shape="rect" coords="113,168,330,192"/>
-<area href="classargs_1_1Counter.html" alt="args::Counter" shape="rect" coords="340,168,557,192"/>
-<area href="classargs_1_1Flag.html" alt="args::Flag" shape="rect" coords="567,168,784,192"/>
-<area href="classargs_1_1PosArg.html" alt="args::PosArg&lt; T, Reader &gt;" shape="rect" coords="794,168,1011,192"/>
-<area href="classargs_1_1PosArgList.html" alt="args::PosArgList&lt; T, List, Reader &gt;" shape="rect" coords="1021,168,1238,192"/>
-<area href="classargs_1_1ArgFlag.html" alt="args::ArgFlag&lt; T, Reader &gt;" shape="rect" coords="0,224,217,248"/>
-<area href="classargs_1_1ArgFlagList.html" alt="args::ArgFlagList&lt; T, List, Reader &gt;" shape="rect" coords="227,224,444,248"/>
-<area href="classargs_1_1HelpFlag.html" alt="args::HelpFlag" shape="rect" coords="567,224,784,248"/>
+<area href="classargs_1_1Group.html" title="Class for all kinds of validating groups, including ArgumentParser. " alt="args::Group" shape="rect" coords="0,56,217,80"/>
+<area href="classargs_1_1NamedBase.html" title="Base class for all match types that have a name. " alt="args::NamedBase" shape="rect" coords="624,56,841,80"/>
+<area href="classargs_1_1ArgumentParser.html" title="The main user facing command line argument parser class. " alt="args::ArgumentParser" shape="rect" coords="0,112,217,136"/>
+<area href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. " alt="args::FlagBase" shape="rect" coords="340,112,557,136"/>
+<area href="classargs_1_1PosBase.html" title="Base class for positional arguments. " alt="args::PosBase" shape="rect" coords="908,112,1125,136"/>
+<area href="classargs_1_1ArgFlagBase.html" title="Base class for argument-accepting flag arguments. " alt="args::ArgFlagBase" shape="rect" coords="113,168,330,192"/>
+<area href="classargs_1_1Flag.html" title="Boolean argument matcher. " alt="args::Flag" shape="rect" coords="567,168,784,192"/>
+<area href="classargs_1_1PosArg.html" title="A positional argument class. " alt="args::PosArg&lt; T, Reader &gt;" shape="rect" coords="794,168,1011,192"/>
+<area href="classargs_1_1PosArgList.html" title="A positional argument class that pushes the found values into a list. " alt="args::PosArgList&lt; T, List, Reader &gt;" shape="rect" coords="1021,168,1238,192"/>
+<area href="classargs_1_1ArgFlag.html" title="An argument-accepting flag class. " alt="args::ArgFlag&lt; T, Reader &gt;" shape="rect" coords="0,224,217,248"/>
+<area href="classargs_1_1ArgFlagList.html" title="An argument-accepting flag class that pushes the found values into a list. " alt="args::ArgFlagList&lt; T, List, Reader &gt;" shape="rect" coords="227,224,444,248"/>
+<area href="classargs_1_1Counter.html" title="A flag class that simply counts the number of times it&#39;s matched. " alt="args::Counter" shape="rect" coords="454,224,671,248"/>
+<area href="classargs_1_1HelpFlag.html" title="Help flag class. " alt="args::HelpFlag" shape="rect" coords="681,224,898,248"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -142,7 +147,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>matched</b></td></tr>
 const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b></td></tr>
 <tr class="separator:a9cdbbcdfa8e764c25f94dfe2c99c3b24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p><a class="el" href="classargs_1_1Base.html" title="Base class for all match types. ">Base</a> class for all match types. </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="args_8hxx_source.html">args.hxx</a></li>
 </ul>
 </div><!-- contents -->
