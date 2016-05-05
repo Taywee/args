@@ -39,6 +39,6 @@ clean:
 
 pages:
 	doxygen Doxyfile
-	mv html/* .
-	rmdir html
+	cp -rv html/* .
+	rm -r html
 
