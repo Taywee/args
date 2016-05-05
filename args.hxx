@@ -14,7 +14,7 @@
 namespace args
 {
     // Wrap a string into a vector of string lines
-    std::vector<std::string> Wrap(const std::string &in, const size_t width)
+    std::vector<std::string> Wrap(const std::string &in, const size_t width, size_t firstlinewidth = 0)
     {
         // Preserve existing line breaks
         const size_t newlineloc = in.find('\n');
@@ -28,6 +28,12 @@ namespace args
                 std::make_move_iterator(std::end(second)));
             return first;
         }
+        if (firstlinewidth == 0)
+        {
+            firstlinewidth = width;
+        }
+        size_t currentwidth = firstlinewidth;
+
         std::istringstream stream(in);
         std::vector<std::string> output;
         std::ostringstream line;
@@ -35,12 +41,13 @@ namespace args
         {
             std::string item;
             stream >> item;
-            if ((size_t(line.tellp()) + 1 + item.size()) > width)
+            if ((size_t(line.tellp()) + 1 + item.size()) > currentwidth)
             {
                 if (line.tellp() > 0)
                 {
                     output.push_back(line.str());
                     line.str(std::string());
+                    currentwidth = width;
                 }
             }
             if (line.tellp() > 0)
@@ -313,6 +320,7 @@ namespace args
             }
 
             virtual void ParseArg(const std::string &value) = 0;
+            virtual std::string ArgName() const = 0;
     };
 
     class Group : public Base
@@ -397,6 +405,27 @@ namespace args
                 return nullptr;
             }
 
+            bool HasFlag() const
+            {
+                for (Base *child: children)
+                {
+                    FlagBase *flag = dynamic_cast<FlagBase *>(child);
+                    Group *group = dynamic_cast<Group *>(child);
+                    if (flag)
+                    {
+                        return true;
+                    }
+                    if (group)
+                    {
+                        if (group->HasFlag())
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
             void Add(Base &child)
             {
                 children.emplace_back(&child);
@@ -445,6 +474,28 @@ namespace args
                     }
                 }
                 return descriptions;
+            }
+
+            std::vector<std::string> GetPosNames() const
+            {
+                std::vector <std::string> names;
+                for (const auto &child: children)
+                {
+                    const Group *group = dynamic_cast<Group *>(child);
+                    const PosBase *pos = dynamic_cast<PosBase *>(child);
+                    if (group)
+                    {
+                        std::vector<std::string> groupNames(group->GetPosNames());
+                        names.insert(
+                            std::end(names),
+                            std::make_move_iterator(std::begin(groupNames)),
+                            std::make_move_iterator(std::end(groupNames)));
+                    } else if (pos)
+                    {
+                        names.emplace_back(pos->ArgName());
+                    }
+                }
+                return names;
             }
 
             struct Validators
@@ -561,7 +612,30 @@ namespace args
                 const std::vector<std::string> description(Wrap(this->description, width - descriptionindent));
                 const std::vector<std::string> epilog(Wrap(this->epilog, width - descriptionindent));
                 std::ostringstream help;
-                help << std::string(progindent, ' ') << prog << "\n\n";
+                std::ostringstream prognameline;
+                prognameline << prog;
+                if (HasFlag())
+                {
+                    prognameline << " {OPTIONS}";
+                }
+                for (const std::string &posname: GetPosNames())
+                {
+                    prognameline << " [" << posname << ']';
+                }
+                const std::vector<std::string> proglines(Wrap(prognameline.str(), width - (progindent + 4), width - progindent));
+                auto progit = std::begin(proglines);
+                if (progit != std::end(proglines))
+                {
+                    help << std::string(progindent, ' ') << *progit << '\n';
+                    ++progit;
+                }
+                for (; progit != std::end(proglines); ++progit)
+                {
+                    help << std::string(progindent + 4, ' ') << *progit << '\n';
+                }
+
+                help << '\n';
+
                 for (const std::string &line: description)
                 {
                     help << std::string(descriptionindent, ' ') << line << "\n";
@@ -908,6 +982,11 @@ namespace args
             {
                 return value;
             }
+
+            virtual std::string ArgName() const override
+            {
+                return GetArgName(name);
+            }
     };
 
     template <
@@ -937,6 +1016,11 @@ namespace args
             const List &Values()
             {
                 return values;
+            }
+
+            virtual std::string ArgName() const override
+            {
+                return GetArgName(name) + std::string("...");
             }
     };
 }
