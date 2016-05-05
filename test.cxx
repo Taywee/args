@@ -8,14 +8,12 @@
 
 int main(int argc, char **argv)
 {
-    args::ArgumentParser parser("This command likes to break your disks");
-    parser.LongPrefix("/");
-    parser.LongSeparator(":");
-    args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
-    args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
-    args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
-    args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
-    args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
+    args::ArgFlag<int> integer(parser, "integer", "The integer flag", args::Matcher({'i'}));
+    args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher({'c'}));
+    args::PosArg<std::string> foo(parser, "foo", "The foo position");
+    args::PosArgList<double> numbers(parser, "numbers", "The numbers position list");
     try
     {
         parser.ParseCLI(argc, argv);
@@ -37,9 +35,9 @@ int main(int argc, char **argv)
         std::cerr << parser.Help();
         return 1;
     }
-    std::cout << "bs = " << bs.value << std::endl;
-    std::cout << "skip = " << skip.value << std::endl;
-    if (input) { std::cout << "if = " << input.value << std::endl; }
-    if (output) { std::cout << "of = " << output.value << std::endl; }
+    if (integer) { std::cout << "i: " << integer.value << std::endl; }
+    if (characters) { for (const auto ch: characters.values) { std::cout << "c: " << ch << std::endl; } }
+    if (foo) { std::cout << "f: " << foo.value << std::endl; }
+    if (numbers) { for (const auto nm: numbers.values) { std::cout << "n: " << nm << std::endl; } }
     return 0;
 }
