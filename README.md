@@ -66,6 +66,12 @@ There are tons of things this library does not do!
 	`--foo` in the same parser), though shortopt and longopt prefixes can be
 	different.
 
+# How do I use it?
+
+Just copy and paste it into your source tree, or put it somewhere that your
+compiler can see.  As long as you can `#include "args.hxx"` and use c++11, you
+should be good to go.
+
 # Examples
 
 All the code examples here will be complete code examples, with some output.
