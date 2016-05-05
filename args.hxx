@@ -10,9 +10,22 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <cstdlib>
 
 namespace args
 {
+    size_t Glyphs(const std::string &string)
+    {
+        size_t length = 0;
+        for (const char c: string)
+        {
+            if ((c & 0xc0) != 0x80)
+            {
+                ++length;
+            }
+        }
+        return length;
+    }
     // Wrap a string into a vector of string lines
     std::vector<std::string> Wrap(const std::string &in, const size_t width, size_t firstlinewidth = 0)
     {
@@ -37,26 +50,31 @@ namespace args
         std::istringstream stream(in);
         std::vector<std::string> output;
         std::ostringstream line;
+        size_t linesize = 0;
         while (stream)
         {
             std::string item;
             stream >> item;
-            if ((size_t(line.tellp()) + 1 + item.size()) > currentwidth)
+            size_t itemsize = Glyphs(item);
+            if ((linesize + 1 + itemsize) > currentwidth)
             {
-                if (line.tellp() > 0)
+                if (linesize > 0)
                 {
                     output.push_back(line.str());
                     line.str(std::string());
+                    linesize = 0;
                     currentwidth = width;
                 }
             }
-            if (line.tellp() > 0)
+            if (linesize)
             {
+                ++linesize;
                 line << " ";
             }
             line << item;
+            linesize += itemsize;
         }
-        if (line.tellp() > 0)
+        if (linesize > 0)
         {
             output.push_back(line.str());
         }
@@ -77,7 +95,6 @@ namespace args
                     break;
 
                 default:
-                    string[i] = std::toupper(string[i], loc);
                     break;
             }
         }
@@ -648,12 +665,13 @@ namespace args
                     const std::vector<std::string> info(Wrap(std::get<1>(description), width - helpindent));
                     help << std::string(flagindent, ' ') << flags;
                     auto infoit = std::begin(info);
-                    if ((flagindent + flags.size() + gutter) > helpindent)
+                    const size_t flagssize = Glyphs(flags);
+                    if ((flagindent + flagssize + gutter) > helpindent)
                     {
                         help << '\n';
                     } else if (infoit != std::end(info))
                     {
-                        help << std::string(helpindent - (flagindent + flags.size()), ' ') << *infoit << '\n';
+                        help << std::string(helpindent - (flagindent + flagssize), ' ') << *infoit << '\n';
                         ++infoit;
                     }
                     for (; infoit != std::end(info); ++infoit)

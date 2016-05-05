@@ -29,6 +29,7 @@
 
 # test and temp files
 test*
+!test.cxx
 *.pyc
 *.swp
 *.swo
