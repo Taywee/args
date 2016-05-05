@@ -1,5 +1,7 @@
 # args
-A simple, small, flexible, single-header C++11 argument parsing library
+
+A simple, small, flexible, single-header C++11 argument parsing library, in
+fewer than 1024 lines of code.
 
 This is designed to somewhat replicate the behavior of Python's argparse, but
 in C++, with static type checking, and hopefully a lot faster.
@@ -15,10 +17,9 @@ license and my name from the header of the args.hxx file in source
 redistributions (ie. don't pretend that you wrote it).  I do welcome additions
 and updates wherever you feel like contributing code.
 
-There is no API documentation here.  The APIs that are most important are the
-ArgumentParser and the constructors of the individual types.  The examples
-should be, for the most part, enough to use this library, but the API
-documentation will come soon enough.
+The API documentation can be found at https://taywee.github.io/args
+
+There are also somewhat extensive examples below.
 
 # What does it do
 
@@ -44,13 +45,6 @@ There are tons of things this library does not do!
 
 ## It does not yet:
 
-* Allow you to use a positional argument list before any other positional
-	arguments (the last argument list will slurp all subsequent positional
-	arguments).  The logic for allowing this would be a lot more code than I'd
-	like, and would make static checking much more difficult, requiring us to
-	sort std::string arguments and pair them to positional arguments before
-	assigning them, rather than what we currently do, which is assiging them as
-	we go for better simplicity and speed.
 * Let you decide not to allow separate-argument argument flags or joined ones
 	(like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
 	same for short options).
@@ -65,6 +59,14 @@ There are tons of things this library does not do!
 * Allow you to intermix multiple different prefix types (eg. `++foo` and
 	`--foo` in the same parser), though shortopt and longopt prefixes can be
 	different.
+* Allow you to have argument flags only optionally accept arguments
+* Allow you to use a positional argument list before any other positional
+	arguments (the last argument list will slurp all subsequent positional
+	arguments).  The logic for allowing this would be a lot more code than I'd
+	like, and would make static checking much more difficult, requiring us to
+	sort std::string arguments and pair them to positional arguments before
+	assigning them, rather than what we currently do, which is assiging them as
+	we go for better simplicity and speed.
 
 # How do I use it?
 
@@ -78,7 +80,11 @@ All the code examples here will be complete code examples, with some output.
 
 ## Simple example:
 
-```c++
+```cpp
+#include <iostream>
+#include <args.hxx>
+int main(int argc, char **argv)
+{
 	args::ArgumentParser parser("This is a test program.", "This goes after the options.");
 	args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
 	try
@@ -117,7 +123,7 @@ All the code examples here will be complete code examples, with some output.
 
 ## Boolean flags, special group types, different matcher construction:
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -194,7 +200,7 @@ Group validation failed somewhere!
 
 ## Argument flags, Positional arguments, lists
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -281,7 +287,7 @@ Argument 'numbers' received invalid value type 'a'
 
 # Custom type parsers (here we use std::tuple)
 
-```c++
+```cpp
 #include <iostream>
 #include <tuple>
 #include <args.hxx>
@@ -374,7 +380,7 @@ there are unextracted characters left in the stream.
 
 ## Long descriptions and proper wrapping and listing
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -480,7 +486,7 @@ int main(int argc, char **argv)
 
 ### dd-style
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -546,7 +552,7 @@ if = /tmp/input
 
 The code is the same as above, but the two lines are replaced out:
 
-```c++
+```cpp
 parser.LongPrefix("/");
 parser.LongSeparator(":");
 ```
