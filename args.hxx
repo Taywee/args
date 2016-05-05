@@ -27,7 +27,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include <cstdlib>
+#include <unordered_set>
 
 namespace args
 {
@@ -150,8 +150,8 @@ namespace args
     class Matcher
     {
         private:
-            const std::vector<char> shortOpts;
-            const std::vector<std::string> longOpts;
+            const std::unordered_set<char> shortOpts;
+            const std::unordered_set<std::string> longOpts;
 
         public:
             // Specify short and long opts separately as iterators
