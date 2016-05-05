@@ -186,12 +186,12 @@ namespace args
 
             bool Match(const char opt) const
             {
-                return std::find(std::begin(shortOpts), std::end(shortOpts), opt) != shortOpts.end();
+                return shortOpts.find(opt) != shortOpts.end();
             }
 
             bool Match(const std::string &opt) const
             {
-                return std::find(std::begin(longOpts), std::end(longOpts), opt) != longOpts.end();
+                return longOpts.find(opt) != longOpts.end();
             }
 
             std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix) const
