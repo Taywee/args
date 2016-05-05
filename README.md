@@ -6,6 +6,9 @@ about 1.2K lines of code.
 This is designed to somewhat replicate the behavior of Python's argparse, but
 in C++, with static type checking, and hopefully a lot faster.
 
+It's probably slower than some other C++ argument-parsing libraries (especially
+with its heavy use of inheritence), but it should be more flexible than most.  
+
 UTF-8 support is limited at best.  No normalization is performed, so non-ascii
 characters are very best kept out of flags, and combined glyphs are probably
 going to mess up help output if you use it.

@@ -277,7 +277,10 @@ namespace args
                 std::get<1>(description) = help;
                 return description;
             }
-
+            virtual std::string Name() const
+            {
+                return name;
+            }
     };
 
     /** Base class for all flag arguments
@@ -315,7 +318,6 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::string upperName(name);
                 const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
                 std::ostringstream flagstream;
                 for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
@@ -344,7 +346,6 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::string upperName(name);
                 const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
                 std::ostringstream flagstream;
                 for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
@@ -353,7 +354,7 @@ namespace args
                     {
                         flagstream << ", ";
                     }
-                    flagstream << *it << ' ' << upperName;
+                    flagstream << *it << ' ' << name;
                 }
                 std::get<0>(description) = flagstream.str();
                 std::get<1>(description) = help;
@@ -378,10 +379,6 @@ namespace args
             }
 
             virtual void ParseArg(const std::string &value) = 0;
-            virtual std::string Name() const
-            {
-                return name;
-            }
     };
 
     /** Class for all kinds of validating groups, including ArgumentParser
