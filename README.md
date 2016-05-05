@@ -15,10 +15,9 @@ license and my name from the header of the args.hxx file in source
 redistributions (ie. don't pretend that you wrote it).  I do welcome additions
 and updates wherever you feel like contributing code.
 
-There is no API documentation here.  The APIs that are most important are the
-ArgumentParser and the constructors of the individual types.  The examples
-should be, for the most part, enough to use this library, but the API
-documentation will come soon enough.
+The API documentation can be found at https://taywee.github.io/args
+
+There are also somewhat extensive examples below.
 
 # What does it do
 
@@ -78,7 +77,11 @@ All the code examples here will be complete code examples, with some output.
 
 ## Simple example:
 
-```c++
+```cpp
+#include <iostream>
+#include <args.hxx>
+int main(int argc, char **argv)
+{
 	args::ArgumentParser parser("This is a test program.", "This goes after the options.");
 	args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
 	try
@@ -117,7 +120,7 @@ All the code examples here will be complete code examples, with some output.
 
 ## Boolean flags, special group types, different matcher construction:
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -194,7 +197,7 @@ Group validation failed somewhere!
 
 ## Argument flags, Positional arguments, lists
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -281,7 +284,7 @@ Argument 'numbers' received invalid value type 'a'
 
 # Custom type parsers (here we use std::tuple)
 
-```c++
+```cpp
 #include <iostream>
 #include <tuple>
 #include <args.hxx>
@@ -374,7 +377,7 @@ there are unextracted characters left in the stream.
 
 ## Long descriptions and proper wrapping and listing
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -480,7 +483,7 @@ int main(int argc, char **argv)
 
 ### dd-style
 
-```c++
+```cpp
 #include <iostream>
 #include <args.hxx>
 int main(int argc, char **argv)
@@ -546,7 +549,7 @@ if = /tmp/input
 
 The code is the same as above, but the two lines are replaced out:
 
-```c++
+```cpp
 parser.LongPrefix("/");
 parser.LongSeparator(":");
 ```
