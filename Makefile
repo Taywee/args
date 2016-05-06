@@ -13,9 +13,6 @@ endif
 LIBS 		= 	
 CFLAGS		+=	-I. $(FLAGS) -c -MMD
 LDFLAGS		+=	$(FLAGS)
-ifneq ($(OS), Darwin)
-LDFLAGS		+=	-lGL
-endif
 
 SOURCES		= 	test.cxx
 OBJECTS		= 	$(SOURCES:.cxx=.o)
