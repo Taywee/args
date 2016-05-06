@@ -6,3 +6,6 @@ pages:
       - public
     only:
       - master
+tests:
+  script:
+    make runtests
