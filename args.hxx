@@ -547,23 +547,26 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            std::vector<std::tuple<std::string, std::string>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix) const
+            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, unsigned int indent = 0) const
             {
-                std::vector<std::tuple<std::string, std::string>> descriptions;
+                std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
                 {
                     const Group *group = dynamic_cast<Group *>(child);
                     const NamedBase *named = dynamic_cast<NamedBase *>(child);
                     if (group)
                     {
-                        std::vector<std::tuple<std::string, std::string>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix));
+                        // Push that group description on the back:
+                        descriptions.emplace_back("", group->help, indent);
+                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, indent + 1));
                         descriptions.insert(
                             std::end(descriptions),
                             std::make_move_iterator(std::begin(groupDescriptions)),
                             std::make_move_iterator(std::end(groupDescriptions)));
                     } else if (named)
                     {
-                        descriptions.emplace_back(named->GetDescription(shortPrefix, longPrefix));
+                        const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix));
+                        descriptions.emplace_back(std::get<0>(description), std::get<1>(description), indent);
                     }
                 }
                 return descriptions;
@@ -823,21 +826,25 @@ namespace args
                 for (const auto &description: GetChildDescriptions(shortprefix, longprefix))
                 {
                     const std::string &flags = std::get<0>(description);
-                    const std::vector<std::string> info(Wrap(std::get<1>(description), helpParams.width - helpParams.helpindent));
-                    help << std::string(helpParams.flagindent, ' ') << flags;
+                    const unsigned int groupindent = std::get<2>(description) * helpParams.eachgroupindent;
+                    const std::vector<std::string> info(Wrap(std::get<1>(description), helpParams.width - (helpParams.helpindent + groupindent)));
+
+                    help << std::string(groupindent + helpParams.flagindent, ' ') << flags;
                     auto infoit = std::begin(info);
                     const std::string::size_type flagssize = Glyphs(flags);
+                    // groupindent is on both sides of this inequality, and therefore can be removed
                     if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent)
                     {
                         help << '\n';
                     } else if (infoit != std::end(info))
                     {
+                        // groupindent is on both sides of the minus sign, and therefore doesn't actually need to be in here
                         help << std::string(helpParams.helpindent - (helpParams.flagindent + flagssize), ' ') << *infoit << '\n';
                         ++infoit;
                     }
                     for (; infoit != std::end(info); ++infoit)
                     {
-                        help << std::string(helpParams.helpindent, ' ') << *infoit << '\n';
+                        help << std::string(groupindent + helpParams.helpindent, ' ') << *infoit << '\n';
                     }
                 }
                 if (hasoptions && hasarguments)
