@@ -245,3 +245,18 @@ TEST_CASE("Custom parser prefixes (Some Windows styles)", "[args]")
     REQUIRE(input.value == "/dev/null");
     REQUIRE_FALSE(output);
 }
+
+TEST_CASE("Help menu can be grabbed as a string, passed into a stream, or by using the overloaded stream operator", "[args]")
+{
+    std::ostream null(nullptr);
+    args::ArgumentParser parser("This command likes to break your disks");
+    args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
+    args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
+    args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
+    args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
+    args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+    parser.ParseArgs(std::vector<std::string>{"--skip=8", "--if=/dev/null"});
+    null << parser.Help();
+    parser.Help(null);
+    null << parser;
+}
