@@ -230,6 +230,24 @@ namespace args
                 }
                 return optStrings;
             }
+
+            /** (INTERNAL) Get all option strings as a vector, with the prefixes and names embedded
+             */
+            std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix, const std::string &name, const std::string longSeparator) const
+            {
+                const std::string bracedname(std::string("[") + name + "]");
+                std::vector<std::string> optStrings;
+                optStrings.reserve(shortOpts.size() + longOpts.size());
+                for (const char opt: shortOpts)
+                {
+                    optStrings.emplace_back(shortPrefix + std::string(1, opt) + bracedname);
+                }
+                for (const std::string &opt: longOpts)
+                {
+                    optStrings.emplace_back(longPrefix + opt + (longSeparator.empty() ? std::string(" ") : longSeparator) + bracedname);
+                }
+                return optStrings;
+            }
     };
 
     /** Base class for all match types
@@ -254,7 +272,7 @@ namespace args
                 return Matched();
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator) const
             {
                 std::tuple<std::string, std::string> description;
                 std::get<1>(description) = help;
@@ -278,7 +296,7 @@ namespace args
             NamedBase(const std::string &name, const std::string &help) : Base(help), name(name) {}
             virtual ~NamedBase() {}
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
                 std::get<0>(description) = name;
@@ -323,7 +341,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
                 const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
@@ -351,10 +369,10 @@ namespace args
             virtual ~ArgFlagBase() {}
             virtual void ParseArg(const std::string &value) = 0;
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
+                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix, name, longSeparator));
                 std::ostringstream flagstream;
                 for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
                 {
@@ -362,7 +380,7 @@ namespace args
                     {
                         flagstream << ", ";
                     }
-                    flagstream << *it << ' ' << name;
+                    flagstream << *it;
                 }
                 std::get<0>(description) = flagstream.str();
                 std::get<1>(description) = help;
@@ -550,7 +568,7 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, unsigned int indent = 0) const
+            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator, unsigned int indent = 0) const
             {
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
@@ -560,15 +578,15 @@ namespace args
                     if (group)
                     {
                         // Push that group description on the back:
-                        descriptions.emplace_back("", group->help, indent);
-                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, indent + 1));
+                        descriptions.emplace_back(group->help, "", indent);
+                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, longSeparator, indent + 1));
                         descriptions.insert(
                             std::end(descriptions),
                             std::make_move_iterator(std::begin(groupDescriptions)),
                             std::make_move_iterator(std::end(groupDescriptions)));
                     } else if (named)
                     {
-                        const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix));
+                        const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix, longSeparator));
                         descriptions.emplace_back(std::get<0>(description), std::get<1>(description), indent);
                     }
                 }
@@ -702,7 +720,7 @@ namespace args
                 unsigned int flagindent = 6;
                 /** The indent of the flag descriptions
                  */
-                unsigned int helpindent = 25;
+                unsigned int helpindent = 40;
                 /** The additional indent each group adds
                  */
                 unsigned int eachgroupindent = 2;
@@ -826,20 +844,29 @@ namespace args
                 }
                 help << "\n";
                 help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
-                for (const auto &description: GetChildDescriptions(shortprefix, longprefix))
+                for (const auto &description: GetChildDescriptions(shortprefix, longprefix, longseparator))
                 {
-                    const std::string &flags = std::get<0>(description);
                     const unsigned int groupindent = std::get<2>(description) * helpParams.eachgroupindent;
+                    const std::vector<std::string> flags(Wrap(std::get<0>(description), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter)));
                     const std::vector<std::string> info(Wrap(std::get<1>(description), helpParams.width - (helpParams.helpindent + groupindent)));
 
-                    help << std::string(groupindent + helpParams.flagindent, ' ') << flags;
+                    std::string::size_type flagssize = 0;
+                    for (auto flagsit = std::begin(flags); flagsit != std::end(flags); ++flagsit)
+                    {
+                        if (flagsit != std::begin(flags))
+                        {
+                            help << '\n';
+                        }
+                        help << std::string(groupindent + helpParams.flagindent, ' ') << *flagsit;
+                        flagssize = Glyphs(*flagsit);
+                    }
+
                     auto infoit = std::begin(info);
-                    const std::string::size_type flagssize = Glyphs(flags);
                     // groupindent is on both sides of this inequality, and therefore can be removed
-                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent)
+                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent || infoit == std::end(info))
                     {
                         help << '\n';
-                    } else if (infoit != std::end(info))
+                    } else
                     {
                         // groupindent is on both sides of the minus sign, and therefore doesn't actually need to be in here
                         help << std::string(helpParams.helpindent - (helpParams.flagindent + flagssize), ' ') << *infoit << '\n';
