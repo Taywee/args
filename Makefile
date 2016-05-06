@@ -49,7 +49,7 @@ pages:
 	doxygen Doxyfile
 	cp -rv doc/html/* .
 
-man:
+doc/man: 
 	doxygen Doxyfile
 	bzip2 doc/man/man3/*.3
 
