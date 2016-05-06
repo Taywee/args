@@ -10,9 +10,9 @@ else
 FLAGS		+=	-O3
 endif
 
-LIBS 		= 	glfw3 assimp
-CFLAGS		+=	-I. $(FLAGS) -c -MMD `pkg-config --cflags $(LIBS)`
-LDFLAGS		+=	$(FLAGS) `pkg-config --libs $(LIBS)`
+LIBS 		= 	
+CFLAGS		+=	-I. $(FLAGS) -c -MMD
+LDFLAGS		+=	$(FLAGS)
 ifneq ($(OS), Darwin)
 LDFLAGS		+=	-lGL
 endif
