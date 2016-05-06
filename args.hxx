@@ -677,6 +677,17 @@ namespace args
             std::string terminator;
 
         public:
+            struct HelpParams
+            {
+                unsigned int width = 80;
+                unsigned int progindent = 2;
+                unsigned int progtailindent = 2;
+                unsigned int descriptionindent = 4;
+                unsigned int flagindent = 4;
+                unsigned int eachgroupindent = 2;
+                unsigned int helpindent = 25;
+                unsigned int gutter = 25;
+            } helpParams;
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
                 Group("arguments", Group::Validators::AllChildGroups),
                 description(description),
@@ -765,13 +776,13 @@ namespace args
              * \param gutter the required minimum spacing between the flag text and the flag help
              * \return the help text as a single string
              */
-            std::string Help(unsigned int width = 80, unsigned int progindent = 2, unsigned int descriptionindent = 4, unsigned int flagindent = 6, unsigned int helpindent = 25, unsigned int gutter = 1) const
+            std::string Help() const
             {
                 bool hasoptions = false;
                 bool hasarguments = false;
 
-                const std::vector<std::string> description(Wrap(this->description, width - descriptionindent));
-                const std::vector<std::string> epilog(Wrap(this->epilog, width - descriptionindent));
+                const std::vector<std::string> description(Wrap(this->description, helpParams.width - helpParams.descriptionindent));
+                const std::vector<std::string> epilog(Wrap(this->epilog, helpParams.width - helpParams.descriptionindent));
                 std::ostringstream help;
                 std::ostringstream prognameline;
                 prognameline << prog;
@@ -785,58 +796,58 @@ namespace args
                     hasarguments = true;
                     prognameline << " [" << posname << ']';
                 }
-                const std::vector<std::string> proglines(Wrap(prognameline.str(), width - (progindent + 4), width - progindent));
+                const std::vector<std::string> proglines(Wrap(prognameline.str(), helpParams.width - (helpParams.progindent + 4), helpParams.width - helpParams.progindent));
                 auto progit = std::begin(proglines);
                 if (progit != std::end(proglines))
                 {
-                    help << std::string(progindent, ' ') << *progit << '\n';
+                    help << std::string(helpParams.progindent, ' ') << *progit << '\n';
                     ++progit;
                 }
                 for (; progit != std::end(proglines); ++progit)
                 {
-                    help << std::string(progindent + 4, ' ') << *progit << '\n';
+                    help << std::string(helpParams.progindent + 4, ' ') << *progit << '\n';
                 }
 
                 help << '\n';
 
                 for (const std::string &line: description)
                 {
-                    help << std::string(descriptionindent, ' ') << line << "\n";
+                    help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
                 help << "\n";
-                help << std::string(progindent, ' ') << "OPTIONS:\n\n";
+                help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
                 for (const auto &description: GetChildDescriptions(shortprefix, longprefix))
                 {
                     const std::string &flags = std::get<0>(description);
-                    const std::vector<std::string> info(Wrap(std::get<1>(description), width - helpindent));
-                    help << std::string(flagindent, ' ') << flags;
+                    const std::vector<std::string> info(Wrap(std::get<1>(description), helpParams.width - helpParams.helpindent));
+                    help << std::string(helpParams.flagindent, ' ') << flags;
                     auto infoit = std::begin(info);
                     const std::string::size_type flagssize = Glyphs(flags);
-                    if ((flagindent + flagssize + gutter) > helpindent)
+                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent)
                     {
                         help << '\n';
                     } else if (infoit != std::end(info))
                     {
-                        help << std::string(helpindent - (flagindent + flagssize), ' ') << *infoit << '\n';
+                        help << std::string(helpParams.helpindent - (helpParams.flagindent + flagssize), ' ') << *infoit << '\n';
                         ++infoit;
                     }
                     for (; infoit != std::end(info); ++infoit)
                     {
-                        help << std::string(helpindent, ' ') << *infoit << '\n';
+                        help << std::string(helpParams.helpindent, ' ') << *infoit << '\n';
                     }
                 }
                 if (hasoptions && hasarguments)
                 {
-                    for (const std::string &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", width - flagindent))
+                    for (const std::string &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
                     {
-                        help << std::string(flagindent, ' ') << item << '\n';
+                        help << std::string(helpParams.flagindent, ' ') << item << '\n';
                     }
                 }
 
                 help << "\n";
                 for (const std::string &line: epilog)
                 {
-                    help << std::string(descriptionindent, ' ') << line << "\n";
+                    help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
                 return help.str();
             }
