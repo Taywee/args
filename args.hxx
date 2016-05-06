@@ -679,14 +679,31 @@ namespace args
         public:
             struct HelpParams
             {
+                /** The width of the help menu
+                 */
                 unsigned int width = 80;
+                /** The indent of the program line
+                 */
                 unsigned int progindent = 2;
-                unsigned int progtailindent = 2;
+                /** The indent of the program trailing lines for long parameters
+                 */
+                unsigned int progtailindent = 4;
+                /** The indent of the description and epilogs
+                 */
                 unsigned int descriptionindent = 4;
-                unsigned int flagindent = 4;
-                unsigned int eachgroupindent = 2;
+                /** The indent of the flags
+                 */
+                unsigned int flagindent = 6;
+                /** The indent of the flag descriptions
+                 */
                 unsigned int helpindent = 25;
-                unsigned int gutter = 25;
+                /** The additional indent each group adds
+                 */
+                unsigned int eachgroupindent = 2;
+
+                /** The minimum gutter between each flag and its help
+                 */
+                unsigned int gutter = 1;
             } helpParams;
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
                 Group("arguments", Group::Validators::AllChildGroups),
@@ -750,10 +767,6 @@ namespace args
              */
             void LongSeparator(const std::string &longseparator)
             {
-                if (longseparator.empty())
-                {
-                    throw ParseError("The long separator may not be empty");
-                }
                 this->longseparator = longseparator;
             }
 
@@ -766,24 +779,15 @@ namespace args
             void Terminator(const std::string &terminator)
             { this->terminator = terminator; }
 
-            /** Generate a help menu as a string.
-             *
-             * \param width the width of the terminal
-             * \param progindent the indent of the program name line
-             * \param descriptionindent the indent of the description and epilog lines
-             * \param flagindent the indent of the flags themselves
-             * \param helpindent the indent of the flag help texts
-             * \param gutter the required minimum spacing between the flag text and the flag help
-             * \return the help text as a single string
+            /** Pass the help menu into an ostream
              */
-            std::string Help() const
+            void Help(std::ostream &help) const
             {
                 bool hasoptions = false;
                 bool hasarguments = false;
 
                 const std::vector<std::string> description(Wrap(this->description, helpParams.width - helpParams.descriptionindent));
                 const std::vector<std::string> epilog(Wrap(this->epilog, helpParams.width - helpParams.descriptionindent));
-                std::ostringstream help;
                 std::ostringstream prognameline;
                 prognameline << prog;
                 if (HasFlag())
@@ -805,7 +809,7 @@ namespace args
                 }
                 for (; progit != std::end(proglines); ++progit)
                 {
-                    help << std::string(helpParams.progindent + 4, ' ') << *progit << '\n';
+                    help << std::string(helpParams.progtailindent, ' ') << *progit << '\n';
                 }
 
                 help << '\n';
@@ -849,6 +853,16 @@ namespace args
                 {
                     help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
+            }
+
+            /** Generate a help menu as a string.
+             *
+             * \return the help text as a single string
+             */
+            std::string Help() const
+            {
+                std::ostringstream help;
+                Help(help);
                 return help.str();
             }
 
@@ -876,7 +890,7 @@ namespace args
                     {
                         const std::string argchunk(chunk.substr(longprefix.size()));
                         // Try to separate it, in case of a separator:
-                        const auto separator = argchunk.find(longseparator);
+                        const auto separator = longseparator.empty() ? argchunk.npos : argchunk.find(longseparator);
                         const std::string arg = (separator != argchunk.npos ?
                             std::string(argchunk, 0, separator)
                             : argchunk);
@@ -996,6 +1010,12 @@ namespace args
                 ParseArgs(args);
             }
     };
+
+    std::ostream &operator<<(std::ostream &os, ArgumentParser &parser)
+    {
+        parser.Help(os);
+        return os;
+    }
 
     /** Boolean argument matcher
      */
