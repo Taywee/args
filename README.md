@@ -112,7 +112,7 @@ arguments out, but that was fast compared to parsing, as would be expected.
 
 ### The run:
 
-```
+```shell
 % g++ -obench bench.cxx -O2 -std=c++11 -lboost_program_options
 % ./bench
 args seconds to run: 0.895472
