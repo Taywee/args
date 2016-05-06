@@ -6,9 +6,6 @@ about 1.3K lines of code.
 This is designed to somewhat replicate the behavior of Python's argparse, but
 in C++, with static type checking, and hopefully a lot faster.
 
-It's probably slower than some other C++ argument-parsing libraries (especially
-with its heavy use of inheritence), but it should be more flexible than most.  
-
 UTF-8 support is limited at best.  No normalization is performed, so non-ascii
 characters are very best kept out of flags, and combined glyphs are probably
 going to mess up help output if you use it.  Most UTF-8 necessary for
@@ -28,7 +25,7 @@ The code can be downloaded at https://github.com/Taywee/args
 
 There are also somewhat extensive examples below.
 
-# What does it do
+# What does it do?
 
 It:
 
@@ -46,7 +43,7 @@ It:
   it.  If this doesn't work for your uses, you can supply a function and parse
   the string yourself if you like.
 
-# What does it not do
+# What does it not do?
 
 There are tons of things this library does not do!
 
@@ -91,13 +88,124 @@ sudo make install DESTDIR=/opt/mydir
 You can also copy the file into your source tree, if you want to be absolutely
 sure you keep a stable API between projects.
 
-## I also want man pages
+## I also want man pages.
 
 ```shell
 sudo make installman
 ```
 
 This requires Doxygen
+
+# How fast is it?
+
+This should not really be a question you ask when you are looking for an
+argument-parsing library, but I did run a simple benchmark against args, TCLAP,
+and boost::program_options, which parses the command line `-i7 -c a 2.7 --char
+b 8.4 -c c 8.8 --char d` with a parser that parses -i as an int, -c as a list
+of chars, and the positional parameters as a list of doubles (the command line
+was originally much more complex, but TCLAP's limitations made me trim it down
+so I could use a common command line across all libraries.  I also have to copy
+in the arguments list with every run, because TCLAP permutes its argument list
+as it runs, but that surprisingly didn't affect much.
+
+### The run:
+
+```
+args seconds to run: 0.793519
+tclap seconds to run: 1.35626
+boost::program_options seconds to run: 2.12119
+```
+
+### The benchmark:
+
+```cpp
+#include <iostream>
+#include <chrono>
+
+#include "args.hxx"
+#include <tclap/CmdLine.h>
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+using namespace std::chrono;
+
+int main()
+{
+	const std::vector<std::string> carguments({"-i7", "-c", "a", "2.7", "--char", "b", "8.4", "-c", "c", "8.8", "--char", "d"});
+	// args
+	{
+		high_resolution_clock::time_point start = high_resolution_clock::now();
+		for (unsigned int i = 0; i < 100000; ++i)
+		{
+			std::vector<std::string> arguments(carguments);
+			args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+			args::ArgFlag<int> integer(parser, "integer", "The integer flag", args::Matcher({'i'}, {"int"}));
+			args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher({'c'}, {"char"}));
+			args::PosArgList<double> numbers(parser, "numbers", "The numbers position list");
+			parser.ParseArgs(arguments);
+		}
+		high_resolution_clock::duration runtime = high_resolution_clock::now() - start;
+		std::cout << "args seconds to run: " << duration_cast<duration<double>>(runtime).count() << std::endl;
+	}
+	// tclap
+	{
+		high_resolution_clock::time_point start = high_resolution_clock::now();
+		for (unsigned int i = 0; i < 100000; ++i)
+		{
+			std::vector<std::string> arguments(carguments);
+			TCLAP::CmdLine cmd("Command description message", ' ', "0.9");
+			TCLAP::ValueArg<int> integer("i", "int", "The integer flag", false, 0, "integer", cmd);
+			TCLAP::MultiArg<char> characters("c", "char", "The character flag", false, "characters", cmd);
+			TCLAP::UnlabeledMultiArg<double> numbers("numbers", "The numbers position list", false, "foo", cmd, false);
+			cmd.parse(arguments);
+		}
+		high_resolution_clock::duration runtime = high_resolution_clock::now() - start;
+		std::cout << "tclap seconds to run: " << duration_cast<duration<double>>(runtime).count() << std::endl;
+	}
+	// boost::program_options
+	{
+		high_resolution_clock::time_point start = high_resolution_clock::now();
+		for (unsigned int i = 0; i < 100000; ++i)
+		{
+			std::vector<std::string> arguments(carguments);
+			po::options_description desc("This is a test program.");
+			desc.add_options()
+				("int,i", po::value<int>(), "The integer flag")
+				("char,c", po::value<std::vector<char>>(), "The character flag")
+				("numbers", po::value<std::vector<double>>(), "The numbers flag");
+			po::positional_options_description p;
+			p.add("numbers", -1);
+			po::variables_map vm;
+			po::store(po::command_line_parser(carguments).options(desc).positional(p).run(), vm);
+			po::notify(vm);
+		}
+		high_resolution_clock::duration runtime = high_resolution_clock::now() - start;
+		std::cout << "boost::program_options seconds to run: " << duration_cast<duration<double>>(runtime).count() << std::endl;
+	}
+	return 0;
+}
+```
+
+So, on top of being more flexible, smaller, and easier to read, it is faster
+than the most common alternatives.
+
+# Is it developed with regression tests?
+
+Yes.  tests.cxx in the git repository has a set of standard tests (which are
+still relatively small in number, but I would welcome some expansion here), and
+thanks to GitLab's CI, these tests run with every single push:
+
+```shell
+% make runtests
+g++ test.cxx -o test.o -I. -std=c++11 -O2 -c -MMD
+g++ -o test test.o -std=c++11 -O2
+./test
+===============================================================================
+All tests passed (74 assertions in 15 test cases)
+
+%
+```
+
+The testing library used is [Catch](https://github.com/philsquared/Catch).
 
 # Examples
 
