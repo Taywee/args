@@ -257,6 +257,11 @@ namespace args
                 std::get<1>(description) = help;
                 return description;
             }
+
+            virtual void ResetMatched()
+            {
+                matched = false;
+            }
     };
 
     /** Base class for all match types that have a name
@@ -588,6 +593,14 @@ namespace args
                 return names;
             }
 
+            virtual void ResetMatched() override
+            {
+                for (auto &child: children)
+                {
+                    child->ResetMatched();
+                }
+            }
+
             /** Default validators
              */
             struct Validators
@@ -835,6 +848,8 @@ namespace args
             template <typename T>
             void ParseArgs(const T &args)
             {
+                // Reset all Matched statuses to false, for validation.  Don't reset values.
+                ResetMatched();
                 bool terminated = false;
 
                 // Check all arg chunks
