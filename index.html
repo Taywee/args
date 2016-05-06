@@ -82,13 +82,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 <div class="textblock"><p>A simple, small, flexible, single-header C++11 argument parsing library, in about 1.3K lines of code.</p>
 <p>This is designed to somewhat replicate the behavior of Python's argparse, but in C++, with static type checking, and hopefully a lot faster.</p>
-<p>It's probably slower than some other C++ argument-parsing libraries (especially with its heavy use of inheritence), but it should be more flexible than most.</p>
 <p>UTF-8 support is limited at best. No normalization is performed, so non-ascii characters are very best kept out of flags, and combined glyphs are probably going to mess up help output if you use it. Most UTF-8 necessary for internationalization should work for most cases, though heavily combinatory UTF alphabets may wreak havoc.</p>
 <p>This program is MIT-licensed, so you can use the header as-is with no restrictions. I'd appreciate attribution in a README, Man page, or something if you are feeling generous, but all that's required is that you don't remove the license and my name from the header of the <a class="el" href="args_8hxx_source.html">args.hxx</a> file in source redistributions (ie. don't pretend that you wrote it). I do welcome additions and updates wherever you feel like contributing code.</p>
 <p>The API documentation can be found at <a href="https://taywee.github.io/args">https://taywee.github.io/args</a></p>
 <p>The code can be downloaded at <a href="https://github.com/Taywee/args">https://github.com/Taywee/args</a></p>
 <p>There are also somewhat extensive examples below.</p>
-<h1>What does it do</h1>
+<h1>What does it do?</h1>
 <p>It:</p>
 <ul>
 <li>lets you handle flags, flag+arguments, and positional arguments simply and elegently, with the full help of static typechecking.</li>
@@ -99,7 +98,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>Lets you customize all prefixes and most separators, allowing you to create an infinite number of different argument syntaxes</li>
 <li>Lets you parse, by default, any type that has a stream extractor operator for it. If this doesn't work for your uses, you can supply a function and parse the string yourself if you like.</li>
 </ul>
-<h1>What does it not do</h1>
+<h1>What does it not do?</h1>
 <p>There are tons of things this library does not do!</p>
 <h2>It does not yet:</h2>
 <ul>
@@ -118,9 +117,92 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --><p>Or, to install it somewhere special (default is <code>/usr/local</code>):</p>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make install DESTDIR=/opt/mydir</div>
 </div><!-- fragment --><p>You can also copy the file into your source tree, if you want to be absolutely sure you keep a stable API between projects.</p>
-<h2>I also want man pages</h2>
+<h2>I also want man pages.</h2>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make installman</div>
 </div><!-- fragment --><p>This requires Doxygen</p>
+<h1>How fast is it?</h1>
+<p>This should not really be a question you ask when you are looking for an argument-parsing library, but I did run a simple benchmark against args, TCLAP, and boost::program_options, which parses the command line <code>-i7 -c a 2.7 --char b 8.4 -c c 8.8 --char d</code> with a parser that parses -i as an int, -c as a list of chars, and the positional parameters as a list of doubles (the command line was originally much more complex, but TCLAP's limitations made me trim it down so I could use a common command line across all libraries. I also have to copy in the arguments list with every run, because TCLAP permutes its argument list as it runs, but that surprisingly didn't affect much.</p>
+<h3>The run:</h3>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;args seconds to run: 0.793519</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;tclap seconds to run: 1.35626</div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;boost::program_options seconds to run: 2.12119</div>
+</div><!-- fragment --><h3>The benchmark:</h3>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;chrono&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &quot;args.hxx&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;tclap/CmdLine.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;boost/program_options.hpp&gt;</span></div>
+<div class="line"><span class="keyword">namespace </span>po = boost::program_options;</div>
+<div class="line"><span class="keyword">using namespace </span>std::chrono;</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">const</span> std::vector&lt;std::string&gt; carguments({<span class="stringliteral">&quot;-i7&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, <span class="stringliteral">&quot;2.7&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;b&quot;</span>, <span class="stringliteral">&quot;8.4&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;8.8&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;d&quot;</span>});</div>
+<div class="line">    <span class="comment">// args</span></div>
+<div class="line">    {</div>
+<div class="line">        high_resolution_clock::time_point start = high_resolution_clock::now();</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; 100000; ++i)</div>
+<div class="line">        {</div>
+<div class="line">            std::vector&lt;std::string&gt; arguments(carguments);</div>
+<div class="line">            <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
+<div class="line">            <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;int&gt;</a> integer(parser, <span class="stringliteral">&quot;integer&quot;</span>, <span class="stringliteral">&quot;The integer flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;i&#39;</span>}, {<span class="stringliteral">&quot;int&quot;</span>}));</div>
+<div class="line">            <a class="code" href="classargs_1_1ArgFlagList.html">args::ArgFlagList&lt;char&gt;</a> characters(parser, <span class="stringliteral">&quot;characters&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;c&#39;</span>}, {<span class="stringliteral">&quot;char&quot;</span>}));</div>
+<div class="line">            <a class="code" href="classargs_1_1PosArgList.html">args::PosArgList&lt;double&gt;</a> numbers(parser, <span class="stringliteral">&quot;numbers&quot;</span>, <span class="stringliteral">&quot;The numbers position list&quot;</span>);</div>
+<div class="line">            parser.ParseArgs(arguments);</div>
+<div class="line">        }</div>
+<div class="line">        high_resolution_clock::duration runtime = high_resolution_clock::now() - start;</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;args seconds to run: &quot;</span> &lt;&lt; duration_cast&lt;duration&lt;double&gt;&gt;(runtime).count() &lt;&lt; std::endl;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="comment">// tclap</span></div>
+<div class="line">    {</div>
+<div class="line">        high_resolution_clock::time_point start = high_resolution_clock::now();</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; 100000; ++i)</div>
+<div class="line">        {</div>
+<div class="line">            std::vector&lt;std::string&gt; arguments(carguments);</div>
+<div class="line">            TCLAP::CmdLine cmd(<span class="stringliteral">&quot;Command description message&quot;</span>, <span class="charliteral">&#39; &#39;</span>, <span class="stringliteral">&quot;0.9&quot;</span>);</div>
+<div class="line">            TCLAP::ValueArg&lt;int&gt; integer(<span class="stringliteral">&quot;i&quot;</span>, <span class="stringliteral">&quot;int&quot;</span>, <span class="stringliteral">&quot;The integer flag&quot;</span>, <span class="keyword">false</span>, 0, <span class="stringliteral">&quot;integer&quot;</span>, cmd);</div>
+<div class="line">            TCLAP::MultiArg&lt;char&gt; characters(<span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;char&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <span class="keyword">false</span>, <span class="stringliteral">&quot;characters&quot;</span>, cmd);</div>
+<div class="line">            TCLAP::UnlabeledMultiArg&lt;double&gt; numbers(<span class="stringliteral">&quot;numbers&quot;</span>, <span class="stringliteral">&quot;The numbers position list&quot;</span>, <span class="keyword">false</span>, <span class="stringliteral">&quot;foo&quot;</span>, cmd, <span class="keyword">false</span>);</div>
+<div class="line">            cmd.parse(arguments);</div>
+<div class="line">        }</div>
+<div class="line">        high_resolution_clock::duration runtime = high_resolution_clock::now() - start;</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;tclap seconds to run: &quot;</span> &lt;&lt; duration_cast&lt;duration&lt;double&gt;&gt;(runtime).count() &lt;&lt; std::endl;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="comment">// boost::program_options</span></div>
+<div class="line">    {</div>
+<div class="line">        high_resolution_clock::time_point start = high_resolution_clock::now();</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; 100000; ++i)</div>
+<div class="line">        {</div>
+<div class="line">            std::vector&lt;std::string&gt; arguments(carguments);</div>
+<div class="line">            po::options_description desc(<span class="stringliteral">&quot;This is a test program.&quot;</span>);</div>
+<div class="line">            desc.add_options()</div>
+<div class="line">                (<span class="stringliteral">&quot;int,i&quot;</span>, po::value&lt;int&gt;(), <span class="stringliteral">&quot;The integer flag&quot;</span>)</div>
+<div class="line">                (<span class="stringliteral">&quot;char,c&quot;</span>, po::value&lt;std::vector&lt;char&gt;&gt;(), <span class="stringliteral">&quot;The character flag&quot;</span>)</div>
+<div class="line">                (<span class="stringliteral">&quot;numbers&quot;</span>, po::value&lt;std::vector&lt;double&gt;&gt;(), <span class="stringliteral">&quot;The numbers flag&quot;</span>);</div>
+<div class="line">            po::positional_options_description p;</div>
+<div class="line">            p.add(<span class="stringliteral">&quot;numbers&quot;</span>, -1);</div>
+<div class="line">            po::variables_map vm;</div>
+<div class="line">            po::store(po::command_line_parser(carguments).options(desc).positional(p).run(), vm);</div>
+<div class="line">            po::notify(vm);</div>
+<div class="line">        }</div>
+<div class="line">        high_resolution_clock::duration runtime = high_resolution_clock::now() - start;</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;boost::program_options seconds to run: &quot;</span> &lt;&lt; duration_cast&lt;duration&lt;double&gt;&gt;(runtime).count() &lt;&lt; std::endl;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>So, on top of being more flexible, smaller, and easier to read, it is faster than the most common alternatives.</p>
+<h1>Is it developed with regression tests?</h1>
+<p>Yes. tests.cxx in the git repository has a set of standard tests (which are still relatively small in number, but I would welcome some expansion here), and thanks to GitLab's CI, these tests run with every single push:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;% make runtests</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;g++ test.cxx -o test.o -I. -std=c++11 -O2 -c -MMD</div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;g++ -o test test.o -std=c++11 -O2</div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;./test</div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;===============================================================================</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;All tests passed (74 assertions in 15 test cases)</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;%</div>
+</div><!-- fragment --><p>The testing library used is <a href="https://github.com/philsquared/Catch">Catch</a>.</p>
 <h1>Examples</h1>
 <p>All the code examples here will be complete code examples, with some output.</p>
 <h2>Simple example:</h2>
