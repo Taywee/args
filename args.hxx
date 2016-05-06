@@ -99,13 +99,16 @@ namespace args
                     currentwidth = width;
                 }
             }
-            if (linesize && !item.empty())
+            if (itemsize > 0)
             {
-                ++linesize;
-                line << " ";
+                if (linesize)
+                {
+                    ++linesize;
+                    line << " ";
+                }
+                line << item;
+                linesize += itemsize;
             }
-            line << item;
-            linesize += itemsize;
         }
         if (linesize > 0)
         {
