@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">1.2.3</span>
+   &#160;<span id="projectnumber">1.2.4</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -114,7 +114,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>Allow you to use a positional argument list before any other positional arguments (the last argument list will slurp all subsequent positional arguments). The logic for allowing this would be a lot more code than I'd like, and would make static checking much more difficult, requiring us to sort std::string arguments and pair them to positional arguments before assigning them, rather than what we currently do, which is assiging them as we go for better simplicity and speed.</li>
 </ul>
 <h1>How do I use it?</h1>
-<p>Just copy the header into your source tree, or put it somewhere that your compiler can see. As long as you can <code>#include "args.hxx"</code> and use c++11, you should be good to go.</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make install</div>
+</div><!-- fragment --><p>Or, to install it somewhere special (default is <code>/usr/local</code>):</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make install DESTDIR=/opt/mydir</div>
+</div><!-- fragment --><p>You can also copy the file into your source tree, if you want to be absolutely sure you keep a stable API between projects.</p>
+<h2>I also want man pages</h2>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make installman</div>
+</div><!-- fragment --><p>This requires Doxygen</p>
 <h1>Examples</h1>
 <p>All the code examples here will be complete code examples, with some output.</p>
 <h2>Simple example:</h2>
