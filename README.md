@@ -78,9 +78,26 @@ There are tons of things this library does not do!
 
 # How do I use it?
 
-Just copy the header into your source tree, or put it somewhere that your
-compiler can see.  As long as you can `#include "args.hxx"` and use c++11, you
-should be good to go.
+```shell
+sudo make install
+```
+
+Or, to install it somewhere special (default is `/usr/local`):
+
+```shell
+sudo make install DESTDIR=/opt/mydir
+```
+
+You can also copy the file into your source tree, if you want to be absolutely
+sure you keep a stable API between projects.
+
+## I also want man pages
+
+```shell
+sudo make installman
+```
+
+This requires Doxygen
 
 # Examples
 
