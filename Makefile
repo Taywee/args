@@ -22,7 +22,7 @@ OBJECTS		= 	$(SOURCES:.cxx=.o)
 DEPENDENCIES=	$(SOURCES:.cxx=.d)
 EXECUTABLE	=	test
 
-.PHONY: all clean pages
+.PHONY: all clean pages runtests
 
 all: $(EXECUTABLE)
 
@@ -42,3 +42,5 @@ pages:
 	cp -rv html/* .
 	rm -r html
 
+runtests: test
+	./test
