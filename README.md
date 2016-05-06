@@ -23,9 +23,7 @@ redistributions (ie. don't pretend that you wrote it).  I do welcome additions
 and updates wherever you feel like contributing code.
 
 The API documentation can be found at https://taywee.github.io/args
-
-I'd also host the documentation at gitgud.io, but they don't offer pages at the
-moment.
+The code can be downloaded at https://github.com/Taywee/args
 
 There are also somewhat extensive examples below.
 
