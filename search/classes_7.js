@@ -1,4 +1,19 @@
 var searchData=
 [
-  ['namedbase',['NamedBase',['../classargs_1_1NamedBase.html',1,'args']]]
+  ['icontext',['IContext',['../structCatch_1_1IContext.html',1,'Catch']]],
+  ['iexceptiontranslator',['IExceptionTranslator',['../structCatch_1_1IExceptionTranslator.html',1,'Catch']]],
+  ['iexceptiontranslatorregistry',['IExceptionTranslatorRegistry',['../structCatch_1_1IExceptionTranslatorRegistry.html',1,'Catch']]],
+  ['igenerator',['IGenerator',['../structCatch_1_1IGenerator.html',1,'Catch']]],
+  ['igeneratorinfo',['IGeneratorInfo',['../structCatch_1_1IGeneratorInfo.html',1,'Catch']]],
+  ['igeneratorsfortest',['IGeneratorsForTest',['../structCatch_1_1IGeneratorsForTest.html',1,'Catch']]],
+  ['imutablecontext',['IMutableContext',['../structCatch_1_1IMutableContext.html',1,'Catch']]],
+  ['imutableregistryhub',['IMutableRegistryHub',['../structCatch_1_1IMutableRegistryHub.html',1,'Catch']]],
+  ['iregistryhub',['IRegistryHub',['../structCatch_1_1IRegistryHub.html',1,'Catch']]],
+  ['iresultcapture',['IResultCapture',['../structCatch_1_1IResultCapture.html',1,'Catch']]],
+  ['irunner',['IRunner',['../structCatch_1_1IRunner.html',1,'Catch']]],
+  ['ishared',['IShared',['../structCatch_1_1IShared.html',1,'Catch']]],
+  ['isstreaminsertable',['IsStreamInsertable',['../structCatch_1_1Detail_1_1IsStreamInsertable.html',1,'Catch::Detail']]],
+  ['itagaliasregistry',['ITagAliasRegistry',['../structCatch_1_1ITagAliasRegistry.html',1,'Catch']]],
+  ['itestcase',['ITestCase',['../structCatch_1_1ITestCase.html',1,'Catch']]],
+  ['itestcaseregistry',['ITestCaseRegistry',['../structCatch_1_1ITestCaseRegistry.html',1,'Catch']]]
 ];

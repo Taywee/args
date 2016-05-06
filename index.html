@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">1.1.1</span>
+   &#160;<span id="projectnumber">1.2.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -80,9 +80,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">args Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>A simple, small, flexible, single-header C++11 argument parsing library, in about 1.2K lines of code.</p>
+<div class="textblock"><p>A simple, small, flexible, single-header C++11 argument parsing library, in about 1.3K lines of code.</p>
 <p>This is designed to somewhat replicate the behavior of Python's argparse, but in C++, with static type checking, and hopefully a lot faster.</p>
-<p>UTF-8 support is limited at best. No normalization is performed, so non-ascii characters are very best kept out of flags, and combined glyphs are probably going to mess up help output if you use it.</p>
+<p>It's probably slower than some other C++ argument-parsing libraries (especially with its heavy use of inheritence), but it should be more flexible than most.</p>
+<p>UTF-8 support is limited at best. No normalization is performed, so non-ascii characters are very best kept out of flags, and combined glyphs are probably going to mess up help output if you use it. Most UTF-8 necessary for internationalization should work for most cases, though heavily combinatory UTF alphabets may wreak havoc.</p>
 <p>This program is MIT-licensed, so you can use the header as-is with no restrictions. I'd appreciate attribution in a README, Man page, or something if you are feeling generous, but all that's required is that you don't remove the license and my name from the header of the <a class="el" href="args_8hxx_source.html">args.hxx</a> file in source redistributions (ie. don't pretend that you wrote it). I do welcome additions and updates wherever you feel like contributing code.</p>
 <p>The API documentation can be found at <a href="https://taywee.github.io/args">https://taywee.github.io/args</a></p>
 <p>I'd also host the documentation at gitgud.io, but they don't offer pages at the moment.</p>
@@ -96,7 +97,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>Allows full validation of groups of required arguments, though output isn't pretty when something fails group validation. User validation functions are accepted. Groups are fully nestable.</li>
 <li>Generates pretty help for you, with some good tweakable parameters.</li>
 <li>Lets you customize all prefixes and most separators, allowing you to create an infinite number of different argument syntaxes</li>
-<li>Lets you parse, by default, any type that has a stream extractor operator for it. If this doesn't work, you can supply a function and parse the string yourself if you like.</li>
+<li>Lets you parse, by default, any type that has a stream extractor operator for it. If this doesn't work for your uses, you can supply a function and parse the string yourself if you like.</li>
 </ul>
 <h1>What does it not do</h1>
 <p>There are tons of things this library does not do!</p>
@@ -106,14 +107,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </ul>
 <h2>It will not ever:</h2>
 <ul>
-<li>Allow you to create subparsers like argparse</li>
+<li>Allow you to create subparsers like argparse in a master parser (you can do this yourself with iterators and multiple parsers)</li>
 <li>Allow one argument flag to take a specific number of arguments (like <code>--foo first second</code>). You can instead split that with a flag list (<code>--foo first --foo second</code>) or a custom type extraction (<code>--foo first,second</code>)</li>
 <li>Allow you to intermix multiple different prefix types (eg. <code>++foo</code> and <code>--foo</code> in the same parser), though shortopt and longopt prefixes can be different.</li>
 <li>Allow you to have argument flags only optionally accept arguments</li>
 <li>Allow you to use a positional argument list before any other positional arguments (the last argument list will slurp all subsequent positional arguments). The logic for allowing this would be a lot more code than I'd like, and would make static checking much more difficult, requiring us to sort std::string arguments and pair them to positional arguments before assigning them, rather than what we currently do, which is assiging them as we go for better simplicity and speed.</li>
 </ul>
 <h1>How do I use it?</h1>
-<p>Just copy and paste it into your source tree, or put it somewhere that your compiler can see. As long as you can <code>#include "args.hxx"</code> and use c++11, you should be good to go.</p>
+<p>Just copy the header into your source tree, or put it somewhere that your compiler can see. As long as you can <code>#include "args.hxx"</code> and use c++11, you should be good to go.</p>
 <h1>Examples</h1>
 <p>All the code examples here will be complete code examples, with some output.</p>
 <h2>Simple example:</h2>
@@ -129,13 +130,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1Help.html">args::Help</a>)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; parser.Help();</div>
+<div class="line">        std::cout &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 0;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ParseError.html">args::ParseError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
@@ -158,7 +159,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
-<div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> group(parser, <span class="stringliteral">&quot;This group is all exclusive&quot;</span>, args::Group::Validators::Xor);</div>
+<div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> group(parser, <span class="stringliteral">&quot;This group is all exclusive:&quot;</span>, args::Group::Validators::Xor);</div>
 <div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> foo(group, <span class="stringliteral">&quot;foo&quot;</span>, <span class="stringliteral">&quot;The foo flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;f&#39;</span>}, {<span class="stringliteral">&quot;foo&quot;</span>}));</div>
 <div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> bar(group, <span class="stringliteral">&quot;bar&quot;</span>, <span class="stringliteral">&quot;The bar flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;b&#39;</span>}));</div>
 <div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> baz(group, <span class="stringliteral">&quot;baz&quot;</span>, <span class="stringliteral">&quot;The baz flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="stringliteral">&quot;baz&quot;</span>}));</div>
@@ -168,19 +169,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1Help.html">args::Help</a>)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; parser.Help();</div>
+<div class="line">        std::cout &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 0;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ParseError.html">args::ParseError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ValidationError.html">args::ValidationError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">if</span> (foo) { std::cout &lt;&lt; <span class="stringliteral">&quot;foo&quot;</span> &lt;&lt; std::endl; }</div>
@@ -196,32 +197,33 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;</div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;  OPTIONS:</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;      -f, --foo          The foo flag </div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;      -b                 The bar flag </div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;      --baz              The baz flag </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    This goes after the options. </div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; % ./test -f</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;foo</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; % ./test --foo</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;foo</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; % ./test --foo -f</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;foo</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; % ./test -b      </div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;bar</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; % ./test --baz</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;baz</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; % ./test --baz -f</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;Group validation failed somewhere!</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  ./test {OPTIONS} </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    This is a test program. </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;...</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; % ./test --baz -fb</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;Group validation failed somewhere!</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  ./test {OPTIONS} </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;...</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; % </div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;                         This group is all exclusive:</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;        -f, --foo          The foo flag </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;        -b                 The bar flag </div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;        --baz              The baz flag </div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    This goes after the options. </div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; % ./test -f</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;foo</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; % ./test --foo</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;foo</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; % ./test --foo -f</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;foo</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; % ./test -b      </div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;bar</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; % ./test --baz</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;baz</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; % ./test --baz -f</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;Group validation failed somewhere!</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  ./test {OPTIONS} </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    This is a test program. </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;...</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; % ./test --baz -fb</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;Group validation failed somewhere!</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  ./test {OPTIONS} </div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;...</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; % </div>
 </div><!-- fragment --><h2>Argument flags, Positional arguments, lists</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
@@ -239,19 +241,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1Help.html">args::Help</a>)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; parser.Help();</div>
+<div class="line">        std::cout &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 0;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ParseError.html">args::ParseError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ValidationError.html">args::ValidationError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">if</span> (integer) { std::cout &lt;&lt; <span class="stringliteral">&quot;i: &quot;</span> &lt;&lt; integer.value &lt;&lt; std::endl; }</div>
@@ -332,13 +334,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1Help.html">args::Help</a>)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; parser.Help();</div>
+<div class="line">        std::cout &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 0;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ParseError.html">args::ParseError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">if</span> (ints)</div>
@@ -418,19 +420,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1Help.html">args::Help</a>)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; parser.Help();</div>
+<div class="line">        std::cout &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 0;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ParseError.html">args::ParseError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ValidationError.html">args::ValidationError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
@@ -501,19 +503,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1Help.html">args::Help</a>)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; parser.Help();</div>
+<div class="line">        std::cout &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 0;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ParseError.html">args::ParseError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ValidationError.html">args::ValidationError</a> e)</div>
 <div class="line">    {</div>
 <div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
-<div class="line">        std::cerr &lt;&lt; parser.Help();</div>
+<div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
 <div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;bs = &quot;</span> &lt;&lt; bs.value &lt;&lt; std::endl;</div>
@@ -561,6 +563,85 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;skip = 87</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;if = /tmp/test.txt</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; % </div>
+</div><!-- fragment --><h2>Group nesting help menu text</h2>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
+<div class="line">{</div>
+<div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
+<div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> xorgroup(parser, <span class="stringliteral">&quot;this group provides xor validation:&quot;</span>, args::Group::Validators::Xor);</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> a(xorgroup, <span class="stringliteral">&quot;a&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;a&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> b(xorgroup, <span class="stringliteral">&quot;b&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;b&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> c(xorgroup, <span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;c&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> nxor(xorgroup, <span class="stringliteral">&quot;this group provides all-or-none (nxor) validation:&quot;</span>, args::Group::Validators::AllOrNone);</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> d(nxor, <span class="stringliteral">&quot;d&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;d&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> e(nxor, <span class="stringliteral">&quot;e&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;e&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> f(nxor, <span class="stringliteral">&quot;f&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;f&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> nxor2(nxor, <span class="stringliteral">&quot;this group provides all-or-none (nxor2) validation:&quot;</span>, args::Group::Validators::AllOrNone);</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> i(nxor2, <span class="stringliteral">&quot;i&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;i&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> j(nxor2, <span class="stringliteral">&quot;j&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;j&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> k(nxor2, <span class="stringliteral">&quot;k&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;k&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> nxor3(nxor, <span class="stringliteral">&quot;this group provides all-or-none (nxor3) validation:&quot;</span>, args::Group::Validators::AllOrNone);</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> l(nxor3, <span class="stringliteral">&quot;l&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;l&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> m(nxor3, <span class="stringliteral">&quot;m&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;m&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> n(nxor3, <span class="stringliteral">&quot;n&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;n&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> atleastone(xorgroup, <span class="stringliteral">&quot;this group provides at-least-one validation:&quot;</span>, args::Group::Validators::AtLeastOne);</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> g(atleastone, <span class="stringliteral">&quot;g&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;g&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> o(atleastone, <span class="stringliteral">&quot;o&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;o&#39;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Show this help menu&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;h&#39;</span>}, {<span class="stringliteral">&quot;help&quot;</span>}));</div>
+<div class="line">    <span class="keywordflow">try</span></div>
+<div class="line">    {</div>
+<div class="line">        parser.ParseCLI(argc, argv);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1Help.html">args::Help</a>)</div>
+<div class="line">    {</div>
+<div class="line">        std::cout &lt;&lt; parser;</div>
+<div class="line">        <span class="keywordflow">return</span> 0;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ParseError.html">args::ParseError</a> e)</div>
+<div class="line">    {</div>
+<div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
+<div class="line">        parser.Help(std::cerr);</div>
+<div class="line">        <span class="keywordflow">return</span> 1;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span> (<a class="code" href="classargs_1_1ValidationError.html">args::ValidationError</a> e)</div>
+<div class="line">    {</div>
+<div class="line">        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;</div>
+<div class="line">        parser.Help(std::cerr);</div>
+<div class="line">        <span class="keywordflow">return</span> 1;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+</div><!-- fragment --><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;% /tmp/test -h</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; /tmp/test {OPTIONS} </div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;   This is a test program. </div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; OPTIONS:</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;                        this group provides xor validation: </div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;       -a                 test flag </div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;       -b                 test flag </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;       -c                 test flag </div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;                          this group provides all-or-none (nxor) validation: </div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;         -d                 test flag </div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;         -e                 test flag </div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;         -f                 test flag </div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;                            this group provides all-or-none (nxor2) validation:</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;           -i                 test flag </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;           -j                 test flag </div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;           -k                 test flag </div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;                            this group provides all-or-none (nxor3) validation:</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;           -l                 test flag </div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;           -m                 test flag </div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;           -n                 test flag </div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;                          this group provides at-least-one validation: </div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;         -g                 test flag </div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;         -o                 test flag </div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;     -h, --help         Show this help menu </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;   This goes after the options. </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;%                                                                                </div>
 </div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

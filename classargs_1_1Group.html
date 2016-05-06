@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">1.1.1</span>
+   &#160;<span id="projectnumber">1.2.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -154,14 +154,17 @@ std::vector&lt; <a class="el" href="classargs_1_1Base.html">Base</a> * &gt;::siz
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a27007b59c7ada6de8288cfdd59a271cf">Matched</a> () const  noexcept override</td></tr>
 <tr class="memdesc:a27007b59c7ada6de8288cfdd59a271cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not this group matches validation. <br /></td></tr>
 <tr class="separator:a27007b59c7ada6de8288cfdd59a271cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12f05d28e2c574a21018abe0194ff8db"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a12f05d28e2c574a21018abe0194ff8db"></a>
-std::vector&lt; std::tuple&lt; std::string, std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a12f05d28e2c574a21018abe0194ff8db">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const </td></tr>
-<tr class="memdesc:a12f05d28e2c574a21018abe0194ff8db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
-<tr class="separator:a12f05d28e2c574a21018abe0194ff8db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa59bec7c580d0ea7288477c4ffeed35f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa59bec7c580d0ea7288477c4ffeed35f"></a>
+std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#aa59bec7c580d0ea7288477c4ffeed35f">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, unsigned int indent=0) const </td></tr>
+<tr class="memdesc:aa59bec7c580d0ea7288477c4ffeed35f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
+<tr class="separator:aa59bec7c580d0ea7288477c4ffeed35f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85382243f31e08ef0ce5df807d82d102"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85382243f31e08ef0ce5df807d82d102"></a>
 std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a85382243f31e08ef0ce5df807d82d102">GetPosNames</a> () const </td></tr>
 <tr class="memdesc:a85382243f31e08ef0ce5df807d82d102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of positional parameters. <br /></td></tr>
 <tr class="separator:a85382243f31e08ef0ce5df807d82d102"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca7582d3fbb5c17f69db2c7dfdf467bd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aca7582d3fbb5c17f69db2c7dfdf467bd"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResetMatched</b> () override</td></tr>
+<tr class="separator:aca7582d3fbb5c17f69db2c7dfdf467bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classargs_1_1Base"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classargs_1_1Base')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classargs_1_1Base.html">args::Base</a></td></tr>
 <tr class="memitem:a746f35038981c797a85f4cc56cfc2125 inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a746f35038981c797a85f4cc56cfc2125"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Base</b> (const std::string &amp;help)</td></tr>
