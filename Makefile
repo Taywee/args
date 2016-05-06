@@ -2,7 +2,7 @@ OS = $(shell uname -s)
 
 CC 			?= 	cc
 CXX			?= 	c++
-DESTDIR		?= 	/usr
+DESTDIR		?= 	/usr/local
 FLAGS 		+= 	-std=c++11
 ifdef DEBUG
 FLAGS		+=	-ggdb -O0
@@ -19,7 +19,7 @@ OBJECTS		= 	$(SOURCES:.cxx=.o)
 DEPENDENCIES=	$(SOURCES:.cxx=.d)
 EXECUTABLE	=	test
 
-.PHONY: all clean pages runtests
+.PHONY: all clean pages runtests uninstall install installman
 
 all: $(EXECUTABLE)
 
@@ -28,16 +28,33 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
 
-clean:
-	rm $(EXECUTABLE) $(OBJECTS) $(DEPENDENCIES)
+uninstall:
+	-rm $(DESTDIR)/include/args.hxx
+	-rmdir $(DESTDIR)/include
+	-rm $(DESTDIR)/share/man/man3/args_*.3.bz2
+	-rmdir -p $(DESTDIR)/share/man/man3
 
-%.o: %.cxx
-	$(CXX) $< -o $@ $(CFLAGS)
+install:
+	mkdir -p $(DESTDIR)/include
+	cp args.hxx $(DESTDIR)/include
+
+installman: doc/man
+	mkdir -p $(DESTDIR)/share/man/man3
+	cp doc/man/man3/*.3.bz2 $(DESTDIR)/share/man/man3
+
+clean:
+	rm -rv $(EXECUTABLE) $(OBJECTS) $(DEPENDENCIES) doc
 
 pages:
 	doxygen Doxyfile
-	cp -rv html/* .
-	rm -r html
+	cp -rv doc/html/* .
+
+man:
+	doxygen Doxyfile
+	bzip2 doc/man/man3/*.3
 
 runtests: test
 	./test
+
+%.o: %.cxx
+	$(CXX) $< -o $@ $(CFLAGS)
