@@ -121,28 +121,38 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make installman</div>
 </div><!-- fragment --><p>This requires Doxygen</p>
 <h1>How fast is it?</h1>
-<p>This should not really be a question you ask when you are looking for an argument-parsing library, but I did run a simple benchmark against args, TCLAP, and boost::program_options, which parses the command line <code>-i7 -c a 2.7 --char b 8.4 -c c 8.8 --char d</code> with a parser that parses -i as an int, -c as a list of chars, and the positional parameters as a list of doubles (the command line was originally much more complex, but TCLAP's limitations made me trim it down so I could use a common command line across all libraries. I also have to copy in the arguments list with every run, because TCLAP permutes its argument list as it runs, but that surprisingly didn't affect much.</p>
+<p>This should not really be a question you ask when you are looking for an argument-parsing library, but I did run a simple benchmark against args, TCLAP, and boost::program_options, which parses the command line <code>-i 7 -c a 2.7 --char b 8.4 -c c 8.8 --char d</code> with a parser that parses -i as an int, -c as a list of chars, and the positional parameters as a list of doubles (the command line was originally much more complex, but TCLAP's limitations made me trim it down so I could use a common command line across all libraries. I also have to copy in the arguments list with every run, because TCLAP permutes its argument list as it runs (and comparison would have been unfair without comparing all about equally), but that surprisingly didn't affect much. Also tested is pulling the arguments out, but that was fast compared to parsing, as would be expected.</p>
 <h3>The run:</h3>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;args seconds to run: 0.793519</div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;tclap seconds to run: 1.35626</div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;boost::program_options seconds to run: 2.12119</div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;% g++ -obench bench.cxx -O2 -std=c++11 -lboost_program_options</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;% ./bench</div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;args seconds to run: 0.895472</div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;tclap seconds to run: 1.45001</div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;boost::program_options seconds to run: 1.98972</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;%</div>
 </div><!-- fragment --><h3>The benchmark:</h3>
-<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="fragment"><div class="line"><span class="preprocessor">#undef NDEBUG</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;chrono&gt;</span></div>
-<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &lt;cassert&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;args.hxx&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;tclap/CmdLine.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;boost/program_options.hpp&gt;</span></div>
 <div class="line"><span class="keyword">namespace </span>po = boost::program_options;</div>
 <div class="line"><span class="keyword">using namespace </span>std::chrono;</div>
-<div class="line"></div>
+<div class="line"><span class="keyword">inline</span> <span class="keywordtype">bool</span> doubleequals(<span class="keyword">const</span> <span class="keywordtype">double</span> a, <span class="keyword">const</span> <span class="keywordtype">double</span> b)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">double</span> delta = 0.0001;</div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">double</span> diff = a - b;</div>
+<div class="line">    <span class="keywordflow">return</span> diff &lt; delta &amp;&amp; diff &gt; -delta;</div>
+<div class="line">}</div>
 <div class="line"><span class="keywordtype">int</span> main()</div>
 <div class="line">{</div>
-<div class="line">    <span class="keyword">const</span> std::vector&lt;std::string&gt; carguments({<span class="stringliteral">&quot;-i7&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, <span class="stringliteral">&quot;2.7&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;b&quot;</span>, <span class="stringliteral">&quot;8.4&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;8.8&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;d&quot;</span>});</div>
+<div class="line">    <span class="keyword">const</span> std::vector&lt;std::string&gt; carguments({<span class="stringliteral">&quot;-i&quot;</span>, <span class="stringliteral">&quot;7&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, <span class="stringliteral">&quot;2.7&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;b&quot;</span>, <span class="stringliteral">&quot;8.4&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;8.8&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;d&quot;</span>});</div>
+<div class="line">    <span class="keyword">const</span> std::vector&lt;std::string&gt; pcarguments({<span class="stringliteral">&quot;progname&quot;</span>, <span class="stringliteral">&quot;-i&quot;</span>, <span class="stringliteral">&quot;7&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, <span class="stringliteral">&quot;2.7&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;b&quot;</span>, <span class="stringliteral">&quot;8.4&quot;</span>, <span class="stringliteral">&quot;-c&quot;</span>, <span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;8.8&quot;</span>, <span class="stringliteral">&quot;--char&quot;</span>, <span class="stringliteral">&quot;d&quot;</span>});</div>
 <div class="line">    <span class="comment">// args</span></div>
 <div class="line">    {</div>
 <div class="line">        high_resolution_clock::time_point start = high_resolution_clock::now();</div>
-<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; 100000; ++i)</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> x = 0; x &lt; 100000; ++x)</div>
 <div class="line">        {</div>
 <div class="line">            std::vector&lt;std::string&gt; arguments(carguments);</div>
 <div class="line">            <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
@@ -150,6 +160,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">            <a class="code" href="classargs_1_1ArgFlagList.html">args::ArgFlagList&lt;char&gt;</a> characters(parser, <span class="stringliteral">&quot;characters&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;c&#39;</span>}, {<span class="stringliteral">&quot;char&quot;</span>}));</div>
 <div class="line">            <a class="code" href="classargs_1_1PosArgList.html">args::PosArgList&lt;double&gt;</a> numbers(parser, <span class="stringliteral">&quot;numbers&quot;</span>, <span class="stringliteral">&quot;The numbers position list&quot;</span>);</div>
 <div class="line">            parser.ParseArgs(arguments);</div>
+<div class="line">            <span class="keyword">const</span> <span class="keywordtype">int</span> i = integer.value;</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;char&gt; c(characters.values);</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;double&gt; n(numbers.values);</div>
+<div class="line">            assert(i == 7);</div>
+<div class="line">            assert(c[0] == <span class="charliteral">&#39;a&#39;</span>);</div>
+<div class="line">            assert(c[1] == <span class="charliteral">&#39;b&#39;</span>);</div>
+<div class="line">            assert(c[2] == <span class="charliteral">&#39;c&#39;</span>);</div>
+<div class="line">            assert(c[3] == <span class="charliteral">&#39;d&#39;</span>);</div>
+<div class="line">            assert(doubleequals(n[0], 2.7));</div>
+<div class="line">            assert(doubleequals(n[1], 8.4));</div>
+<div class="line">            assert(doubleequals(n[2], 8.8));</div>
 <div class="line">        }</div>
 <div class="line">        high_resolution_clock::duration runtime = high_resolution_clock::now() - start;</div>
 <div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;args seconds to run: &quot;</span> &lt;&lt; duration_cast&lt;duration&lt;double&gt;&gt;(runtime).count() &lt;&lt; std::endl;</div>
@@ -157,14 +178,25 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    <span class="comment">// tclap</span></div>
 <div class="line">    {</div>
 <div class="line">        high_resolution_clock::time_point start = high_resolution_clock::now();</div>
-<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; 100000; ++i)</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> x = 0; x &lt; 100000; ++x)</div>
 <div class="line">        {</div>
-<div class="line">            std::vector&lt;std::string&gt; arguments(carguments);</div>
+<div class="line">            std::vector&lt;std::string&gt; arguments(pcarguments);</div>
 <div class="line">            TCLAP::CmdLine cmd(<span class="stringliteral">&quot;Command description message&quot;</span>, <span class="charliteral">&#39; &#39;</span>, <span class="stringliteral">&quot;0.9&quot;</span>);</div>
 <div class="line">            TCLAP::ValueArg&lt;int&gt; integer(<span class="stringliteral">&quot;i&quot;</span>, <span class="stringliteral">&quot;int&quot;</span>, <span class="stringliteral">&quot;The integer flag&quot;</span>, <span class="keyword">false</span>, 0, <span class="stringliteral">&quot;integer&quot;</span>, cmd);</div>
 <div class="line">            TCLAP::MultiArg&lt;char&gt; characters(<span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;char&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <span class="keyword">false</span>, <span class="stringliteral">&quot;characters&quot;</span>, cmd);</div>
 <div class="line">            TCLAP::UnlabeledMultiArg&lt;double&gt; numbers(<span class="stringliteral">&quot;numbers&quot;</span>, <span class="stringliteral">&quot;The numbers position list&quot;</span>, <span class="keyword">false</span>, <span class="stringliteral">&quot;foo&quot;</span>, cmd, <span class="keyword">false</span>);</div>
 <div class="line">            cmd.parse(arguments);</div>
+<div class="line">            <span class="keyword">const</span> <span class="keywordtype">int</span> i = integer.getValue();</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;char&gt; c(characters.getValue());</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;double&gt; n(numbers.getValue());</div>
+<div class="line">            assert(i == 7);</div>
+<div class="line">            assert(c[0] == <span class="charliteral">&#39;a&#39;</span>);</div>
+<div class="line">            assert(c[1] == <span class="charliteral">&#39;b&#39;</span>);</div>
+<div class="line">            assert(c[2] == <span class="charliteral">&#39;c&#39;</span>);</div>
+<div class="line">            assert(c[3] == <span class="charliteral">&#39;d&#39;</span>);</div>
+<div class="line">            assert(doubleequals(n[0], 2.7));</div>
+<div class="line">            assert(doubleequals(n[1], 8.4));</div>
+<div class="line">            assert(doubleequals(n[2], 8.8));</div>
 <div class="line">        }</div>
 <div class="line">        high_resolution_clock::duration runtime = high_resolution_clock::now() - start;</div>
 <div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;tclap seconds to run: &quot;</span> &lt;&lt; duration_cast&lt;duration&lt;double&gt;&gt;(runtime).count() &lt;&lt; std::endl;</div>
@@ -172,7 +204,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    <span class="comment">// boost::program_options</span></div>
 <div class="line">    {</div>
 <div class="line">        high_resolution_clock::time_point start = high_resolution_clock::now();</div>
-<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; 100000; ++i)</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> x = 0; x &lt; 100000; ++x)</div>
 <div class="line">        {</div>
 <div class="line">            std::vector&lt;std::string&gt; arguments(carguments);</div>
 <div class="line">            po::options_description desc(<span class="stringliteral">&quot;This is a test program.&quot;</span>);</div>
@@ -184,7 +216,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">            p.add(<span class="stringliteral">&quot;numbers&quot;</span>, -1);</div>
 <div class="line">            po::variables_map vm;</div>
 <div class="line">            po::store(po::command_line_parser(carguments).options(desc).positional(p).run(), vm);</div>
-<div class="line">            po::notify(vm);</div>
+<div class="line">            <span class="keyword">const</span> <span class="keywordtype">int</span> i = vm[<span class="stringliteral">&quot;int&quot;</span>].as&lt;<span class="keywordtype">int</span>&gt;();</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;char&gt; c(vm[<span class="stringliteral">&quot;char&quot;</span>].as&lt;std::vector&lt;char&gt;&gt;());</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;double&gt; n(vm[<span class="stringliteral">&quot;numbers&quot;</span>].as&lt;std::vector&lt;double&gt;&gt;());</div>
+<div class="line">            assert(i == 7);</div>
+<div class="line">            assert(c[0] == <span class="charliteral">&#39;a&#39;</span>);</div>
+<div class="line">            assert(c[1] == <span class="charliteral">&#39;b&#39;</span>);</div>
+<div class="line">            assert(c[2] == <span class="charliteral">&#39;c&#39;</span>);</div>
+<div class="line">            assert(c[3] == <span class="charliteral">&#39;d&#39;</span>);</div>
+<div class="line">            assert(doubleequals(n[0], 2.7));</div>
+<div class="line">            assert(doubleequals(n[1], 8.4));</div>
+<div class="line">            assert(doubleequals(n[2], 8.8));</div>
 <div class="line">        }</div>
 <div class="line">        high_resolution_clock::duration runtime = high_resolution_clock::now() - start;</div>
 <div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;boost::program_options seconds to run: &quot;</span> &lt;&lt; duration_cast&lt;duration&lt;double&gt;&gt;(runtime).count() &lt;&lt; std::endl;</div>
