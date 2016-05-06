@@ -99,7 +99,7 @@ namespace args
                     currentwidth = width;
                 }
             }
-            if (linesize)
+            if (linesize && !item.empty())
             {
                 ++linesize;
                 line << " ";
