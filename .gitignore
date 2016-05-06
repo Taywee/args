@@ -22,6 +22,7 @@
 *.lc
 
 # Generated Documentation
+/doc/
 /html/
 /man/
 /latex/
