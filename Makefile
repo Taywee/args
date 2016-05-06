@@ -7,7 +7,7 @@ FLAGS 		+= 	-std=c++11
 ifdef DEBUG
 FLAGS		+=	-ggdb -O0
 else
-FLAGS		+=	-O3
+FLAGS		+=	-O2
 endif
 
 LIBS 		= 	
