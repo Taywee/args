@@ -243,5 +243,5 @@ TEST_CASE("Custom parser prefixes (Some Windows styles)", "[args]")
     REQUIRE(skip.value == 8);
     REQUIRE(input);
     REQUIRE(input.value == "/dev/null");
-    REQUIRE(output);
+    REQUIRE_FALSE(output);
 }
