@@ -868,17 +868,18 @@ namespace args
 
             /** Parse all arguments.
              *
-             * \param args an iterable of the arguments
+             * \param begin an iterator to the beginning of the argument list
+             * \param end an iterator to the past-the-end element of the argument list
              */
-            template <typename T>
-            void ParseArgs(const T &args)
+            template <typename It>
+            void ParseArgs(It begin, It end)
             {
                 // Reset all Matched statuses to false, for validation.  Don't reset values.
                 ResetMatched();
                 bool terminated = false;
 
                 // Check all arg chunks
-                for (auto it = std::begin(args); it != std::end(args); ++it)
+                for (auto it = begin; it != end; ++it)
                 {
                     const std::string &chunk = *it;
 
@@ -907,7 +908,7 @@ namespace args
                                 } else
                                 {
                                     ++it;
-                                    if (it == std::end(args))
+                                    if (it == end)
                                     {
                                         std::ostringstream problem;
                                         problem << "Argument " << arg << " requires an argument but received none";
@@ -950,7 +951,7 @@ namespace args
                                     } else
                                     {
                                         ++it;
-                                        if (it == std::end(args))
+                                        if (it == end)
                                         {
                                             std::ostringstream problem;
                                             problem << "Flag '" << arg << "' requires an argument but received none";
@@ -990,6 +991,16 @@ namespace args
                     problem << "Group validation failed somewhere!";
                     throw ValidationError(problem.str().c_str());
                 }
+            }
+
+            /** Parse all arguments.
+             *
+             * \param args an iterable of the arguments
+             */
+            template <typename T>
+            void ParseArgs(const T &args)
+            {
+                ParseArgs(std::begin(args), std::end(args));
             }
 
             /** Convenience function to parse the CLI from argc and argv
