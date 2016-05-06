@@ -257,6 +257,11 @@ namespace args
                 std::get<1>(description) = help;
                 return description;
             }
+
+            virtual void ResetMatched()
+            {
+                matched = false;
+            }
     };
 
     /** Base class for all match types that have a name
@@ -542,23 +547,26 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            std::vector<std::tuple<std::string, std::string>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix) const
+            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, unsigned int indent = 0) const
             {
-                std::vector<std::tuple<std::string, std::string>> descriptions;
+                std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
                 {
                     const Group *group = dynamic_cast<Group *>(child);
                     const NamedBase *named = dynamic_cast<NamedBase *>(child);
                     if (group)
                     {
-                        std::vector<std::tuple<std::string, std::string>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix));
+                        // Push that group description on the back:
+                        descriptions.emplace_back("", group->help, indent);
+                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, indent + 1));
                         descriptions.insert(
                             std::end(descriptions),
                             std::make_move_iterator(std::begin(groupDescriptions)),
                             std::make_move_iterator(std::end(groupDescriptions)));
                     } else if (named)
                     {
-                        descriptions.emplace_back(named->GetDescription(shortPrefix, longPrefix));
+                        const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix));
+                        descriptions.emplace_back(std::get<0>(description), std::get<1>(description), indent);
                     }
                 }
                 return descriptions;
@@ -586,6 +594,14 @@ namespace args
                     }
                 }
                 return names;
+            }
+
+            virtual void ResetMatched() override
+            {
+                for (auto &child: children)
+                {
+                    child->ResetMatched();
+                }
             }
 
             /** Default validators
@@ -664,6 +680,34 @@ namespace args
             std::string terminator;
 
         public:
+            struct HelpParams
+            {
+                /** The width of the help menu
+                 */
+                unsigned int width = 80;
+                /** The indent of the program line
+                 */
+                unsigned int progindent = 2;
+                /** The indent of the program trailing lines for long parameters
+                 */
+                unsigned int progtailindent = 4;
+                /** The indent of the description and epilogs
+                 */
+                unsigned int descriptionindent = 4;
+                /** The indent of the flags
+                 */
+                unsigned int flagindent = 6;
+                /** The indent of the flag descriptions
+                 */
+                unsigned int helpindent = 25;
+                /** The additional indent each group adds
+                 */
+                unsigned int eachgroupindent = 2;
+
+                /** The minimum gutter between each flag and its help
+                 */
+                unsigned int gutter = 1;
+            } helpParams;
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
                 Group("arguments", Group::Validators::AllChildGroups),
                 description(description),
@@ -726,10 +770,6 @@ namespace args
              */
             void LongSeparator(const std::string &longseparator)
             {
-                if (longseparator.empty())
-                {
-                    throw ParseError("The long separator may not be empty");
-                }
                 this->longseparator = longseparator;
             }
 
@@ -742,24 +782,15 @@ namespace args
             void Terminator(const std::string &terminator)
             { this->terminator = terminator; }
 
-            /** Generate a help menu as a string.
-             *
-             * \param width the width of the terminal
-             * \param progindent the indent of the program name line
-             * \param descriptionindent the indent of the description and epilog lines
-             * \param flagindent the indent of the flags themselves
-             * \param helpindent the indent of the flag help texts
-             * \param gutter the required minimum spacing between the flag text and the flag help
-             * \return the help text as a single string
+            /** Pass the help menu into an ostream
              */
-            std::string Help(unsigned int width = 80, unsigned int progindent = 2, unsigned int descriptionindent = 4, unsigned int flagindent = 6, unsigned int helpindent = 25, unsigned int gutter = 1) const
+            void Help(std::ostream &help) const
             {
                 bool hasoptions = false;
                 bool hasarguments = false;
 
-                const std::vector<std::string> description(Wrap(this->description, width - descriptionindent));
-                const std::vector<std::string> epilog(Wrap(this->epilog, width - descriptionindent));
-                std::ostringstream help;
+                const std::vector<std::string> description(Wrap(this->description, helpParams.width - helpParams.descriptionindent));
+                const std::vector<std::string> epilog(Wrap(this->epilog, helpParams.width - helpParams.descriptionindent));
                 std::ostringstream prognameline;
                 prognameline << prog;
                 if (HasFlag())
@@ -772,73 +803,90 @@ namespace args
                     hasarguments = true;
                     prognameline << " [" << posname << ']';
                 }
-                const std::vector<std::string> proglines(Wrap(prognameline.str(), width - (progindent + 4), width - progindent));
+                const std::vector<std::string> proglines(Wrap(prognameline.str(), helpParams.width - (helpParams.progindent + 4), helpParams.width - helpParams.progindent));
                 auto progit = std::begin(proglines);
                 if (progit != std::end(proglines))
                 {
-                    help << std::string(progindent, ' ') << *progit << '\n';
+                    help << std::string(helpParams.progindent, ' ') << *progit << '\n';
                     ++progit;
                 }
                 for (; progit != std::end(proglines); ++progit)
                 {
-                    help << std::string(progindent + 4, ' ') << *progit << '\n';
+                    help << std::string(helpParams.progtailindent, ' ') << *progit << '\n';
                 }
 
                 help << '\n';
 
                 for (const std::string &line: description)
                 {
-                    help << std::string(descriptionindent, ' ') << line << "\n";
+                    help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
                 help << "\n";
-                help << std::string(progindent, ' ') << "OPTIONS:\n\n";
+                help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
                 for (const auto &description: GetChildDescriptions(shortprefix, longprefix))
                 {
                     const std::string &flags = std::get<0>(description);
-                    const std::vector<std::string> info(Wrap(std::get<1>(description), width - helpindent));
-                    help << std::string(flagindent, ' ') << flags;
+                    const unsigned int groupindent = std::get<2>(description) * helpParams.eachgroupindent;
+                    const std::vector<std::string> info(Wrap(std::get<1>(description), helpParams.width - (helpParams.helpindent + groupindent)));
+
+                    help << std::string(groupindent + helpParams.flagindent, ' ') << flags;
                     auto infoit = std::begin(info);
                     const std::string::size_type flagssize = Glyphs(flags);
-                    if ((flagindent + flagssize + gutter) > helpindent)
+                    // groupindent is on both sides of this inequality, and therefore can be removed
+                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent)
                     {
                         help << '\n';
                     } else if (infoit != std::end(info))
                     {
-                        help << std::string(helpindent - (flagindent + flagssize), ' ') << *infoit << '\n';
+                        // groupindent is on both sides of the minus sign, and therefore doesn't actually need to be in here
+                        help << std::string(helpParams.helpindent - (helpParams.flagindent + flagssize), ' ') << *infoit << '\n';
                         ++infoit;
                     }
                     for (; infoit != std::end(info); ++infoit)
                     {
-                        help << std::string(helpindent, ' ') << *infoit << '\n';
+                        help << std::string(groupindent + helpParams.helpindent, ' ') << *infoit << '\n';
                     }
                 }
                 if (hasoptions && hasarguments)
                 {
-                    for (const std::string &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", width - flagindent))
+                    for (const std::string &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
                     {
-                        help << std::string(flagindent, ' ') << item << '\n';
+                        help << std::string(helpParams.flagindent, ' ') << item << '\n';
                     }
                 }
 
                 help << "\n";
                 for (const std::string &line: epilog)
                 {
-                    help << std::string(descriptionindent, ' ') << line << "\n";
+                    help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
+            }
+
+            /** Generate a help menu as a string.
+             *
+             * \return the help text as a single string
+             */
+            std::string Help() const
+            {
+                std::ostringstream help;
+                Help(help);
                 return help.str();
             }
 
             /** Parse all arguments.
              *
-             * \param args an iterable of the arguments
+             * \param begin an iterator to the beginning of the argument list
+             * \param end an iterator to the past-the-end element of the argument list
              */
-            template <typename T>
-            void ParseArgs(const T &args)
+            template <typename It>
+            void ParseArgs(It begin, It end)
             {
+                // Reset all Matched statuses to false, for validation.  Don't reset values.
+                ResetMatched();
                 bool terminated = false;
 
                 // Check all arg chunks
-                for (auto it = std::begin(args); it != std::end(args); ++it)
+                for (auto it = begin; it != end; ++it)
                 {
                     const std::string &chunk = *it;
 
@@ -850,7 +898,7 @@ namespace args
                     {
                         const std::string argchunk(chunk.substr(longprefix.size()));
                         // Try to separate it, in case of a separator:
-                        const auto separator = argchunk.find(longseparator);
+                        const auto separator = longseparator.empty() ? argchunk.npos : argchunk.find(longseparator);
                         const std::string arg = (separator != argchunk.npos ?
                             std::string(argchunk, 0, separator)
                             : argchunk);
@@ -867,7 +915,7 @@ namespace args
                                 } else
                                 {
                                     ++it;
-                                    if (it == std::end(args))
+                                    if (it == end)
                                     {
                                         std::ostringstream problem;
                                         problem << "Argument " << arg << " requires an argument but received none";
@@ -910,7 +958,7 @@ namespace args
                                     } else
                                     {
                                         ++it;
-                                        if (it == std::end(args))
+                                        if (it == end)
                                         {
                                             std::ostringstream problem;
                                             problem << "Flag '" << arg << "' requires an argument but received none";
@@ -952,6 +1000,16 @@ namespace args
                 }
             }
 
+            /** Parse all arguments.
+             *
+             * \param args an iterable of the arguments
+             */
+            template <typename T>
+            void ParseArgs(const T &args)
+            {
+                ParseArgs(std::begin(args), std::end(args));
+            }
+
             /** Convenience function to parse the CLI from argc and argv
              *
              * Just assigns the program name and vectorizes arguments for passing into ParseArgs()
@@ -970,6 +1028,12 @@ namespace args
                 ParseArgs(args);
             }
     };
+
+    std::ostream &operator<<(std::ostream &os, ArgumentParser &parser)
+    {
+        parser.Help(os);
+        return os;
+    }
 
     /** Boolean argument matcher
      */

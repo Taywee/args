@@ -1,7 +1,7 @@
 # args
 
 A simple, small, flexible, single-header C++11 argument parsing library, in
-about 1.2K lines of code.
+about 1.3K lines of code.
 
 This is designed to somewhat replicate the behavior of Python's argparse, but
 in C++, with static type checking, and hopefully a lot faster.
@@ -11,7 +11,9 @@ with its heavy use of inheritence), but it should be more flexible than most.
 
 UTF-8 support is limited at best.  No normalization is performed, so non-ascii
 characters are very best kept out of flags, and combined glyphs are probably
-going to mess up help output if you use it.
+going to mess up help output if you use it.  Most UTF-8 necessary for
+internationalization should work for most cases, though heavily combinatory UTF
+alphabets may wreak havoc.
 
 This program is MIT-licensed, so you can use the header as-is with no
 restrictions. I'd appreciate attribution in a README, Man page, or something if
@@ -42,8 +44,8 @@ It:
 * Lets you customize all prefixes and most separators, allowing you to create
 	an infinite number of different argument syntaxes
 * Lets you parse, by default, any type that has a stream extractor operator for
-	it.  If this doesn't work, you can supply a function and parse the string
-	yourself if you like.
+  it.  If this doesn't work for your uses, you can supply a function and parse
+  the string yourself if you like.
 
 # What does it not do
 
@@ -57,7 +59,8 @@ There are tons of things this library does not do!
 
 ## It will not ever:
 
-* Allow you to create subparsers like argparse
+* Allow you to create subparsers like argparse in a master parser (you can do
+	this yourself with iterators and multiple parsers)
 * Allow one argument flag to take a specific number of arguments
 	(like `--foo first second`).  You can instead split that with a flag list
 	(`--foo first --foo second`) or a custom type extraction
@@ -76,7 +79,7 @@ There are tons of things this library does not do!
 
 # How do I use it?
 
-Just copy and paste it into your source tree, or put it somewhere that your
+Just copy the header into your source tree, or put it somewhere that your
 compiler can see.  As long as you can `#include "args.hxx"` and use c++11, you
 should be good to go.
 
@@ -99,13 +102,13 @@ int main(int argc, char **argv)
 	}
 	catch (args::Help)
 	{
-		std::cout << parser.Help();
+		std::cout << parser;
 		return 0;
 	}
 	catch (args::ParseError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	return 0;
@@ -135,7 +138,7 @@ int main(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-	args::Group group(parser, "This group is all exclusive", args::Group::Validators::Xor);
+	args::Group group(parser, "This group is all exclusive:", args::Group::Validators::Xor);
 	args::Flag foo(group, "foo", "The foo flag", args::Matcher({'f'}, {"foo"}));
 	args::Flag bar(group, "bar", "The bar flag", args::Matcher({'b'}));
 	args::Flag baz(group, "baz", "The baz flag", args::Matcher({"baz"}));
@@ -145,19 +148,19 @@ int main(int argc, char **argv)
 	}
 	catch (args::Help)
 	{
-		std::cout << parser.Help();
+		std::cout << parser;
 		return 0;
 	}
 	catch (args::ParseError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	catch (args::ValidationError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	if (foo) { std::cout << "foo" << std::endl; }
@@ -176,9 +179,10 @@ Group validation failed somewhere!
 
   OPTIONS:
 
-      -f, --foo          The foo flag 
-      -b                 The bar flag 
-      --baz              The baz flag 
+                         This group is all exclusive:
+        -f, --foo          The foo flag 
+        -b                 The bar flag 
+        --baz              The baz flag 
 
     This goes after the options. 
  % ./test -f
@@ -223,19 +227,19 @@ int main(int argc, char **argv)
 	}
 	catch (args::Help)
 	{
-		std::cout << parser.Help();
+		std::cout << parser;
 		return 0;
 	}
 	catch (args::ParseError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	catch (args::ValidationError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	if (integer) { std::cout << "i: " << integer.value << std::endl; }
@@ -323,13 +327,13 @@ int main(int argc, char **argv)
     }
     catch (args::Help)
     {
-        std::cout << parser.Help();
+        std::cout << parser;
         return 0;
     }
     catch (args::ParseError e)
     {
         std::cerr << e.what() << std::endl;
-        std::cerr << parser.Help();
+        std::cerr << parser;
         return 1;
     }
     if (ints)
@@ -420,19 +424,19 @@ int main(int argc, char **argv)
 	}
 	catch (args::Help)
 	{
-		std::cout << parser.Help();
+		std::cout << parser;
 		return 0;
 	}
 	catch (args::ParseError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	catch (args::ValidationError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	return 0;
@@ -511,19 +515,19 @@ int main(int argc, char **argv)
 	}
 	catch (args::Help)
 	{
-		std::cout << parser.Help();
+		std::cout << parser;
 		return 0;
 	}
 	catch (args::ParseError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	catch (args::ValidationError e)
 	{
 		std::cerr << e.what() << std::endl;
-		std::cerr << parser.Help();
+		std::cerr << parser;
 		return 1;
 	}
 	std::cout << "bs = " << bs.value << std::endl;
@@ -582,4 +586,90 @@ bs = 72
 skip = 87
 if = /tmp/test.txt
  % 
+```
+
+## Group nesting help menu text
+
+```cpp
+#include <iostream>
+#include <args.hxx>
+int main(int argc, char **argv)
+{
+	args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+	args::Group xorgroup(parser, "this group provides xor validation:", args::Group::Validators::Xor);
+	args::Flag a(xorgroup, "a", "test flag", args::Matcher({'a'}));
+	args::Flag b(xorgroup, "b", "test flag", args::Matcher({'b'}));
+	args::Flag c(xorgroup, "c", "test flag", args::Matcher({'c'}));
+	args::Group nxor(xorgroup, "this group provides all-or-none (nxor) validation:", args::Group::Validators::AllOrNone);
+	args::Flag d(nxor, "d", "test flag", args::Matcher({'d'}));
+	args::Flag e(nxor, "e", "test flag", args::Matcher({'e'}));
+	args::Flag f(nxor, "f", "test flag", args::Matcher({'f'}));
+	args::Group nxor2(nxor, "this group provides all-or-none (nxor2) validation:", args::Group::Validators::AllOrNone);
+	args::Flag i(nxor2, "i", "test flag", args::Matcher({'i'}));
+	args::Flag j(nxor2, "j", "test flag", args::Matcher({'j'}));
+	args::Flag k(nxor2, "k", "test flag", args::Matcher({'k'}));
+	args::Group nxor3(nxor, "this group provides all-or-none (nxor3) validation:", args::Group::Validators::AllOrNone);
+	args::Flag l(nxor3, "l", "test flag", args::Matcher({'l'}));
+	args::Flag m(nxor3, "m", "test flag", args::Matcher({'m'}));
+	args::Flag n(nxor3, "n", "test flag", args::Matcher({'n'}));
+	args::Group atleastone(xorgroup, "this group provides at-least-one validation:", args::Group::Validators::AtLeastOne);
+	args::Flag g(atleastone, "g", "test flag", args::Matcher({'g'}));
+	args::Flag o(atleastone, "o", "test flag", args::Matcher({'o'}));
+	args::HelpFlag help(parser, "help", "Show this help menu", args::Matcher({'h'}, {"help"}));
+    try
+    {
+        parser.ParseCLI(argc, argv);
+    }
+    catch (args::Help)
+    {
+		std::cout << parser;
+        return 0;
+    }
+    catch (args::ParseError e)
+    {
+        std::cerr << e.what() << std::endl;
+        parser.Help(std::cerr);
+        return 1;
+    }
+    catch (args::ValidationError e)
+    {
+        std::cerr << e.what() << std::endl;
+        parser.Help(std::cerr);
+        return 1;
+    }
+    return 0;
+}
+```
+
+```shell
+ % /tmp/test -h
+  /tmp/test {OPTIONS} 
+
+    This is a test program. 
+
+  OPTIONS:
+
+                         this group provides xor validation: 
+        -a                 test flag 
+        -b                 test flag 
+        -c                 test flag 
+                           this group provides all-or-none (nxor) validation: 
+          -d                 test flag 
+          -e                 test flag 
+          -f                 test flag 
+                             this group provides all-or-none (nxor2) validation:
+            -i                 test flag 
+            -j                 test flag 
+            -k                 test flag 
+                             this group provides all-or-none (nxor3) validation:
+            -l                 test flag 
+            -m                 test flag 
+            -n                 test flag 
+                           this group provides at-least-one validation: 
+          -g                 test flag 
+          -o                 test flag 
+      -h, --help         Show this help menu 
+
+    This goes after the options. 
+ %                                                                                
 ```

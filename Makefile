@@ -7,22 +7,19 @@ FLAGS 		+= 	-std=c++11
 ifdef DEBUG
 FLAGS		+=	-ggdb -O0
 else
-FLAGS		+=	-O3
+FLAGS		+=	-O2
 endif
 
-LIBS 		= 	glfw3 assimp
-CFLAGS		+=	-I. $(FLAGS) -c -MMD `pkg-config --cflags $(LIBS)`
-LDFLAGS		+=	$(FLAGS) `pkg-config --libs $(LIBS)`
-ifneq ($(OS), Darwin)
-LDFLAGS		+=	-lGL
-endif
+LIBS 		= 	
+CFLAGS		+=	-I. $(FLAGS) -c -MMD
+LDFLAGS		+=	$(FLAGS)
 
 SOURCES		= 	test.cxx
 OBJECTS		= 	$(SOURCES:.cxx=.o)
 DEPENDENCIES=	$(SOURCES:.cxx=.d)
 EXECUTABLE	=	test
 
-.PHONY: all clean pages
+.PHONY: all clean pages runtests
 
 all: $(EXECUTABLE)
 
@@ -42,3 +39,5 @@ pages:
 	cp -rv html/* .
 	rm -r html
 
+runtests: test
+	./test
