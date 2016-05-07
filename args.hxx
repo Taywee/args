@@ -227,7 +227,7 @@ namespace args
 
             /** Specify a mixed single initializer-list of both short and long opts
              *
-             * This is the fancy one: `args::Matcher{'a'}`, or `args::Matcher{"foo"}`, or `args::Matcher{"foo", 'f', 'F', "FoO"}`
+             * This is the fancy one: args::Matcher{'a'}, or args::Matcher{"foo"}, or args::Matcher{"foo", 'f', 'F', "FoO"}
              */
             Matcher(std::initializer_list<EitherOpt> in) :
                 shortOpts(EitherOpt::GetShort(in)), longOpts(EitherOpt::GetLong(in)) {}

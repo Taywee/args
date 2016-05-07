@@ -104,7 +104,7 @@ with an args::Matcher object (check its construction details in the doxygen
 documentation.
 
 Then you can either call it with args::ArgumentParser::ParseCLI for the full
-command line with program name, or args::ArgumentParser::ParseArguments with
+command line with program name, or args::ArgumentParser::ParseArgs with
 just the arguments to be parsed.  The argument and group variables can then be
 interpreted as a boolean to see if they've been matched, and their arguments
 can be pulled from their value and values attributes, if applicable.
