@@ -4,6 +4,14 @@
 
 #include <iostream>
 
+std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
+{
+    is >> std::get<0>(ints);
+    is.get();
+    is >> std::get<1>(ints);
+    return is;
+}
+
 #include <args.hxx>
 
 #define CATCH_CONFIG_MAIN
@@ -12,7 +20,7 @@
 TEST_CASE("Help flag throws Help exception", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
+    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher{'h', "help"});
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{}));
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--help"}), args::Help);
 }
@@ -20,7 +28,7 @@ TEST_CASE("Help flag throws Help exception", "[args]")
 TEST_CASE("Unknown flags throw exceptions", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
+    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher{'h', "help"});
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{}));
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--Help"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-H"}), args::ParseError);
@@ -29,10 +37,10 @@ TEST_CASE("Unknown flags throw exceptions", "[args]")
 TEST_CASE("Boolean flags work as expected, with clustering", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::Flag foo(parser, "FOO", "test flag", args::Matcher({'f'}, {"foo"}));
-    args::Flag bar(parser, "BAR", "test flag", args::Matcher({'b'}, {"bar"}));
-    args::Flag baz(parser, "BAZ", "test flag", args::Matcher({'a'}, {"baz"}));
-    args::Flag bix(parser, "BAZ", "test flag", args::Matcher({'x'}, {"bix"}));
+    args::Flag foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::Flag bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"});
+    args::Flag baz(parser, "BAZ", "test flag", args::Matcher{'a', "baz"});
+    args::Flag bix(parser, "BAZ", "test flag", args::Matcher{'x', "bix"});
     parser.ParseArgs(std::vector<std::string>{"--baz", "-fb"});
     REQUIRE(foo);
     REQUIRE(bar);
@@ -43,11 +51,30 @@ TEST_CASE("Boolean flags work as expected, with clustering", "[args]")
 TEST_CASE("Argument flags work as expected, with clustering", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher({'f'}, {"foo"}));
-    args::Flag bar(parser, "BAR", "test flag", args::Matcher({'b'}, {"bar"}));
-    args::ArgFlag<double> baz(parser, "BAZ", "test flag", args::Matcher({'a'}, {"baz"}));
-    args::ArgFlag<char> bim(parser, "BAZ", "test flag", args::Matcher({'B'}, {"bim"}));
-    args::Flag bix(parser, "BAZ", "test flag", args::Matcher({'x'}, {"bix"}));
+    args::ArgFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::Flag bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"});
+    args::ArgFlag<double> baz(parser, "BAZ", "test flag", args::Matcher{'a', "baz"});
+    args::ArgFlag<char> bim(parser, "BAZ", "test flag", args::Matcher{'B', "bim"});
+    args::Flag bix(parser, "BAZ", "test flag", args::Matcher{'x', "bix"});
+    parser.ParseArgs(std::vector<std::string>{"-bftest", "--baz=7.555e2", "--bim", "c"});
+    REQUIRE(foo);
+    REQUIRE(foo.value == "test");
+    REQUIRE(bar);
+    REQUIRE(baz);
+    REQUIRE((baz.value > 755.49 && baz.value < 755.51));
+    REQUIRE(bim);
+    REQUIRE(bim.value == 'c');
+    REQUIRE_FALSE(bix);
+}
+
+TEST_CASE("Unified argument lists for match work", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::ArgFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::Flag bar(parser, "BAR", "test flag", args::Matcher{"bar", 'b'});
+    args::ArgFlag<double> baz(parser, "BAZ", "test flag", args::Matcher{'a', "baz"});
+    args::ArgFlag<char> bim(parser, "BAZ", "test flag", args::Matcher{'B', "bim"});
+    args::Flag bix(parser, "BAZ", "test flag", args::Matcher{"bix"});
     parser.ParseArgs(std::vector<std::string>{"-bftest", "--baz=7.555e2", "--bim", "c"});
     REQUIRE(foo);
     REQUIRE(foo.value == "test");
@@ -62,7 +89,7 @@ TEST_CASE("Argument flags work as expected, with clustering", "[args]")
 TEST_CASE("Invalid argument parsing throws parsing exceptions", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlag<int> foo(parser, "FOO", "test flag", args::Matcher({'f'}, {"foo"}));
+    args::ArgFlag<int> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo=7.5"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "7a"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "7e4"}), args::ParseError);
@@ -71,7 +98,7 @@ TEST_CASE("Invalid argument parsing throws parsing exceptions", "[args]")
 TEST_CASE("Argument flag lists work as expected", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlagList<int> foo(parser, "FOO", "test flag", args::Matcher({'f'}, {"foo"}));
+    args::ArgFlagList<int> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
     parser.ParseArgs(std::vector<std::string>{"--foo=7", "-f2", "-f", "9", "--foo", "42"});
     REQUIRE((foo.values == std::vector<int>{7, 2, 9, 42}));
 }
@@ -172,14 +199,6 @@ TEST_CASE("Argument groups should nest", "[args]")
 }
 
 #include <tuple>
-
-std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
-{
-    is >> std::get<0>(ints);
-    is.get();
-    is >> std::get<1>(ints);
-    return is;
-}
 
 void DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
 {
