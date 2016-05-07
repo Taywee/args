@@ -151,41 +151,49 @@ namespace args
             }
     };
 
+    /** A simple unified option type for unified initializer lists
+     */
     struct EitherOpt
     {
-        bool isShort;
-        char shortOpt;
-        std::string longOpt;
-        EitherOpt(const std::string &opt) : isShort(false), longOpt(opt) {}
-        EitherOpt(const char *opt) : isShort(false), longOpt(opt) {}
-        EitherOpt(const char opt) : isShort(true), shortOpt(opt) {}
+        const bool isShort;
+        const char shortOpt;
+        const std::string longOpt;
+        EitherOpt(const std::string &opt) : isShort(false), shortOpt(), longOpt(opt) {}
+        EitherOpt(const char *opt) : isShort(false), shortOpt(), longOpt(opt) {}
+        EitherOpt(const char opt) : isShort(true), shortOpt(opt), longOpt() {}
+
+        /** Get just the long options from an initializer list of EitherOpts
+         */
+        static std::unordered_set<std::string> GetLong(std::initializer_list<EitherOpt> opts)
+        {
+            std::unordered_set<std::string>  longOpts;
+            for (const EitherOpt &opt: opts)
+            {
+                if (!opt.isShort)
+                {
+                    longOpts.insert(opt.longOpt);
+                }
+            }
+            return longOpts;
+        }
+
+        /** Get just the short options from an initializer list of EitherOpts
+         */
+        static std::unordered_set<char> GetShort(std::initializer_list<EitherOpt> opts)
+        {
+            std::unordered_set<char>  shortOpts;
+            for (const EitherOpt &opt: opts)
+            {
+                if (opt.isShort)
+                {
+                    shortOpts.insert(opt.shortOpt);
+                }
+            }
+            return shortOpts;
+        }
     };
 
-    std::unordered_set<std::string> GetLong(std::initializer_list<EitherOpt> opts)
-    {
-        std::unordered_set<std::string>  longOpts;
-        for (const EitherOpt &opt: opts)
-        {
-            if (!opt.isShort)
-            {
-                longOpts.insert(opt.longOpt);
-            }
-        }
-        return longOpts;
-    }
 
-    std::unordered_set<char> GetShort(std::initializer_list<EitherOpt> opts)
-    {
-        std::unordered_set<char>  shortOpts;
-        for (const EitherOpt &opt: opts)
-        {
-            if (opt.isShort)
-            {
-                shortOpts.insert(opt.shortOpt);
-            }
-        }
-        return shortOpts;
-    }
 
     /** A class of "matchers", specifying short and long options that can possibly be matched
      *
@@ -199,6 +207,8 @@ namespace args
 
         public:
             /** Specify short and long opts separately as iterators
+             *
+             * ex: `args::Matcher(shortOpts.begin(), shortOpts.end(), longOpts.begin(), longOpts.end())`
              */
             template <typename ShortIt, typename LongIt>
             Matcher(ShortIt shortOptsStart, ShortIt shortOptsEnd, LongIt longOptsStart, LongIt longOptsEnd) :
@@ -207,23 +217,20 @@ namespace args
             {}
 
             /** Specify short and long opts separately as iterables
+             *
+             * ex: `args::Matcher(shortOpts, longOpts)`
              */
             template <typename Short, typename Long>
             Matcher(Short &&shortIn, Long &&longIn) :
                 shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
             {}
 
-            /** Specify short and long opts as initializer lists
-             */
-            Matcher(std::initializer_list<char> shortIn, std::initializer_list<std::string> longIn) :
-                shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
-            {}
-
             /** Specify a mixed single initializer-list of both short and long opts
+             *
+             * This is the fancy one: `args::Matcher{'a'}`, or `args::Matcher{"foo"}`, or `args::Matcher{"foo", 'f', 'F', "FoO"}`
              */
             Matcher(std::initializer_list<EitherOpt> in) :
-                shortOpts(GetShort(in)), longOpts(GetLong(in))
-            {}
+                shortOpts(EitherOpt::GetShort(in)), longOpts(EitherOpt::GetLong(in)) {}
 
             Matcher(Matcher &&other) : shortOpts(std::move(other.shortOpts)), longOpts(std::move(other.longOpts))
             {}
