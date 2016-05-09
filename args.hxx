@@ -849,6 +849,10 @@ namespace args
              */
             void LongSeparator(const std::string &longseparator)
             {
+                if (longseparator.empty())
+                {
+                    throw std::runtime_error("longseparator can not be set to empty");
+                }
                 this->longseparator = longseparator;
             }
 
@@ -1051,17 +1055,16 @@ namespace args
                                         std::ostringstream problem;
                                         problem << "Flag '" << arg << "' requires an argument but received none";
                                         throw ParseError(problem.str().c_str());
+                                    }
+
+                                    if (allowSeparateLongArgument)
+                                    {
+                                        argbase->ParseArg(*it);
                                     } else
                                     {
-                                        if (allowSeparateLongArgument)
-                                        {
-                                            argbase->ParseArg(*it);
-                                        } else
-                                        {
-                                            std::ostringstream problem;
-                                            problem << "Flag '" << arg << "' was passed a separate argument, but these are disallowed";
-                                            throw ParseError(problem.str().c_str());
-                                        }
+                                        std::ostringstream problem;
+                                        problem << "Flag '" << arg << "' was passed a separate argument, but these are disallowed";
+                                        throw ParseError(problem.str().c_str());
                                     }
                                 }
                             } else if (separator != argchunk.npos)
@@ -1110,17 +1113,16 @@ namespace args
                                             std::ostringstream problem;
                                             problem << "Flag '" << *argit << "' requires an argument but received none";
                                             throw ParseError(problem.str().c_str());
+                                        }
+
+                                        if (allowSeparateShortArgument)
+                                        {
+                                            argbase->ParseArg(*it);
                                         } else
                                         {
-                                            if (allowSeparateShortArgument)
-                                            {
-                                                argbase->ParseArg(*it);
-                                            } else
-                                            {
-                                                std::ostringstream problem;
-                                                problem << "Flag '" << *argit << "' was passed a separate argument, but these are disallowed";
-                                                throw ParseError(problem.str().c_str());
-                                            }
+                                            std::ostringstream problem;
+                                            problem << "Flag '" << *argit << "' was passed a separate argument, but these are disallowed";
+                                            throw ParseError(problem.str().c_str());
                                         }
                                     }
                                     // Because this argchunk is done regardless
