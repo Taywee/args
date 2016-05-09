@@ -73,7 +73,7 @@ There are tons of things this library does not do!
     assigning them, rather than what we currently do, which is assiging them as
     we go for better simplicity and speed.
 
-# How do I use it?
+# How do I install it?
 
 ```shell
 sudo make install
@@ -95,6 +95,19 @@ sudo make installman
 ```
 
 This requires Doxygen
+
+# How do I use it?
+
+Create an ArgumentParser, modify its attributes to fit your needs, add
+arguments through regular argument objects (or create your own), and match them
+with an args::Matcher object (check its construction details in the doxygen
+documentation.
+
+Then you can either call it with args::ArgumentParser::ParseCLI for the full
+command line with program name, or args::ArgumentParser::ParseArgs with
+just the arguments to be parsed.  The argument and group variables can then be
+interpreted as a boolean to see if they've been matched, and their arguments
+can be pulled from their value and values attributes, if applicable.
 
 # How fast is it?
 
@@ -150,8 +163,8 @@ int main()
         {
             std::vector<std::string> arguments(carguments);
             args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-            args::ArgFlag<int> integer(parser, "integer", "The integer flag", args::Matcher({'i'}, {"int"}));
-            args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher({'c'}, {"char"}));
+            args::ArgFlag<int> integer(parser, "integer", "The integer flag", args::Matcher{'i', "int"});
+            args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher{'c', "char"});
             args::PosArgList<double> numbers(parser, "numbers", "The numbers position list");
             parser.ParseArgs(arguments);
             const int i = integer.value;
@@ -263,7 +276,7 @@ All the code examples here will be complete code examples, with some output.
 int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
+    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher{'h', "help"});
     try
     {
         parser.ParseCLI(argc, argv);
@@ -307,7 +320,7 @@ int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::Group group(parser, "This group is all exclusive:", args::Group::Validators::Xor);
-    args::Flag foo(group, "foo", "The foo flag", args::Matcher({'f'}, {"foo"}));
+    args::Flag foo(group, "foo", "The foo flag", args::Matcher{'f', "foo"});
     args::Flag bar(group, "bar", "The bar flag", args::Matcher({'b'}));
     args::Flag baz(group, "baz", "The baz flag", args::Matcher({"baz"}));
     try
@@ -384,7 +397,7 @@ Group validation failed somewhere!
 int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher({'h'}, {"help"}));
+    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher{'h', "help"});
     args::ArgFlag<int> integer(parser, "integer", "The integer flag", args::Matcher({'i'}));
     args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher({'c'}));
     args::PosArg<std::string> foo(parser, "foo", "The foo position");
@@ -564,9 +577,9 @@ there are unextracted characters left in the stream.
 int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program with a really long description that is probably going to have to be wrapped across multiple different lines.  This is a test to see how the line wrapping works", "This goes after the options.  This epilog is also long enough that it will have to be properly wrapped to display correctly on the screen");
-    args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({'h'}, {"help"}));
-    args::ArgFlag<std::string> foo(parser, "FOO", "The foo flag.", args::Matcher({'a', 'b', 'c'}, {"a", "b", "c", "the-foo-flag"}));
-    args::ArgFlag<std::string> bar(parser, "BAR", "The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.", args::Matcher({'d', 'e', 'f'}, {"d", "e", "f"}));
+    args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher{'h', "help"});
+    args::ArgFlag<std::string> foo(parser, "FOO", "The foo flag.", args::Matcher{'a', 'b', 'c', "a", "b", "c", "the-foo-flag"});
+    args::ArgFlag<std::string> bar(parser, "BAR", "The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.", args::Matcher{'d', 'e', 'f', "d", "e", "f"});
     args::ArgFlag<std::string> baz(parser, "FOO", "The baz flag.  This one has a lot of options, and will need wrapping in the description, even with its short flag list.", args::Matcher({"baz"}));
     args::PosArg<std::string> pos1(parser, "POS1", "The pos1 argument.");
     args::PosArgList<std::string> poslist1(parser, "POSLIST1", "The poslist1 argument.");
@@ -783,7 +796,7 @@ int main(int argc, char **argv)
     args::Group atleastone(xorgroup, "this group provides at-least-one validation:", args::Group::Validators::AtLeastOne);
     args::Flag g(atleastone, "g", "test flag", args::Matcher({'g'}));
     args::Flag o(atleastone, "o", "test flag", args::Matcher({'o'}));
-    args::HelpFlag help(parser, "help", "Show this help menu", args::Matcher({'h'}, {"help"}));
+    args::HelpFlag help(parser, "help", "Show this help menu", args::Matcher{'h', "help"});
     try
     {
         parser.ParseCLI(argc, argv);
