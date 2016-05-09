@@ -151,7 +151,7 @@ namespace args
             }
     };
 
-    /** A simple unified option type for unified initializer lists
+    /** A simple unified option type for unified initializer lists for the Matcher class.
      */
     struct EitherOpt
     {
@@ -195,9 +195,11 @@ namespace args
 
 
 
-    /** A class of "matchers", specifying short and long options that can possibly be matched
+    /** A class of "matchers", specifying short and long options that can
+     * possibly be matched.
      *
-     * This is supposed to be constructed and then passed in, not used directly from user code.
+     * This is supposed to be constructed and then passed in, not used directly
+     * from user code.
      */
     class Matcher
     {
@@ -227,7 +229,15 @@ namespace args
 
             /** Specify a mixed single initializer-list of both short and long opts
              *
-             * This is the fancy one: args::Matcher{'a'}, or args::Matcher{"foo"}, or args::Matcher{"foo", 'f', 'F', "FoO"}
+             * This is the fancy one.  It takes a single initializer list of
+             * any number of any mixed kinds of options.  Chars are
+             * automatically interpreted as short options, and strings are
+             * automatically interpreted as long options:
+             *
+             *     args::Matcher{'a'}
+             *     args::Matcher{"foo"}
+             *     args::Matcher{'h', "help"}
+             *     args::Matcher{"foo", 'f', 'F', "FoO"}
              */
             Matcher(std::initializer_list<EitherOpt> in) :
                 shortOpts(EitherOpt::GetShort(in)), longOpts(EitherOpt::GetLong(in)) {}
@@ -270,18 +280,18 @@ namespace args
 
             /** (INTERNAL) Get all option strings as a vector, with the prefixes and names embedded
              */
-            std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix, const std::string &name, const std::string longSeparator) const
+            std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix, const std::string &name, const std::string &shortSeparator, const std::string longSeparator) const
             {
                 const std::string bracedname(std::string("[") + name + "]");
                 std::vector<std::string> optStrings;
                 optStrings.reserve(shortOpts.size() + longOpts.size());
                 for (const char opt: shortOpts)
                 {
-                    optStrings.emplace_back(shortPrefix + std::string(1, opt) + bracedname);
+                    optStrings.emplace_back(shortPrefix + std::string(1, opt) + shortSeparator + bracedname);
                 }
                 for (const std::string &opt: longOpts)
                 {
-                    optStrings.emplace_back(longPrefix + opt + (longSeparator.empty() ? std::string(" ") : longSeparator) + bracedname);
+                    optStrings.emplace_back(longPrefix + opt + longSeparator + bracedname);
                 }
                 return optStrings;
             }
@@ -309,7 +319,7 @@ namespace args
                 return Matched();
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator) const
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const
             {
                 std::tuple<std::string, std::string> description;
                 std::get<1>(description) = help;
@@ -333,7 +343,7 @@ namespace args
             NamedBase(const std::string &name, const std::string &help) : Base(help), name(name) {}
             virtual ~NamedBase() {}
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &longSeparator) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
                 std::get<0>(description) = name;
@@ -378,7 +388,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
                 const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
@@ -406,10 +416,10 @@ namespace args
             virtual ~ArgFlagBase() {}
             virtual void ParseArg(const std::string &value) = 0;
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix, name, longSeparator));
+                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix, name, shortSeparator, longSeparator));
                 std::ostringstream flagstream;
                 for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
                 {
@@ -605,7 +615,7 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, const std::string &longSeparator, unsigned int indent = 0) const
+            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, unsigned int indent = 0) const
             {
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
@@ -616,14 +626,14 @@ namespace args
                     {
                         // Push that group description on the back:
                         descriptions.emplace_back(group->help, "", indent);
-                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, longSeparator, indent + 1));
+                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + 1));
                         descriptions.insert(
                             std::end(descriptions),
                             std::make_move_iterator(std::begin(groupDescriptions)),
                             std::make_move_iterator(std::end(groupDescriptions)));
                     } else if (named)
                     {
-                        const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix, longSeparator));
+                        const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator));
                         descriptions.emplace_back(std::get<0>(description), std::get<1>(description), indent);
                     }
                 }
@@ -737,7 +747,14 @@ namespace args
 
             std::string terminator;
 
+            bool allowJoinedShortArgument;
+            bool allowJoinedLongArgument;
+            bool allowSeparateShortArgument;
+            bool allowSeparateLongArgument;
+
         public:
+            /** A simple structure of parameters for easy user-modifyable help menus
+             */
             struct HelpParams
             {
                 /** The width of the help menu
@@ -773,7 +790,11 @@ namespace args
                 longprefix("--"),
                 shortprefix("-"),
                 longseparator("="),
-                terminator("--") {}
+                terminator("--"),
+                allowJoinedShortArgument(true),
+                allowJoinedLongArgument(true),
+                allowSeparateShortArgument(true),
+                allowSeparateLongArgument(true) {}
 
             /** The program name for help generation
              */
@@ -840,6 +861,41 @@ namespace args
             void Terminator(const std::string &terminator)
             { this->terminator = terminator; }
 
+            /** Get the current argument separation parameters.
+             *
+             * See SetArgumentSeparations for details on what each one means.
+             */
+            void GetArgumentSeparations(
+                bool &allowJoinedShortArgument,
+                bool &allowJoinedLongArgument,
+                bool &allowSeparateShortArgument,
+                bool &allowSeparateLongArgument) const
+            {
+                allowJoinedShortArgument = this->allowJoinedShortArgument;
+                allowJoinedLongArgument = this->allowJoinedLongArgument;
+                allowSeparateShortArgument = this->allowSeparateShortArgument;
+                allowSeparateLongArgument = this->allowSeparateLongArgument;
+            }
+
+            /** Change allowed option separation.
+             *
+             * \param allowJoinedShortArgument Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field)
+             * \param allowJoinedLongArgument Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field)
+             * \param allowSeparateShortArgument Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             * \param allowSeparateLongArgument Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             */
+            void SetArgumentSeparations(
+                const bool allowJoinedShortArgument,
+                const bool allowJoinedLongArgument,
+                const bool allowSeparateShortArgument,
+                const bool allowSeparateLongArgument)
+            {
+                this->allowJoinedShortArgument = allowJoinedShortArgument;
+                this->allowJoinedLongArgument = allowJoinedLongArgument;
+                this->allowSeparateShortArgument = allowSeparateShortArgument;
+                this->allowSeparateLongArgument = allowSeparateLongArgument;
+            }
+
             /** Pass the help menu into an ostream
              */
             void Help(std::ostream &help) const
@@ -881,7 +937,7 @@ namespace args
                 }
                 help << "\n";
                 help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
-                for (const auto &description: GetChildDescriptions(shortprefix, longprefix, longseparator))
+                for (const auto &description: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortArgument ? "" : " ", allowJoinedLongArgument ? longseparator : " "))
                 {
                     const unsigned int groupindent = std::get<2>(description) * helpParams.eachgroupindent;
                     const std::vector<std::string> flags(Wrap(std::get<0>(description), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter)));
@@ -978,18 +1034,34 @@ namespace args
                             {
                                 if (separator != argchunk.npos)
                                 {
-                                    argbase->ParseArg(argchunk.substr(separator + longseparator.size()));
+                                    if (allowJoinedLongArgument)
+                                    {
+                                        argbase->ParseArg(argchunk.substr(separator + longseparator.size()));
+                                    } else
+                                    {
+                                        std::ostringstream problem;
+                                        problem << "Flag '" << arg << "' was passed a joined argument, but these are disallowed";
+                                        throw ParseError(problem.str().c_str());
+                                    }
                                 } else
                                 {
                                     ++it;
                                     if (it == end)
                                     {
                                         std::ostringstream problem;
-                                        problem << "Argument " << arg << " requires an argument but received none";
+                                        problem << "Flag '" << arg << "' requires an argument but received none";
                                         throw ParseError(problem.str().c_str());
                                     } else
                                     {
-                                        argbase->ParseArg(*it);
+                                        if (allowSeparateLongArgument)
+                                        {
+                                            argbase->ParseArg(*it);
+                                        } else
+                                        {
+                                            std::ostringstream problem;
+                                            problem << "Flag '" << arg << "' was passed a separate argument, but these are disallowed";
+                                            throw ParseError(problem.str().c_str());
+                                        }
                                     }
                                 }
                             } else if (separator != argchunk.npos)
@@ -1001,7 +1073,7 @@ namespace args
                         } else
                         {
                             std::ostringstream problem;
-                            problem << "Argument could not be matched: " << arg;
+                            problem << "Flag could not be matched: " << arg;
                             throw ParseError(problem.str().c_str());
                         }
                         // Check short args
@@ -1021,18 +1093,34 @@ namespace args
                                     const std::string arg(++argit, std::end(argchunk));
                                     if (!arg.empty())
                                     {
-                                        argbase->ParseArg(arg);
+                                        if (allowJoinedShortArgument)
+                                        {
+                                            argbase->ParseArg(arg);
+                                        } else
+                                        {
+                                            std::ostringstream problem;
+                                            problem << "Flag '" << *argit << "' was passed a joined argument, but these are disallowed";
+                                            throw ParseError(problem.str().c_str());
+                                        }
                                     } else
                                     {
                                         ++it;
                                         if (it == end)
                                         {
                                             std::ostringstream problem;
-                                            problem << "Flag '" << arg << "' requires an argument but received none";
+                                            problem << "Flag '" << *argit << "' requires an argument but received none";
                                             throw ParseError(problem.str().c_str());
                                         } else
                                         {
-                                            argbase->ParseArg(*it);
+                                            if (allowSeparateShortArgument)
+                                            {
+                                                argbase->ParseArg(*it);
+                                            } else
+                                            {
+                                                std::ostringstream problem;
+                                                problem << "Flag '" << *argit << "' was passed a separate argument, but these are disallowed";
+                                                throw ParseError(problem.str().c_str());
+                                            }
                                         }
                                     }
                                     // Because this argchunk is done regardless
@@ -1041,7 +1129,7 @@ namespace args
                             } else
                             {
                                 std::ostringstream problem;
-                                problem << "Argument could not be matched: '" << arg << "'";
+                                problem << "Flag could not be matched: '" << arg << "'";
                                 throw ParseError(problem.str().c_str());
                             }
                         }
@@ -1054,7 +1142,7 @@ namespace args
                         } else
                         {
                             std::ostringstream problem;
-                            problem << "Passed in argument, but no positional arguments were ready to receive it" << chunk;
+                            problem << "Passed in argument, but no positional arguments were ready to receive it: " << chunk;
                             throw ParseError(problem.str().c_str());
                         }
                     }

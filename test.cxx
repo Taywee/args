@@ -68,6 +68,13 @@ TEST_CASE("Argument flags work as expected, with clustering", "[args]")
     REQUIRE_FALSE(bix);
 }
 
+TEST_CASE("Passing an argument to a non-argument flag throws an error", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Flag bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"});
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--bar=test"}), args::ParseError);
+}
+
 TEST_CASE("Unified argument lists for match work", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
@@ -277,4 +284,34 @@ TEST_CASE("Help menu can be grabbed as a string, passed into a stream, or by usi
     null << parser.Help();
     parser.Help(null);
     null << parser;
+}
+
+TEST_CASE("Required argument separation being violated throws an error", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::ArgFlag<std::string> bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"});
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-btest"}));
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--bar=test"}));
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "test"}));
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--bar", "test"}));
+    parser.SetArgumentSeparations(true, false, false, false);
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-btest"}));
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--bar=test"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-b", "test"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--bar", "test"}), args::ParseError);
+    parser.SetArgumentSeparations(false, true, false, false);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-btest"}), args::ParseError);
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--bar=test"}));
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-b", "test"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--bar", "test"}), args::ParseError);
+    parser.SetArgumentSeparations(false, false, true, false);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-btest"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--bar=test"}), args::ParseError);
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "test"}));
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--bar", "test"}), args::ParseError);
+    parser.SetArgumentSeparations(false, false, false, true);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-btest"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--bar=test"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-b", "test"}), args::ParseError);
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--bar", "test"}));
 }
