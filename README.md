@@ -1,5 +1,7 @@
 # args
 
+[![build status](https://gitgud.io/Taywee/args/badges/master/build.svg)](https://gitgud.io/Taywee/args/commits/master)
+
 A simple, small, flexible, single-header C++11 argument parsing library, in
 about 1K lines of code.
 
