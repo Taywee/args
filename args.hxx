@@ -981,10 +981,10 @@ namespace args
                                 ArgFlagBase *argbase = dynamic_cast<ArgFlagBase *>(base);
                                 if (argbase)
                                 {
-                                    argchunk.erase(std::begin(argchunk), ++argit);
-                                    if (!argchunk.empty())
+                                    const std::string arg(++argit, std::end(argchunk));
+                                    if (!arg.empty())
                                     {
-                                        argbase->ParseArg(argchunk);
+                                        argbase->ParseArg(arg);
                                     } else
                                     {
                                         ++it;
