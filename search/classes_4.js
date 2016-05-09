@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['group',['Group',['../classargs_1_1Group.html',1,'args']]]
+  ['flag',['Flag',['../classargs_1_1Flag.html',1,'args']]],
+  ['flagbase',['FlagBase',['../classargs_1_1FlagBase.html',1,'args']]]
 ];

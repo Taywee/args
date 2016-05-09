@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">1.2.4</span>
+   &#160;<span id="projectnumber">2.1.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -116,6 +116,7 @@ Inheritance diagram for args::ArgumentParser:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structargs_1_1ArgumentParser_1_1HelpParams.html">HelpParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A simple structure of parameters for easy user-modifyable help menus.  <a href="structargs_1_1ArgumentParser_1_1HelpParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -179,6 +180,12 @@ const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a cl
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ArgumentParser.html#a27c66514e6dbcaa4853a5cefff4e0300">Terminator</a> (const std::string &amp;terminator)</td></tr>
 <tr class="memdesc:a27c66514e6dbcaa4853a5cefff4e0300"><td class="mdescLeft">&#160;</td><td class="mdescRight">The terminator that separates short options from long ones. <br /></td></tr>
 <tr class="separator:a27c66514e6dbcaa4853a5cefff4e0300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08a7070444aeda524d6fc367bef7b963"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ArgumentParser.html#a08a7070444aeda524d6fc367bef7b963">GetArgumentSeparations</a> (bool &amp;allowJoinedShortArgument, bool &amp;allowJoinedLongArgument, bool &amp;allowSeparateShortArgument, bool &amp;allowSeparateLongArgument) const </td></tr>
+<tr class="memdesc:a08a7070444aeda524d6fc367bef7b963"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current argument separation parameters.  <a href="#a08a7070444aeda524d6fc367bef7b963">More...</a><br /></td></tr>
+<tr class="separator:a08a7070444aeda524d6fc367bef7b963"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7129b531fb9acdd392d5f30fbc4d0a8c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ArgumentParser.html#a7129b531fb9acdd392d5f30fbc4d0a8c">SetArgumentSeparations</a> (const bool allowJoinedShortArgument, const bool allowJoinedLongArgument, const bool allowSeparateShortArgument, const bool allowSeparateLongArgument)</td></tr>
+<tr class="memdesc:a7129b531fb9acdd392d5f30fbc4d0a8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change allowed option separation.  <a href="#a7129b531fb9acdd392d5f30fbc4d0a8c">More...</a><br /></td></tr>
+<tr class="separator:a7129b531fb9acdd392d5f30fbc4d0a8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b267fe674fe5d0efe90f8ecd2d77f7b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4b267fe674fe5d0efe90f8ecd2d77f7b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ArgumentParser.html#a4b267fe674fe5d0efe90f8ecd2d77f7b">Help</a> (std::ostream &amp;help) const </td></tr>
 <tr class="memdesc:a4b267fe674fe5d0efe90f8ecd2d77f7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pass the help menu into an ostream. <br /></td></tr>
@@ -232,10 +239,10 @@ std::vector&lt; <a class="el" href="classargs_1_1Base.html">Base</a> * &gt;::siz
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a27007b59c7ada6de8288cfdd59a271cf">Matched</a> () const  noexcept override</td></tr>
 <tr class="memdesc:a27007b59c7ada6de8288cfdd59a271cf inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not this group matches validation. <br /></td></tr>
 <tr class="separator:a27007b59c7ada6de8288cfdd59a271cf inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a108204e32db7dd5b31dc00d03daa8990 inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a108204e32db7dd5b31dc00d03daa8990"></a>
-std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a108204e32db7dd5b31dc00d03daa8990">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;longSeparator, unsigned int indent=0) const </td></tr>
-<tr class="memdesc:a108204e32db7dd5b31dc00d03daa8990 inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
-<tr class="separator:a108204e32db7dd5b31dc00d03daa8990 inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ef395fc1d98bd88c02f0df7ed422bf7 inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ef395fc1d98bd88c02f0df7ed422bf7"></a>
+std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a7ef395fc1d98bd88c02f0df7ed422bf7">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator, unsigned int indent=0) const </td></tr>
+<tr class="memdesc:a7ef395fc1d98bd88c02f0df7ed422bf7 inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
+<tr class="separator:a7ef395fc1d98bd88c02f0df7ed422bf7 inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85382243f31e08ef0ce5df807d82d102 inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85382243f31e08ef0ce5df807d82d102"></a>
 std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a85382243f31e08ef0ce5df807d82d102">GetPosNames</a> () const </td></tr>
 <tr class="memdesc:a85382243f31e08ef0ce5df807d82d102 inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of positional parameters. <br /></td></tr>
@@ -250,9 +257,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResetMatched<
 <tr class="memitem:aaa33ce43b11ec89dd81258f70ffa525f inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaa33ce43b11ec89dd81258f70ffa525f"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const  noexcept</td></tr>
 <tr class="separator:aaa33ce43b11ec89dd81258f70ffa525f inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bc9367b9740add63ef36a8687fd1298 inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9bc9367b9740add63ef36a8687fd1298"></a>
-virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;longSeparator) const </td></tr>
-<tr class="separator:a9bc9367b9740add63ef36a8687fd1298 inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb0f33ec5e1ffe0dc6f8fe604a130623 inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afb0f33ec5e1ffe0dc6f8fe604a130623"></a>
+virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator) const </td></tr>
+<tr class="separator:afb0f33ec5e1ffe0dc6f8fe604a130623 inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -273,6 +280,55 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The main user facing command line argument parser class. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a08a7070444aeda524d6fc367bef7b963"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void args::ArgumentParser::GetArgumentSeparations </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>allowJoinedShortArgument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>allowJoinedLongArgument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>allowSeparateShortArgument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>allowSeparateLongArgument</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the current argument separation parameters. </p>
+<p>See SetArgumentSeparations for details on what each one means. </p>
+
+</div>
+</div>
 <a class="anchor" id="a18de0a26d9f252cec2119d0d54647755"></a>
 <div class="memitem">
 <div class="memproto">
@@ -412,6 +468,63 @@ template&lt;typename T &gt; </div>
 
 <p>Convenience function to parse the CLI from argc and argv. </p>
 <p>Just assigns the program name and vectorizes arguments for passing into <a class="el" href="classargs_1_1ArgumentParser.html#ac2852678eece00f5ac0689381f26a204" title="Parse all arguments. ">ParseArgs()</a> </p>
+
+</div>
+</div>
+<a class="anchor" id="a7129b531fb9acdd392d5f30fbc4d0a8c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void args::ArgumentParser::SetArgumentSeparations </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>allowJoinedShortArgument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>allowJoinedLongArgument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>allowSeparateShortArgument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>allowSeparateLongArgument</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Change allowed option separation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">allowJoinedShortArgument</td><td>Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field) </td></tr>
+    <tr><td class="paramname">allowJoinedLongArgument</td><td>Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field) </td></tr>
+    <tr><td class="paramname">allowSeparateShortArgument</td><td>Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field) </td></tr>
+    <tr><td class="paramname">allowSeparateLongArgument</td><td>Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

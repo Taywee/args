@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">1.2.4</span>
+   &#160;<span id="projectnumber">2.1.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -80,7 +80,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">args Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>A simple, small, flexible, single-header C++11 argument parsing library, in about 1.3K lines of code.</p>
+<div class="textblock"><p>A simple, small, flexible, single-header C++11 argument parsing library, in about 1K lines of code.</p>
 <p>This is designed to somewhat replicate the behavior of Python's argparse, but in C++, with static type checking, and hopefully a lot faster.</p>
 <p>UTF-8 support is limited at best. No normalization is performed, so non-ascii characters are very best kept out of flags, and combined glyphs are probably going to mess up help output if you use it. Most UTF-8 necessary for internationalization should work for most cases, though heavily combinatory UTF alphabets may wreak havoc.</p>
 <p>This program is MIT-licensed, so you can use the header as-is with no restrictions. I'd appreciate attribution in a README, Man page, or something if you are feeling generous, but all that's required is that you don't remove the license and my name from the header of the <a class="el" href="args_8hxx_source.html">args.hxx</a> file in source redistributions (ie. don't pretend that you wrote it). I do welcome additions and updates wherever you feel like contributing code.</p>
@@ -97,22 +97,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>Generates pretty help for you, with some good tweakable parameters.</li>
 <li>Lets you customize all prefixes and most separators, allowing you to create an infinite number of different argument syntaxes</li>
 <li>Lets you parse, by default, any type that has a stream extractor operator for it. If this doesn't work for your uses, you can supply a function and parse the string yourself if you like.</li>
+<li>Lets you decide not to allow separate-argument argument flags or joined ones (like disallowing <code>--foo bar</code>, requiring <code>--foo=bar</code>, or the inverse, or the same for short options).</li>
 </ul>
 <h1>What does it not do?</h1>
 <p>There are tons of things this library does not do!</p>
-<h2>It does not yet:</h2>
-<ul>
-<li>Let you decide not to allow separate-argument argument flags or joined ones (like disallowing <code>--foo bar</code>, requiring <code>--foo=bar</code>, or the inverse, or the same for short options).</li>
-</ul>
 <h2>It will not ever:</h2>
 <ul>
 <li>Allow you to create subparsers like argparse in a master parser (you can do this yourself with iterators and multiple parsers)</li>
 <li>Allow one argument flag to take a specific number of arguments (like <code>--foo first second</code>). You can instead split that with a flag list (<code>--foo first --foo second</code>) or a custom type extraction (<code>--foo first,second</code>)</li>
 <li>Allow you to intermix multiple different prefix types (eg. <code>++foo</code> and <code>--foo</code> in the same parser), though shortopt and longopt prefixes can be different.</li>
 <li>Allow you to have argument flags only optionally accept arguments</li>
+<li>Allow you to make flag arguments sensitive to order (like gnu find), or make them sensitive to relative ordering with positional flags. The only orderings that are order-sensitive are:<ul>
+<li>Positional options relative to one-another</li>
+<li>List positional options or flag arguments to each of their own respective items</li>
+</ul>
+</li>
 <li>Allow you to use a positional argument list before any other positional arguments (the last argument list will slurp all subsequent positional arguments). The logic for allowing this would be a lot more code than I'd like, and would make static checking much more difficult, requiring us to sort std::string arguments and pair them to positional arguments before assigning them, rather than what we currently do, which is assiging them as we go for better simplicity and speed.</li>
 </ul>
-<h1>How do I use it?</h1>
+<h1>How do I install it?</h1>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make install</div>
 </div><!-- fragment --><p>Or, to install it somewhere special (default is <code>/usr/local</code>):</p>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make install DESTDIR=/opt/mydir</div>
@@ -120,8 +122,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <h2>I also want man pages.</h2>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make installman</div>
 </div><!-- fragment --><p>This requires Doxygen</p>
+<h1>How do I use it?</h1>
+<p>Create an ArgumentParser, modify its attributes to fit your needs, add arguments through regular argument objects (or create your own), and match them with an <a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">args::Matcher</a> object (check its construction details in the doxygen documentation.</p>
+<p>Then you can either call it with <a class="el" href="classargs_1_1ArgumentParser.html#aa5477da47401025c5c05d1fac84da016" title="Convenience function to parse the CLI from argc and argv. ">args::ArgumentParser::ParseCLI</a> for the full command line with program name, or <a class="el" href="classargs_1_1ArgumentParser.html#ac2852678eece00f5ac0689381f26a204" title="Parse all arguments. ">args::ArgumentParser::ParseArgs</a> with just the arguments to be parsed. The argument and group variables can then be interpreted as a boolean to see if they've been matched, and their arguments can be pulled from their value and values attributes, if applicable.</p>
 <h1>How fast is it?</h1>
-<p>This should not really be a question you ask when you are looking for an argument-parsing library, but I did run a simple benchmark against args, TCLAP, and boost::program_options, which parses the command line <code>-i 7 -c a 2.7 --char b 8.4 -c c 8.8 --char d</code> with a parser that parses -i as an int, -c as a list of chars, and the positional parameters as a list of doubles (the command line was originally much more complex, but TCLAP's limitations made me trim it down so I could use a common command line across all libraries. I also have to copy in the arguments list with every run, because TCLAP permutes its argument list as it runs (and comparison would have been unfair without comparing all about equally), but that surprisingly didn't affect much. Also tested is pulling the arguments out, but that was fast compared to parsing, as would be expected.</p>
+<p>This should not really be a question you ask when you are looking for an argument-parsing library, but every test I've done shows args as being about 65% faster than TCLAP and 220% faster than boost::program_options.</p>
+<p>The simplest benchmark I threw together is the following one, which parses the command line <code>-i 7 -c a 2.7 --char b 8.4 -c c 8.8 --char d</code> with a parser that parses -i as an int, -c as a list of chars, and the positional parameters as a list of doubles (the command line was originally much more complex, but TCLAP's limitations made me trim it down so I could use a common command line across all libraries. I also have to copy in the arguments list with every run, because TCLAP permutes its argument list as it runs (and comparison would have been unfair without comparing all about equally), but that surprisingly didn't affect much. Also tested is pulling the arguments out, but that was fast compared to parsing, as would be expected.</p>
 <h3>The run:</h3>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;% g++ -obench bench.cxx -O2 -std=c++11 -lboost_program_options</div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;% ./bench</div>
@@ -156,8 +162,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">        {</div>
 <div class="line">            std::vector&lt;std::string&gt; arguments(carguments);</div>
 <div class="line">            <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
-<div class="line">            <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;int&gt;</a> integer(parser, <span class="stringliteral">&quot;integer&quot;</span>, <span class="stringliteral">&quot;The integer flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;i&#39;</span>}, {<span class="stringliteral">&quot;int&quot;</span>}));</div>
-<div class="line">            <a class="code" href="classargs_1_1ArgFlagList.html">args::ArgFlagList&lt;char&gt;</a> characters(parser, <span class="stringliteral">&quot;characters&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;c&#39;</span>}, {<span class="stringliteral">&quot;char&quot;</span>}));</div>
+<div class="line">            <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;int&gt;</a> integer(parser, <span class="stringliteral">&quot;integer&quot;</span>, <span class="stringliteral">&quot;The integer flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;i&#39;</span>, <span class="stringliteral">&quot;int&quot;</span>});</div>
+<div class="line">            <a class="code" href="classargs_1_1ArgFlagList.html">args::ArgFlagList&lt;char&gt;</a> characters(parser, <span class="stringliteral">&quot;characters&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;c&#39;</span>, <span class="stringliteral">&quot;char&quot;</span>});</div>
 <div class="line">            <a class="code" href="classargs_1_1PosArgList.html">args::PosArgList&lt;double&gt;</a> numbers(parser, <span class="stringliteral">&quot;numbers&quot;</span>, <span class="stringliteral">&quot;The numbers position list&quot;</span>);</div>
 <div class="line">            parser.ParseArgs(arguments);</div>
 <div class="line">            <span class="keyword">const</span> <span class="keywordtype">int</span> i = integer.value;</div>
@@ -253,7 +259,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
-<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Display this help menu&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;h&#39;</span>}, {<span class="stringliteral">&quot;help&quot;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Display this help menu&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;h&#39;</span>, <span class="stringliteral">&quot;help&quot;</span>});</div>
 <div class="line">    <span class="keywordflow">try</span></div>
 <div class="line">    {</div>
 <div class="line">        parser.ParseCLI(argc, argv);</div>
@@ -290,7 +296,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
 <div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> group(parser, <span class="stringliteral">&quot;This group is all exclusive:&quot;</span>, args::Group::Validators::Xor);</div>
-<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> foo(group, <span class="stringliteral">&quot;foo&quot;</span>, <span class="stringliteral">&quot;The foo flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;f&#39;</span>}, {<span class="stringliteral">&quot;foo&quot;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> foo(group, <span class="stringliteral">&quot;foo&quot;</span>, <span class="stringliteral">&quot;The foo flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;f&#39;</span>, <span class="stringliteral">&quot;foo&quot;</span>});</div>
 <div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> bar(group, <span class="stringliteral">&quot;bar&quot;</span>, <span class="stringliteral">&quot;The bar flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;b&#39;</span>}));</div>
 <div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> baz(group, <span class="stringliteral">&quot;baz&quot;</span>, <span class="stringliteral">&quot;The baz flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="stringliteral">&quot;baz&quot;</span>}));</div>
 <div class="line">    <span class="keywordflow">try</span></div>
@@ -360,7 +366,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
-<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Display this help menu&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;h&#39;</span>}, {<span class="stringliteral">&quot;help&quot;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Display this help menu&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;h&#39;</span>, <span class="stringliteral">&quot;help&quot;</span>});</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;int&gt;</a> integer(parser, <span class="stringliteral">&quot;integer&quot;</span>, <span class="stringliteral">&quot;The integer flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;i&#39;</span>}));</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgFlagList.html">args::ArgFlagList&lt;char&gt;</a> characters(parser, <span class="stringliteral">&quot;characters&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;c&#39;</span>}));</div>
 <div class="line">    <a class="code" href="classargs_1_1PosArg.html">args::PosArg&lt;std::string&gt;</a> foo(parser, <span class="stringliteral">&quot;foo&quot;</span>, <span class="stringliteral">&quot;The foo position&quot;</span>);</div>
@@ -522,9 +528,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program with a really long description that is probably going to have to be wrapped across multiple different lines.  This is a test to see how the line wrapping works&quot;</span>, <span class="stringliteral">&quot;This goes after the options.  This epilog is also long enough that it will have to be properly wrapped to display correctly on the screen&quot;</span>);</div>
-<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;HELP&quot;</span>, <span class="stringliteral">&quot;Show this help menu.&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;h&#39;</span>}, {<span class="stringliteral">&quot;help&quot;</span>}));</div>
-<div class="line">    <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;std::string&gt;</a> foo(parser, <span class="stringliteral">&quot;FOO&quot;</span>, <span class="stringliteral">&quot;The foo flag.&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;a&#39;</span>, <span class="charliteral">&#39;b&#39;</span>, <span class="charliteral">&#39;c&#39;</span>}, {<span class="stringliteral">&quot;a&quot;</span>, <span class="stringliteral">&quot;b&quot;</span>, <span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;the-foo-flag&quot;</span>}));</div>
-<div class="line">    <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;std::string&gt;</a> bar(parser, <span class="stringliteral">&quot;BAR&quot;</span>, <span class="stringliteral">&quot;The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;d&#39;</span>, <span class="charliteral">&#39;e&#39;</span>, <span class="charliteral">&#39;f&#39;</span>}, {<span class="stringliteral">&quot;d&quot;</span>, <span class="stringliteral">&quot;e&quot;</span>, <span class="stringliteral">&quot;f&quot;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;HELP&quot;</span>, <span class="stringliteral">&quot;Show this help menu.&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;h&#39;</span>, <span class="stringliteral">&quot;help&quot;</span>});</div>
+<div class="line">    <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;std::string&gt;</a> foo(parser, <span class="stringliteral">&quot;FOO&quot;</span>, <span class="stringliteral">&quot;The foo flag.&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;a&#39;</span>, <span class="charliteral">&#39;b&#39;</span>, <span class="charliteral">&#39;c&#39;</span>, <span class="stringliteral">&quot;a&quot;</span>, <span class="stringliteral">&quot;b&quot;</span>, <span class="stringliteral">&quot;c&quot;</span>, <span class="stringliteral">&quot;the-foo-flag&quot;</span>});</div>
+<div class="line">    <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;std::string&gt;</a> bar(parser, <span class="stringliteral">&quot;BAR&quot;</span>, <span class="stringliteral">&quot;The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;d&#39;</span>, <span class="charliteral">&#39;e&#39;</span>, <span class="charliteral">&#39;f&#39;</span>, <span class="stringliteral">&quot;d&quot;</span>, <span class="stringliteral">&quot;e&quot;</span>, <span class="stringliteral">&quot;f&quot;</span>});</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgFlag.html">args::ArgFlag&lt;std::string&gt;</a> baz(parser, <span class="stringliteral">&quot;FOO&quot;</span>, <span class="stringliteral">&quot;The baz flag.  This one has a lot of options, and will need wrapping in the description, even with its short flag list.&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="stringliteral">&quot;baz&quot;</span>}));</div>
 <div class="line">    <a class="code" href="classargs_1_1PosArg.html">args::PosArg&lt;std::string&gt;</a> pos1(parser, <span class="stringliteral">&quot;POS1&quot;</span>, <span class="stringliteral">&quot;The pos1 argument.&quot;</span>);</div>
 <div class="line">    <a class="code" href="classargs_1_1PosArgList.html">args::PosArgList&lt;std::string&gt;</a> poslist1(parser, <span class="stringliteral">&quot;POSLIST1&quot;</span>, <span class="stringliteral">&quot;The poslist1 argument.&quot;</span>);</div>
@@ -718,7 +724,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    <a class="code" href="classargs_1_1Group.html">args::Group</a> atleastone(xorgroup, <span class="stringliteral">&quot;this group provides at-least-one validation:&quot;</span>, args::Group::Validators::AtLeastOne);</div>
 <div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> g(atleastone, <span class="stringliteral">&quot;g&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;g&#39;</span>}));</div>
 <div class="line">    <a class="code" href="classargs_1_1Flag.html">args::Flag</a> o(atleastone, <span class="stringliteral">&quot;o&quot;</span>, <span class="stringliteral">&quot;test flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;o&#39;</span>}));</div>
-<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Show this help menu&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>({<span class="charliteral">&#39;h&#39;</span>}, {<span class="stringliteral">&quot;help&quot;</span>}));</div>
+<div class="line">    <a class="code" href="classargs_1_1HelpFlag.html">args::HelpFlag</a> help(parser, <span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Show this help menu&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;h&#39;</span>, <span class="stringliteral">&quot;help&quot;</span>});</div>
 <div class="line">    <span class="keywordflow">try</span></div>
 <div class="line">    {</div>
 <div class="line">        parser.ParseCLI(argc, argv);</div>
