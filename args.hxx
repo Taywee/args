@@ -1007,7 +1007,7 @@ namespace args
                         // Check short args
                     } else if (!terminated && chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
                     {
-                        std::string argchunk(chunk.substr(shortprefix.size()));
+                        const std::string argchunk(chunk.substr(shortprefix.size()));
                         for (auto argit = std::begin(argchunk); argit != std::end(argchunk); ++argit)
                         {
                             const char arg = *argit;
@@ -1087,16 +1087,12 @@ namespace args
                 {
                     prog.assign(argv[0]);
                 }
-                std::vector<std::string> args;
-                for (int i = 1; i < argc; ++i)
-                {
-                    args.emplace_back(argv[i]);
-                }
+                const std::vector<std::string> args(argv + 1, argv + argc);
                 ParseArgs(args);
             }
     };
 
-    std::ostream &operator<<(std::ostream &os, ArgumentParser &parser)
+    std::ostream &operator<<(std::ostream &os, const ArgumentParser &parser)
     {
         parser.Help(os);
         return os;

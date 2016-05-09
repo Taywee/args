@@ -2,6 +2,7 @@
  * This code is released under the license described in the LICENSE file
  */
 
+#include <tuple>
 #include <iostream>
 
 std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
@@ -197,8 +198,6 @@ TEST_CASE("Argument groups should nest", "[args]")
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-b"}), args::ValidationError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a", "-dg"}), args::ValidationError);
 }
-
-#include <tuple>
 
 void DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
 {
