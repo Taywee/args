@@ -1,3 +1,4 @@
 tests:
   script:
-    make runtests
+    - make test
+    - ./test
