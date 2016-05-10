@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['descriptionindent',['descriptionindent',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a3cd0047cf6e3d9e8d276143969786d48',1,'args::ArgumentParser::HelpParams']]]
+  ['eachgroupindent',['eachgroupindent',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a39e31bcfc82a687ed8290783546ffd05',1,'args::ArgumentParser::HelpParams']]]
 ];

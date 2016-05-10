@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">2.0.0</span>
+   &#160;<span id="projectnumber">3.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -90,7 +91,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classargs_1_1PosArgList-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">args::PosArgList&lt; T, List, Reader &gt; Class Template Reference</div>  </div>
@@ -124,6 +125,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseArg</b> 
 <tr class="memitem:a64801bad7d839403897dd9f3c48ad059"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a64801bad7d839403897dd9f3c48ad059"></a>
 virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>Name</b> () const  override</td></tr>
 <tr class="separator:a64801bad7d839403897dd9f3c48ad059"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38a5f38530f27ea8511c629058b20e3e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a38a5f38530f27ea8511c629058b20e3e"></a>
+List &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1PosArgList.html#a38a5f38530f27ea8511c629058b20e3e">Get</a> () noexcept</td></tr>
+<tr class="memdesc:a38a5f38530f27ea8511c629058b20e3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the values. <br /></td></tr>
+<tr class="separator:a38a5f38530f27ea8511c629058b20e3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classargs_1_1PosBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classargs_1_1PosBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classargs_1_1PosBase.html">args::PosBase</a></td></tr>
 <tr class="memitem:a75da9f58ece76b71e27398110164953d inherit pub_methods_classargs_1_1PosBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a75da9f58ece76b71e27398110164953d"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>PosBase</b> (const std::string &amp;name, const std::string &amp;help)</td></tr>
@@ -135,9 +140,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>Ready</b> ()</td></tr
 <tr class="memitem:a73a52a866bebf8b949893a1301183340 inherit pub_methods_classargs_1_1NamedBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a73a52a866bebf8b949893a1301183340"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>NamedBase</b> (const std::string &amp;name, const std::string &amp;help)</td></tr>
 <tr class="separator:a73a52a866bebf8b949893a1301183340 inherit pub_methods_classargs_1_1NamedBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3001c459e804e2ee3be8e8008b66f500 inherit pub_methods_classargs_1_1NamedBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3001c459e804e2ee3be8e8008b66f500"></a>
-virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefi, const std::string &amp;longSeparator) const  override</td></tr>
-<tr class="separator:a3001c459e804e2ee3be8e8008b66f500 inherit pub_methods_classargs_1_1NamedBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0db8ccd3a9dbfe19d7ed96918d4f4040 inherit pub_methods_classargs_1_1NamedBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0db8ccd3a9dbfe19d7ed96918d4f4040"></a>
+virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefi, const std::string &amp;shortSeparator, const std::string &amp;longSeparator) const  override</td></tr>
+<tr class="separator:a0db8ccd3a9dbfe19d7ed96918d4f4040 inherit pub_methods_classargs_1_1NamedBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classargs_1_1Base"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classargs_1_1Base')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classargs_1_1Base.html">args::Base</a></td></tr>
 <tr class="memitem:a746f35038981c797a85f4cc56cfc2125 inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a746f35038981c797a85f4cc56cfc2125"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Base</b> (const std::string &amp;help)</td></tr>
@@ -152,11 +157,11 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>Matched</b> (
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResetMatched</b> ()</td></tr>
 <tr class="separator:ac081087c4830b7c7b852ea24df119b12 inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a2763a3aa62406b031d6003c6b08cf9ca"><td class="memItemLeft" align="right" valign="top">List&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1PosArgList.html#a2763a3aa62406b031d6003c6b08cf9ca">values</a></td></tr>
-<tr class="memdesc:a2763a3aa62406b031d6003c6b08cf9ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">The publicly accessible value member list.  <a href="#a2763a3aa62406b031d6003c6b08cf9ca">More...</a><br /></td></tr>
-<tr class="separator:a2763a3aa62406b031d6003c6b08cf9ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a877d10920c288e6d95320a3363d95e2b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a877d10920c288e6d95320a3363d95e2b"></a>
+List &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (<a class="el" href="classargs_1_1PosArgList.html">PosArgList</a> &amp;)</td></tr>
+<tr class="separator:a877d10920c288e6d95320a3363d95e2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -189,25 +194,7 @@ class args::PosArgList&lt; T, List, Reader &gt;</h3>
   </table>
   </dd>
 </dl>
-</div><h2 class="groupheader">Member Data Documentation</h2>
-<a class="anchor" id="a2763a3aa62406b031d6003c6b08cf9ca"></a>
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T , typename List  = std::vector&lt;T&gt;, void(*)(const std::string &amp;, const std::string &amp;, T &amp;) Reader = ArgReader&lt;T&gt;&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">List <a class="el" href="classargs_1_1PosArgList.html">args::PosArgList</a>&lt; T, List, Reader &gt;::values</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>The publicly accessible value member list. </p>
-<p>You can change this, but you probably shouldn't. </p>
-
-</div>
-</div>
-<hr/>The documentation for this class was generated from the following file:<ul>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="args_8hxx_source.html">args.hxx</a></li>
 </ul>
 </div><!-- contents -->

@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">2.0.0</span>
+   &#160;<span id="projectnumber">3.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -154,10 +155,14 @@ std::vector&lt; <a class="el" href="classargs_1_1Base.html">Base</a> * &gt;::siz
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a27007b59c7ada6de8288cfdd59a271cf">Matched</a> () const  noexcept override</td></tr>
 <tr class="memdesc:a27007b59c7ada6de8288cfdd59a271cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not this group matches validation. <br /></td></tr>
 <tr class="separator:a27007b59c7ada6de8288cfdd59a271cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a108204e32db7dd5b31dc00d03daa8990"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a108204e32db7dd5b31dc00d03daa8990"></a>
-std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a108204e32db7dd5b31dc00d03daa8990">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;longSeparator, unsigned int indent=0) const </td></tr>
-<tr class="memdesc:a108204e32db7dd5b31dc00d03daa8990"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
-<tr class="separator:a108204e32db7dd5b31dc00d03daa8990"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5796a6270afc0cc535a59b5fe2e51c67"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5796a6270afc0cc535a59b5fe2e51c67"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a5796a6270afc0cc535a59b5fe2e51c67">Get</a> () const </td></tr>
+<tr class="memdesc:a5796a6270afc0cc535a59b5fe2e51c67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get validation. <br /></td></tr>
+<tr class="separator:a5796a6270afc0cc535a59b5fe2e51c67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ef395fc1d98bd88c02f0df7ed422bf7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ef395fc1d98bd88c02f0df7ed422bf7"></a>
+std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a7ef395fc1d98bd88c02f0df7ed422bf7">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator, unsigned int indent=0) const </td></tr>
+<tr class="memdesc:a7ef395fc1d98bd88c02f0df7ed422bf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
+<tr class="separator:a7ef395fc1d98bd88c02f0df7ed422bf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85382243f31e08ef0ce5df807d82d102"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85382243f31e08ef0ce5df807d82d102"></a>
 std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a85382243f31e08ef0ce5df807d82d102">GetPosNames</a> () const </td></tr>
 <tr class="memdesc:a85382243f31e08ef0ce5df807d82d102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of positional parameters. <br /></td></tr>
@@ -172,9 +177,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResetMatched<
 <tr class="memitem:aaa33ce43b11ec89dd81258f70ffa525f inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaa33ce43b11ec89dd81258f70ffa525f"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const  noexcept</td></tr>
 <tr class="separator:aaa33ce43b11ec89dd81258f70ffa525f inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bc9367b9740add63ef36a8687fd1298 inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9bc9367b9740add63ef36a8687fd1298"></a>
-virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;longSeparator) const </td></tr>
-<tr class="separator:a9bc9367b9740add63ef36a8687fd1298 inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb0f33ec5e1ffe0dc6f8fe604a130623 inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afb0f33ec5e1ffe0dc6f8fe604a130623"></a>
+virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator) const </td></tr>
+<tr class="separator:afb0f33ec5e1ffe0dc6f8fe604a130623 inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>

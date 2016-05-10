@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['count',['count',['../classargs_1_1Counter.html#a52ba2bc7c45e547f9cd6749d930f7701',1,'args::Counter']]]
+  ['descriptionindent',['descriptionindent',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a3cd0047cf6e3d9e8d276143969786d48',1,'args::ArgumentParser::HelpParams']]]
 ];

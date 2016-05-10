@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">2.0.0</span>
+   &#160;<span id="projectnumber">3.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -129,10 +130,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#aa568c30ccb60200be5f0a0549b222ecc">GetOptionStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const </td></tr>
 <tr class="memdesc:aa568c30ccb60200be5f0a0549b222ecc"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all option strings as a vector, with the prefixes embedded <br /></td></tr>
 <tr class="separator:aa568c30ccb60200be5f0a0549b222ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b32f33973b5e52895f35e57558709f3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5b32f33973b5e52895f35e57558709f3"></a>
-std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a5b32f33973b5e52895f35e57558709f3">GetOptionStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;name, const std::string longSeparator) const </td></tr>
-<tr class="memdesc:a5b32f33973b5e52895f35e57558709f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all option strings as a vector, with the prefixes and names embedded <br /></td></tr>
-<tr class="separator:a5b32f33973b5e52895f35e57558709f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ffb66597877d323f8245439e005c1c6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6ffb66597877d323f8245439e005c1c6"></a>
+std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a6ffb66597877d323f8245439e005c1c6">GetOptionStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;name, const std::string &amp;shortSeparator, const std::string longSeparator) const </td></tr>
+<tr class="memdesc:a6ffb66597877d323f8245439e005c1c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all option strings as a vector, with the prefixes and names embedded <br /></td></tr>
+<tr class="separator:a6ffb66597877d323f8245439e005c1c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A class of "matchers", specifying short and long options that can possibly be matched. </p>
@@ -251,8 +252,10 @@ template&lt;typename Short , typename Long &gt; </div>
 </div><div class="memdoc">
 
 <p>Specify a mixed single initializer-list of both short and long opts. </p>
-<p>This is the fancy one: <a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">args::Matcher</a>{'a'}, or <a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">args::Matcher</a>{"foo"}, or <a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">args::Matcher</a>{"foo", 'f', 'F', "FoO"} </p>
-
+<p>This is the fancy one. It takes a single initializer list of any number of any mixed kinds of options. Chars are automatically interpreted as short options, and strings are automatically interpreted as long options: </p><pre class="fragment">args::Matcher{'a'}
+args::Matcher{"foo"}
+args::Matcher{'h', "help"}
+args::Matcher{"foo", 'f', 'F', "FoO"}</pre> 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>

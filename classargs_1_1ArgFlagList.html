@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">2.0.0</span>
+   &#160;<span id="projectnumber">3.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -90,7 +91,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classargs_1_1ArgFlagList-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">args::ArgFlagList&lt; T, List, Reader &gt; Class Template Reference</div>  </div>
@@ -122,13 +123,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1a025793f9a72092a2710cbd11c06a47"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1a025793f9a72092a2710cbd11c06a47"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseArg</b> (const std::string &amp;value) override</td></tr>
 <tr class="separator:a1a025793f9a72092a2710cbd11c06a47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae80a9bb4b7c74abc177412a8ec412902"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae80a9bb4b7c74abc177412a8ec412902"></a>
+List &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ArgFlagList.html#ae80a9bb4b7c74abc177412a8ec412902">Get</a> () noexcept</td></tr>
+<tr class="memdesc:ae80a9bb4b7c74abc177412a8ec412902"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the values. <br /></td></tr>
+<tr class="separator:ae80a9bb4b7c74abc177412a8ec412902"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classargs_1_1ArgFlagBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classargs_1_1ArgFlagBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classargs_1_1ArgFlagBase.html">args::ArgFlagBase</a></td></tr>
 <tr class="memitem:a23ae47684bf2a17fe5241f7ccc7c58f1 inherit pub_methods_classargs_1_1ArgFlagBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a23ae47684bf2a17fe5241f7ccc7c58f1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ArgFlagBase</b> (const std::string &amp;name, const std::string &amp;help, <a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher)</td></tr>
 <tr class="separator:a23ae47684bf2a17fe5241f7ccc7c58f1 inherit pub_methods_classargs_1_1ArgFlagBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa56e44f9e23e266ecf77dbf296a10ad6 inherit pub_methods_classargs_1_1ArgFlagBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa56e44f9e23e266ecf77dbf296a10ad6"></a>
-virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;longSeparator) const  override</td></tr>
-<tr class="separator:aa56e44f9e23e266ecf77dbf296a10ad6 inherit pub_methods_classargs_1_1ArgFlagBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c46b3200ed9e1602ff5e3d5e4e30c6d inherit pub_methods_classargs_1_1ArgFlagBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7c46b3200ed9e1602ff5e3d5e4e30c6d"></a>
+virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator) const  override</td></tr>
+<tr class="separator:a7c46b3200ed9e1602ff5e3d5e4e30c6d inherit pub_methods_classargs_1_1ArgFlagBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classargs_1_1FlagBase"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classargs_1_1FlagBase')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classargs_1_1FlagBase.html">args::FlagBase</a></td></tr>
 <tr class="memitem:a691cfbfa7445f997a9581a7f7d32505a inherit pub_methods_classargs_1_1FlagBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a691cfbfa7445f997a9581a7f7d32505a"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>FlagBase</b> (const std::string &amp;name, const std::string &amp;help, <a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher)</td></tr>
@@ -160,11 +165,11 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>Matched</b> (
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResetMatched</b> ()</td></tr>
 <tr class="separator:ac081087c4830b7c7b852ea24df119b12 inherit pub_methods_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a03a62ea7a8bf3e4e54a43fc9bb1e1ca9"><td class="memItemLeft" align="right" valign="top">List&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ArgFlagList.html#a03a62ea7a8bf3e4e54a43fc9bb1e1ca9">values</a></td></tr>
-<tr class="memdesc:a03a62ea7a8bf3e4e54a43fc9bb1e1ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The publicly accessible value member list.  <a href="#a03a62ea7a8bf3e4e54a43fc9bb1e1ca9">More...</a><br /></td></tr>
-<tr class="separator:a03a62ea7a8bf3e4e54a43fc9bb1e1ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:adf216ddc965d59f2fbdfe724a8e44c65"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adf216ddc965d59f2fbdfe724a8e44c65"></a>
+List &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (<a class="el" href="classargs_1_1ArgFlagList.html">ArgFlagList</a> &amp;)</td></tr>
+<tr class="separator:adf216ddc965d59f2fbdfe724a8e44c65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -197,25 +202,7 @@ class args::ArgFlagList&lt; T, List, Reader &gt;</h3>
   </table>
   </dd>
 </dl>
-</div><h2 class="groupheader">Member Data Documentation</h2>
-<a class="anchor" id="a03a62ea7a8bf3e4e54a43fc9bb1e1ca9"></a>
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T , typename List  = std::vector&lt;T&gt;, void(*)(const std::string &amp;, const std::string &amp;, T &amp;) Reader = ArgReader&lt;T&gt;&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">List <a class="el" href="classargs_1_1ArgFlagList.html">args::ArgFlagList</a>&lt; T, List, Reader &gt;::values</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>The publicly accessible value member list. </p>
-<p>You can change this, but you probably shouldn't. </p>
-
-</div>
-</div>
-<hr/>The documentation for this class was generated from the following file:<ul>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="args_8hxx_source.html">args.hxx</a></li>
 </ul>
 </div><!-- contents -->
