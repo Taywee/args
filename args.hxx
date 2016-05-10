@@ -1265,8 +1265,6 @@ namespace args
      */
     class Counter : public Flag
     {
-        friend int get(Counter &);
-
         private:
             int count;
 
@@ -1341,8 +1339,6 @@ namespace args
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class ArgFlag : public ArgFlagBase
     {
-        friend T &get(ArgFlag &);
-
         private:
             T value;
 
@@ -1380,7 +1376,6 @@ namespace args
         void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class ArgFlagList : public ArgFlagBase
     {
-        friend List &get(ArgFlagList &);
         private:
             List values;
 
@@ -1415,7 +1410,6 @@ namespace args
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class PosArg : public PosBase
     {
-        friend T &get(PosArg &);
         private:
             T value;
         public:
@@ -1453,7 +1447,6 @@ namespace args
         void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class PosArgList : public PosBase
     {
-        friend List &get(PosArgList &);
         private:
             List values;
 
