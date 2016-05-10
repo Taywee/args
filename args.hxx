@@ -40,7 +40,10 @@
  */
 namespace args
 {
-    /** Getter to grab the value reference
+    /** Getter to grab the value from the argument type.
+     *
+     * If the Get() function of the type returns a reference, so does this, and
+     * the value will be modifiable.
      */
     template <typename Arg>
     auto get(Arg &arg) -> decltype(arg.Get())
