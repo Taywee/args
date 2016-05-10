@@ -138,38 +138,49 @@ namespace args
         return output;
     }
 
-    /** Errors that occur during regular parsing
+    /** Base error class
      */
-    class ParseError : public std::runtime_error
+    class Error : public std::runtime_error
     {
         public:
-            ParseError(const char *problem) : std::runtime_error(problem) {}
+            Error(const std::string &problem) : std::runtime_error(problem) {}
+            virtual ~Error() {};
+    };
+
+    /** Errors that occur during regular parsing
+     */
+    class ParseError : public Error
+    {
+        public:
+            ParseError(const std::string &problem) : Error(problem) {}
             virtual ~ParseError() {};
     };
 
     /** Errors that are detected from group validation after parsing finishes
      */
-    class ValidationError : public std::runtime_error
+    class ValidationError : public Error
     {
         public:
-            ValidationError(const char *problem) : std::runtime_error(problem) {}
+            ValidationError(const std::string &problem) : Error(problem) {}
             virtual ~ValidationError() {};
+    };
+
+    /** Errors that are caused by invalid use of this library
+     */
+    class UsageError : public Error
+    {
+        public:
+            UsageError(const std::string &problem) : Error(problem) {}
+            virtual ~UsageError() {};
     };
 
     /** An exception that indicates that the user has requested help
      */
-    class Help : public std::exception
+    class Help : public Error
     {
-        private:
-            const std::string flag;
         public:
-            Help(const std::string &flag) : flag(flag) {}
+            Help(const std::string &flag) : Error(flag) {}
             virtual ~Help() {};
-
-            virtual const char *what() const noexcept override
-            {
-                return flag.c_str();
-            }
     };
 
     /** A simple unified option type for unified initializer lists for the Matcher class.
@@ -555,7 +566,7 @@ namespace args
              *
              * \return the first ready PosBase pointer, or nullptr if there is no match
              */
-            PosBase *GetNextPos()
+            PosBase *GetNextPositional()
             {
                 for (Base *child: children)
                 {
@@ -563,7 +574,7 @@ namespace args
                     Group *group = dynamic_cast<Group *>(child);
                     if (group)
                     {
-                        next = group->GetNextPos();
+                        next = group->GetNextPositional();
                     }
                     if (next and next->Ready())
                     {
@@ -1105,7 +1116,7 @@ namespace args
                                     {
                                         std::ostringstream problem;
                                         problem << "Flag '" << arg << "' was passed a joined argument, but these are disallowed";
-                                        throw ParseError(problem.str().c_str());
+                                        throw ParseError(problem.str());
                                     }
                                 } else
                                 {
@@ -1114,7 +1125,7 @@ namespace args
                                     {
                                         std::ostringstream problem;
                                         problem << "Flag '" << arg << "' requires an argument but received none";
-                                        throw ParseError(problem.str().c_str());
+                                        throw ParseError(problem.str());
                                     }
 
                                     if (allowSeparateLongValue)
@@ -1124,20 +1135,20 @@ namespace args
                                     {
                                         std::ostringstream problem;
                                         problem << "Flag '" << arg << "' was passed a separate argument, but these are disallowed";
-                                        throw ParseError(problem.str().c_str());
+                                        throw ParseError(problem.str());
                                     }
                                 }
                             } else if (separator != argchunk.npos)
                             {
                                 std::ostringstream problem;
                                 problem << "Passed an argument into a non-argument flag: " << chunk;
-                                throw ParseError(problem.str().c_str());
+                                throw ParseError(problem.str());
                             }
                         } else
                         {
                             std::ostringstream problem;
                             problem << "Flag could not be matched: " << arg;
-                            throw ParseError(problem.str().c_str());
+                            throw ParseError(problem.str());
                         }
                         // Check short args
                     } else if (!terminated && chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
@@ -1163,7 +1174,7 @@ namespace args
                                         {
                                             std::ostringstream problem;
                                             problem << "Flag '" << *argit << "' was passed a joined argument, but these are disallowed";
-                                            throw ParseError(problem.str().c_str());
+                                            throw ParseError(problem.str());
                                         }
                                     } else
                                     {
@@ -1172,7 +1183,7 @@ namespace args
                                         {
                                             std::ostringstream problem;
                                             problem << "Flag '" << *argit << "' requires an argument but received none";
-                                            throw ParseError(problem.str().c_str());
+                                            throw ParseError(problem.str());
                                         }
 
                                         if (allowSeparateShortValue)
@@ -1182,7 +1193,7 @@ namespace args
                                         {
                                             std::ostringstream problem;
                                             problem << "Flag '" << *argit << "' was passed a separate argument, but these are disallowed";
-                                            throw ParseError(problem.str().c_str());
+                                            throw ParseError(problem.str());
                                         }
                                     }
                                     // Because this argchunk is done regardless
@@ -1192,12 +1203,12 @@ namespace args
                             {
                                 std::ostringstream problem;
                                 problem << "Flag could not be matched: '" << arg << "'";
-                                throw ParseError(problem.str().c_str());
+                                throw ParseError(problem.str());
                             }
                         }
                     } else
                     {
-                        PosBase *pos = GetNextPos();
+                        PosBase *pos = GetNextPositional();
                         if (pos)
                         {
                             pos->ParseValue(chunk);
@@ -1205,7 +1216,7 @@ namespace args
                         {
                             std::ostringstream problem;
                             problem << "Passed in argument, but no positional arguments were ready to receive it: " << chunk;
-                            throw ParseError(problem.str().c_str());
+                            throw ParseError(problem.str());
                         }
                     }
                 }
@@ -1213,7 +1224,7 @@ namespace args
                 {
                     std::ostringstream problem;
                     problem << "Group validation failed somewhere!";
-                    throw ValidationError(problem.str().c_str());
+                    throw ValidationError(problem.str());
                 }
             }
 
@@ -1360,7 +1371,7 @@ namespace args
         {
             std::ostringstream problem;
             problem << "Argument '" << name << "' received invalid value type '" << value << "'";
-            throw ParseError(problem.str().c_str());
+            throw ParseError(problem.str());
         }
     }
 
