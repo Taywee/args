@@ -1,7 +1,9 @@
 # args
 
+[![build status](https://gitgud.io/Taywee/args/badges/master/build.svg)](https://gitgud.io/Taywee/args/commits/master)
+
 A simple, small, flexible, single-header C++11 argument parsing library, in
-about 1.3K lines of code.
+about 1K lines of code.
 
 This is designed to somewhat replicate the behavior of Python's argparse, but
 in C++, with static type checking, and hopefully a lot faster.
@@ -42,16 +44,14 @@ It:
 * Lets you parse, by default, any type that has a stream extractor operator for
   it.  If this doesn't work for your uses, you can supply a function and parse
   the string yourself if you like.
+* Lets you decide not to allow separate-argument argument flags or joined ones
+  (like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
+  same for short options).
 
 # What does it not do?
 
 There are tons of things this library does not do!
 
-## It does not yet:
-
-* Let you decide not to allow separate-argument argument flags or joined ones
-    (like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
-    same for short options).
 
 ## It will not ever:
 
@@ -65,6 +65,12 @@ There are tons of things this library does not do!
     `--foo` in the same parser), though shortopt and longopt prefixes can be
     different.
 * Allow you to have argument flags only optionally accept arguments
+* Allow you to make flag arguments sensitive to order (like gnu find), or make
+  them sensitive to relative ordering with positional flags.  The only
+  orderings that are order-sensitive are:
+    * Positional options relative to one-another
+    * List positional options or flag arguments to each of their own respective
+      items
 * Allow you to use a positional argument list before any other positional
     arguments (the last argument list will slurp all subsequent positional
     arguments).  The logic for allowing this would be a lot more code than I'd
@@ -112,16 +118,19 @@ can be pulled from their value and values attributes, if applicable.
 # How fast is it?
 
 This should not really be a question you ask when you are looking for an
-argument-parsing library, but I did run a simple benchmark against args, TCLAP,
-and boost::program_options, which parses the command line `-i 7 -c a 2.7 --char
-b 8.4 -c c 8.8 --char d` with a parser that parses -i as an int, -c as a list
-of chars, and the positional parameters as a list of doubles (the command line
-was originally much more complex, but TCLAP's limitations made me trim it down
-so I could use a common command line across all libraries.  I also have to copy
-in the arguments list with every run, because TCLAP permutes its argument list
-as it runs (and comparison would have been unfair without comparing all about
-equally), but that surprisingly didn't affect much.  Also tested is pulling the
-arguments out, but that was fast compared to parsing, as would be expected.
+argument-parsing library, but every test I've done shows args as being about
+65% faster than TCLAP and 220% faster than boost::program_options.
+
+The simplest benchmark I threw together is the following one, which parses the
+command line `-i 7 -c a 2.7 --char b 8.4 -c c 8.8 --char d` with a parser that
+parses -i as an int, -c as a list of chars, and the positional parameters as a
+list of doubles (the command line was originally much more complex, but TCLAP's
+limitations made me trim it down so I could use a common command line across
+all libraries.  I also have to copy in the arguments list with every run,
+because TCLAP permutes its argument list as it runs (and comparison would have
+been unfair without comparing all about equally), but that surprisingly didn't
+affect much.  Also tested is pulling the arguments out, but that was fast
+compared to parsing, as would be expected.
 
 ### The run:
 
@@ -167,9 +176,9 @@ int main()
             args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher{'c', "char"});
             args::PosArgList<double> numbers(parser, "numbers", "The numbers position list");
             parser.ParseArgs(arguments);
-            const int i = integer.value;
-            const std::vector<char> c(characters.values);
-            const std::vector<double> n(numbers.values);
+            const int i = args::get(integer);
+            const std::vector<char> c(args::get(characters));
+            const std::vector<double> n(args::get(numbers));
             assert(i == 7);
             assert(c[0] == 'a');
             assert(c[1] == 'b');
@@ -423,10 +432,10 @@ int main(int argc, char **argv)
         std::cerr << parser;
         return 1;
     }
-    if (integer) { std::cout << "i: " << integer.value << std::endl; }
-    if (characters) { for (const auto ch: characters.values) { std::cout << "c: " << ch << std::endl; } }
-    if (foo) { std::cout << "f: " << foo.value << std::endl; }
-    if (numbers) { for (const auto nm: numbers.values) { std::cout << "n: " << nm << std::endl; } }
+    if (integer) { std::cout << "i: " << args::get(integer) << std::endl; }
+    if (characters) { for (const auto ch: args::get(characters)) { std::cout << "c: " << ch << std::endl; } }
+    if (foo) { std::cout << "f: " << args::get(foo) << std::endl; }
+    if (numbers) { for (const auto nm: args::get(numbers)) { std::cout << "n: " << nm << std::endl; } }
     return 0;
 }
 ```
@@ -519,11 +528,11 @@ int main(int argc, char **argv)
     }
     if (ints)
     {
-        std::cout << "ints found: " << std::get<0>(ints.value) << " and " << std::get<1>(ints.value) << std::endl;
+        std::cout << "ints found: " << std::get<0>(args::get(ints)) << " and " << std::get<1>(args::get(ints)) << std::endl;
     }
     if (doubles)
     {
-        std::cout << "doubles found: " << std::get<0>(doubles.value) << " and " << std::get<1>(doubles.value) << std::endl;
+        std::cout << "doubles found: " << std::get<0>(args::get(doubles)) << " and " << std::get<1>(args::get(doubles)) << std::endl;
     }
     return 0;
 }
@@ -711,10 +720,10 @@ int main(int argc, char **argv)
         std::cerr << parser;
         return 1;
     }
-    std::cout << "bs = " << bs.value << std::endl;
-    std::cout << "skip = " << skip.value << std::endl;
-    if (input) { std::cout << "if = " << input.value << std::endl; }
-    if (output) { std::cout << "of = " << output.value << std::endl; }
+    std::cout << "bs = " << args::get(bs) << std::endl;
+    std::cout << "skip = " << args::get(skip) << std::endl;
+    if (input) { std::cout << "if = " << args::get(input) << std::endl; }
+    if (output) { std::cout << "of = " << args::get(output) << std::endl; }
     return 0;
 }
 ```
