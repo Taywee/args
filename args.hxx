@@ -19,6 +19,12 @@
  * IN THE SOFTWARE.
  */
 
+/** \file args.hxx
+ * \brief this single-header lets you use all of the args functionality
+ *
+ * The important stuff is done inside the args namespace
+ */
+
 #include <algorithm>
 #include <exception>
 #include <functional>
@@ -29,6 +35,9 @@
 #include <unordered_set>
 #include <type_traits>
 
+/** \namespace args
+ * \brief contains all the functionality of the args library
+ */
 namespace args
 {
     /** Getter to grab the value reference
