@@ -176,9 +176,9 @@ int main()
             args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher{'c', "char"});
             args::PosArgList<double> numbers(parser, "numbers", "The numbers position list");
             parser.ParseArgs(arguments);
-            const int i = integer.value;
-            const std::vector<char> c(characters.values);
-            const std::vector<double> n(numbers.values);
+            const int i = args::get(integer);
+            const std::vector<char> c(args::get(characters));
+            const std::vector<double> n(args::get(numbers));
             assert(i == 7);
             assert(c[0] == 'a');
             assert(c[1] == 'b');
@@ -432,10 +432,10 @@ int main(int argc, char **argv)
         std::cerr << parser;
         return 1;
     }
-    if (integer) { std::cout << "i: " << integer.value << std::endl; }
-    if (characters) { for (const auto ch: characters.values) { std::cout << "c: " << ch << std::endl; } }
-    if (foo) { std::cout << "f: " << foo.value << std::endl; }
-    if (numbers) { for (const auto nm: numbers.values) { std::cout << "n: " << nm << std::endl; } }
+    if (integer) { std::cout << "i: " << args::get(integer) << std::endl; }
+    if (characters) { for (const auto ch: args::get(characters)) { std::cout << "c: " << ch << std::endl; } }
+    if (foo) { std::cout << "f: " << args::get(foo) << std::endl; }
+    if (numbers) { for (const auto nm: args::get(numbers)) { std::cout << "n: " << nm << std::endl; } }
     return 0;
 }
 ```
@@ -528,11 +528,11 @@ int main(int argc, char **argv)
     }
     if (ints)
     {
-        std::cout << "ints found: " << std::get<0>(ints.value) << " and " << std::get<1>(ints.value) << std::endl;
+        std::cout << "ints found: " << std::get<0>(args::get(ints)) << " and " << std::get<1>(args::get(ints)) << std::endl;
     }
     if (doubles)
     {
-        std::cout << "doubles found: " << std::get<0>(doubles.value) << " and " << std::get<1>(doubles.value) << std::endl;
+        std::cout << "doubles found: " << std::get<0>(args::get(doubles)) << " and " << std::get<1>(args::get(doubles)) << std::endl;
     }
     return 0;
 }
@@ -720,10 +720,10 @@ int main(int argc, char **argv)
         std::cerr << parser;
         return 1;
     }
-    std::cout << "bs = " << bs.value << std::endl;
-    std::cout << "skip = " << skip.value << std::endl;
-    if (input) { std::cout << "if = " << input.value << std::endl; }
-    if (output) { std::cout << "of = " << output.value << std::endl; }
+    std::cout << "bs = " << args::get(bs) << std::endl;
+    std::cout << "skip = " << args::get(skip) << std::endl;
+    if (input) { std::cout << "if = " << args::get(input) << std::endl; }
+    if (output) { std::cout << "of = " << args::get(output) << std::endl; }
     return 0;
 }
 ```
