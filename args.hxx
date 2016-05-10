@@ -45,10 +45,10 @@ namespace args
      * If the Get() function of the type returns a reference, so does this, and
      * the value will be modifiable.
      */
-    template <typename Arg>
-    auto get(Arg &arg) -> decltype(arg.Get())
+    template <typename Option>
+    auto get(Option &option) -> decltype(option.Get())
     {
-        return arg.Get();
+        return option.Get();
     }
 
     /** (INTERNAL) Count UTF-8 glyphs
@@ -174,50 +174,50 @@ namespace args
 
     /** A simple unified option type for unified initializer lists for the Matcher class.
      */
-    struct EitherOpt
+    struct EitherFlag
     {
         const bool isShort;
-        const char shortOpt;
-        const std::string longOpt;
-        EitherOpt(const std::string &opt) : isShort(false), shortOpt(), longOpt(opt) {}
-        EitherOpt(const char *opt) : isShort(false), shortOpt(), longOpt(opt) {}
-        EitherOpt(const char opt) : isShort(true), shortOpt(opt), longOpt() {}
+        const char shortFlag;
+        const std::string longFlag;
+        EitherFlag(const std::string &flag) : isShort(false), shortFlag(), longFlag(flag) {}
+        EitherFlag(const char *flag) : isShort(false), shortFlag(), longFlag(flag) {}
+        EitherFlag(const char flag) : isShort(true), shortFlag(flag), longFlag() {}
 
-        /** Get just the long options from an initializer list of EitherOpts
+        /** Get just the long flags from an initializer list of EitherFlags
          */
-        static std::unordered_set<std::string> GetLong(std::initializer_list<EitherOpt> opts)
+        static std::unordered_set<std::string> GetLong(std::initializer_list<EitherFlag> flags)
         {
-            std::unordered_set<std::string>  longOpts;
-            for (const EitherOpt &opt: opts)
+            std::unordered_set<std::string>  longFlags;
+            for (const EitherFlag &flag: flags)
             {
-                if (!opt.isShort)
+                if (!flag.isShort)
                 {
-                    longOpts.insert(opt.longOpt);
+                    longFlags.insert(flag.longFlag);
                 }
             }
-            return longOpts;
+            return longFlags;
         }
 
-        /** Get just the short options from an initializer list of EitherOpts
+        /** Get just the short flags from an initializer list of EitherFlags
          */
-        static std::unordered_set<char> GetShort(std::initializer_list<EitherOpt> opts)
+        static std::unordered_set<char> GetShort(std::initializer_list<EitherFlag> flags)
         {
-            std::unordered_set<char>  shortOpts;
-            for (const EitherOpt &opt: opts)
+            std::unordered_set<char>  shortFlags;
+            for (const EitherFlag &flag: flags)
             {
-                if (opt.isShort)
+                if (flag.isShort)
                 {
-                    shortOpts.insert(opt.shortOpt);
+                    shortFlags.insert(flag.shortFlag);
                 }
             }
-            return shortOpts;
+            return shortFlags;
         }
     };
 
 
 
-    /** A class of "matchers", specifying short and long options that can
-     * possibly be matched.
+    /** A class of "matchers", specifying short and flags that can possibly be
+     * matched.
      *
      * This is supposed to be constructed and then passed in, not used directly
      * from user code.
@@ -225,96 +225,96 @@ namespace args
     class Matcher
     {
         private:
-            const std::unordered_set<char> shortOpts;
-            const std::unordered_set<std::string> longOpts;
+            const std::unordered_set<char> shortFlags;
+            const std::unordered_set<std::string> longFlags;
 
         public:
-            /** Specify short and long opts separately as iterators
+            /** Specify short and long flags separately as iterators
              *
-             * ex: `args::Matcher(shortOpts.begin(), shortOpts.end(), longOpts.begin(), longOpts.end())`
+             * ex: `args::Matcher(shortFlags.begin(), shortFlags.end(), longFlags.begin(), longFlags.end())`
              */
             template <typename ShortIt, typename LongIt>
-            Matcher(ShortIt shortOptsStart, ShortIt shortOptsEnd, LongIt longOptsStart, LongIt longOptsEnd) :
-                shortOpts(shortOptsStart, shortOptsEnd),
-                longOpts(longOptsStart, longOptsEnd)
+            Matcher(ShortIt shortFlagsStart, ShortIt shortFlagsEnd, LongIt longFlagsStart, LongIt longFlagsEnd) :
+                shortFlags(shortFlagsStart, shortFlagsEnd),
+                longFlags(longFlagsStart, longFlagsEnd)
             {}
 
-            /** Specify short and long opts separately as iterables
+            /** Specify short and long flags separately as iterables
              *
-             * ex: `args::Matcher(shortOpts, longOpts)`
+             * ex: `args::Matcher(shortFlags, longFlags)`
              */
             template <typename Short, typename Long>
             Matcher(Short &&shortIn, Long &&longIn) :
-                shortOpts(std::begin(shortIn), std::end(shortIn)), longOpts(std::begin(longIn), std::end(longIn))
+                shortFlags(std::begin(shortIn), std::end(shortIn)), longFlags(std::begin(longIn), std::end(longIn))
             {}
 
-            /** Specify a mixed single initializer-list of both short and long opts
+            /** Specify a mixed single initializer-list of both short and long flags
              *
              * This is the fancy one.  It takes a single initializer list of
-             * any number of any mixed kinds of options.  Chars are
-             * automatically interpreted as short options, and strings are
-             * automatically interpreted as long options:
+             * any number of any mixed kinds of flags.  Chars are
+             * automatically interpreted as short flags, and strings are
+             * automatically interpreted as long flags:
              *
              *     args::Matcher{'a'}
              *     args::Matcher{"foo"}
              *     args::Matcher{'h', "help"}
              *     args::Matcher{"foo", 'f', 'F', "FoO"}
              */
-            Matcher(std::initializer_list<EitherOpt> in) :
-                shortOpts(EitherOpt::GetShort(in)), longOpts(EitherOpt::GetLong(in)) {}
+            Matcher(std::initializer_list<EitherFlag> in) :
+                shortFlags(EitherFlag::GetShort(in)), longFlags(EitherFlag::GetLong(in)) {}
 
-            Matcher(Matcher &&other) : shortOpts(std::move(other.shortOpts)), longOpts(std::move(other.longOpts))
+            Matcher(Matcher &&other) : shortFlags(std::move(other.shortFlags)), longFlags(std::move(other.longFlags))
             {}
 
             ~Matcher() {}
 
-            /** (INTERNAL) Check if there is a match of a short opt
+            /** (INTERNAL) Check if there is a match of a short flag
              */
-            bool Match(const char opt) const
+            bool Match(const char flag) const
             {
-                return shortOpts.find(opt) != shortOpts.end();
+                return shortFlags.find(flag) != shortFlags.end();
             }
 
-            /** (INTERNAL) Check if there is a match of a long opt
+            /** (INTERNAL) Check if there is a match of a long flag
              */
-            bool Match(const std::string &opt) const
+            bool Match(const std::string &flag) const
             {
-                return longOpts.find(opt) != longOpts.end();
+                return longFlags.find(flag) != longFlags.end();
             }
 
-            /** (INTERNAL) Get all option strings as a vector, with the prefixes embedded
+            /** (INTERNAL) Get all flag strings as a vector, with the prefixes embedded
              */
-            std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix) const
+            std::vector<std::string> GetFlagStrings(const std::string &shortPrefix, const std::string &longPrefix) const
             {
-                std::vector<std::string> optStrings;
-                optStrings.reserve(shortOpts.size() + longOpts.size());
-                for (const char opt: shortOpts)
+                std::vector<std::string> flagStrings;
+                flagStrings.reserve(shortFlags.size() + longFlags.size());
+                for (const char flag: shortFlags)
                 {
-                    optStrings.emplace_back(shortPrefix + std::string(1, opt));
+                    flagStrings.emplace_back(shortPrefix + std::string(1, flag));
                 }
-                for (const std::string &opt: longOpts)
+                for (const std::string &flag: longFlags)
                 {
-                    optStrings.emplace_back(longPrefix + opt);
+                    flagStrings.emplace_back(longPrefix + flag);
                 }
-                return optStrings;
+                return flagStrings;
             }
 
-            /** (INTERNAL) Get all option strings as a vector, with the prefixes and names embedded
+            /** (INTERNAL) Get all flag strings as a vector, with the prefixes and names embedded
              */
-            std::vector<std::string> GetOptionStrings(const std::string &shortPrefix, const std::string &longPrefix, const std::string &name, const std::string &shortSeparator, const std::string longSeparator) const
+            std::vector<std::string> GetFlagStrings(const std::string &shortPrefix, const std::string &longPrefix, const std::string &name, const std::string &shortSeparator, const std::string longSeparator) const
             {
                 const std::string bracedname(std::string("[") + name + "]");
-                std::vector<std::string> optStrings;
-                optStrings.reserve(shortOpts.size() + longOpts.size());
-                for (const char opt: shortOpts)
+                std::vector<std::string> flagStrings;
+                flagStrings.reserve(shortFlags.size() + longFlags.size());
+                for (const char flag: shortFlags)
                 {
-                    optStrings.emplace_back(shortPrefix + std::string(1, opt) + shortSeparator + bracedname);
+                    flagStrings.emplace_back(shortPrefix + std::string(1, flag) + shortSeparator + bracedname);
                 }
-                for (const std::string &opt: longOpts)
+                for (const std::string &flag: longFlags)
                 {
-                    optStrings.emplace_back(longPrefix + opt + longSeparator + bracedname);
+                    flagStrings.emplace_back(longPrefix + flag + longSeparator + bracedname);
                 }
-                return optStrings;
+                return flagStrings;
             }
     };
 
@@ -377,7 +377,7 @@ namespace args
             }
     };
 
-    /** Base class for all flag arguments
+    /** Base class for all flag options
      */
     class FlagBase : public NamedBase
     {
@@ -389,9 +389,9 @@ namespace args
 
             virtual ~FlagBase() {}
 
-            virtual FlagBase *Match(const std::string &arg)
+            virtual FlagBase *Match(const std::string &flag)
             {
-                if (matcher.Match(arg))
+                if (matcher.Match(flag))
                 {
                     matched = true;
                     return this;
@@ -399,9 +399,9 @@ namespace args
                 return nullptr;
             }
 
-            virtual FlagBase *Match(const char arg)
+            virtual FlagBase *Match(const char flag)
             {
-                if (matcher.Match(arg))
+                if (matcher.Match(flag))
                 {
                     matched = true;
                     return this;
@@ -412,11 +412,11 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix));
+                const std::vector<std::string> flagStrings(matcher.GetFlagStrings(shortPrefix, longPrefix));
                 std::ostringstream flagstream;
-                for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
+                for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
-                    if (it != std::begin(optStrings))
+                    if (it != std::begin(flagStrings))
                     {
                         flagstream << ", ";
                     }
@@ -428,23 +428,23 @@ namespace args
             }
     };
 
-    /** Base class for argument-accepting flag arguments
+    /** Base class for value-accepting flag options
      */
-    class ArgFlagBase : public FlagBase
+    class ValueFlagBase : public FlagBase
     {
         public:
-            ArgFlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : FlagBase(name, help, std::move(matcher)) {}
-            virtual ~ArgFlagBase() {}
-            virtual void ParseArg(const std::string &value) = 0;
+            ValueFlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : FlagBase(name, help, std::move(matcher)) {}
+            virtual ~ValueFlagBase() {}
+            virtual void ParseValue(const std::string &value) = 0;
 
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::vector<std::string> optStrings(matcher.GetOptionStrings(shortPrefix, longPrefix, name, shortSeparator, longSeparator));
+                const std::vector<std::string> flagStrings(matcher.GetFlagStrings(shortPrefix, longPrefix, name, shortSeparator, longSeparator));
                 std::ostringstream flagstream;
-                for (auto it = std::begin(optStrings); it != std::end(optStrings); ++it)
+                for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
-                    if (it != std::begin(optStrings))
+                    if (it != std::begin(flagStrings))
                     {
                         flagstream << ", ";
                     }
@@ -456,7 +456,7 @@ namespace args
             }
     };
 
-    /** Base class for positional arguments
+    /** Base class for positional options
      */
     class PosBase : public NamedBase
     {
@@ -472,7 +472,7 @@ namespace args
                 return ready;
             }
 
-            virtual void ParseArg(const std::string &value) = 0;
+            virtual void ParseValue(const std::string &value) = 0;
     };
 
     /** Class for all kinds of validating groups, including ArgumentParser
@@ -491,27 +491,27 @@ namespace args
             }
             virtual ~Group() {}
 
-            /** Return the first FlagBase that matches arg, or nullptr
+            /** Return the first FlagBase that matches flag, or nullptr
              *
-             * \param arg The argument with prefixes stripped
+             * \param flag The flag with prefixes stripped
              * \return the first matching FlagBase pointer, or nullptr if there is no match
              */
-            FlagBase *Match(const std::string &arg)
+            FlagBase *Match(const std::string &flag)
             {
                 for (Base *child: children)
                 {
-                    FlagBase *flag = dynamic_cast<FlagBase *>(child);
+                    FlagBase *flagBase = dynamic_cast<FlagBase *>(child);
                     Group *group = dynamic_cast<Group *>(child);
-                    if (flag)
+                    if (flagBase)
                     {
-                        FlagBase *match = flag->Match(arg);
+                        FlagBase *match = flagBase->Match(flag);
                         if (match)
                         {
                             return match;
                         }
                     } else if (group)
                     {
-                        FlagBase *match = group->Match(arg);
+                        FlagBase *match = group->Match(flag);
                         if (match)
                         {
                             return match;
@@ -521,27 +521,27 @@ namespace args
                 return nullptr;
             }
 
-            /** Return the first FlagBase that matches arg, or nullptr
+            /** Return the first FlagBase that matches flag, or nullptr
              *
-             * \param arg The argument with prefixes stripped
+             * \param flag The flag with prefixes stripped
              * \return the first matching FlagBase pointer, or nullptr if there is no match
              */
-            FlagBase *Match(const char arg)
+            FlagBase *Match(const char flag)
             {
                 for (Base *child: children)
                 {
-                    FlagBase *flag = dynamic_cast<FlagBase *>(child);
+                    FlagBase *flagBase = dynamic_cast<FlagBase *>(child);
                     Group *group = dynamic_cast<Group *>(child);
-                    if (flag)
+                    if (flagBase)
                     {
-                        FlagBase *match = flag->Match(arg);
+                        FlagBase *match = flagBase->Match(flag);
                         if (match)
                         {
                             return match;
                         }
                     } else if (group)
                     {
-                        FlagBase *match = group->Match(arg);
+                        FlagBase *match = group->Match(flag);
                         if (match)
                         {
                             return match;
@@ -551,7 +551,7 @@ namespace args
                 return nullptr;
             }
 
-            /** Get the next ready positional parameter, or nullptr if there is none
+            /** Get the next ready positional, or nullptr if there is none
              *
              * \return the first ready PosBase pointer, or nullptr if there is no match
              */
@@ -776,10 +776,10 @@ namespace args
 
             std::string terminator;
 
-            bool allowJoinedShortArgument;
-            bool allowJoinedLongArgument;
-            bool allowSeparateShortArgument;
-            bool allowSeparateLongArgument;
+            bool allowJoinedShortValue;
+            bool allowJoinedLongValue;
+            bool allowSeparateShortValue;
+            bool allowSeparateLongValue;
 
         public:
             /** A simple structure of parameters for easy user-modifyable help menus
@@ -825,17 +825,17 @@ namespace args
                 bool showProglinePositionals = true;
             } helpParams;
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
-                Group("arguments", Group::Validators::AllChildGroups),
+                Group("options", Group::Validators::AllChildGroups),
                 description(description),
                 epilog(epilog),
                 longprefix("--"),
                 shortprefix("-"),
                 longseparator("="),
                 terminator("--"),
-                allowJoinedShortArgument(true),
-                allowJoinedLongArgument(true),
-                allowSeparateShortArgument(true),
-                allowSeparateLongArgument(true) {}
+                allowJoinedShortValue(true),
+                allowJoinedLongValue(true),
+                allowSeparateShortValue(true),
+                allowSeparateLongValue(true) {}
 
             /** The program name for help generation
              */
@@ -846,11 +846,11 @@ namespace args
             void Prog(const std::string &prog)
             { this->prog = prog; }
 
-            /** The description that appears on the prog line after options and positionals
+            /** The description that appears on the prog line after options
              */
             const std::string &ProglinePostfix() const
             { return proglinePostfix; }
-            /** The description that appears on the prog line after options and positionals
+            /** The description that appears on the prog line after options
              */
             void ProglinePostfix(const std::string &proglinePostfix)
             { this->proglinePostfix = proglinePostfix; }
@@ -873,29 +873,29 @@ namespace args
             void Epilog(const std::string &epilog)
             { this->epilog = epilog; }
 
-            /** The prefix for long options
+            /** The prefix for long flags
              */
             const std::string &LongPrefix() const
             { return longprefix; }
-            /** The prefix for long options
+            /** The prefix for long flags
              */
             void LongPrefix(const std::string &longprefix)
             { this->longprefix = longprefix; }
 
-            /** The prefix for short options
+            /** The prefix for short flags
              */
             const std::string &ShortPrefix() const
             { return shortprefix; }
-            /** The prefix for short options
+            /** The prefix for short flags
              */
             void ShortPrefix(const std::string &shortprefix)
             { this->shortprefix = shortprefix; }
 
-            /** The separator for long options
+            /** The separator for long flags
              */
             const std::string &LongSeparator() const
             { return longseparator; }
-            /** The separator for long options
+            /** The separator for long flags
              */
             void LongSeparator(const std::string &longseparator)
             {
@@ -906,11 +906,11 @@ namespace args
                 this->longseparator = longseparator;
             }
 
-            /** The terminator that separates short options from long ones
+            /** The terminator that forcibly separates flags from positionals
              */
             const std::string &Terminator() const
             { return terminator; }
-            /** The terminator that separates short options from long ones
+            /** The terminator that forcibly separates flags from positionals
              */
             void Terminator(const std::string &terminator)
             { this->terminator = terminator; }
@@ -920,34 +920,34 @@ namespace args
              * See SetArgumentSeparations for details on what each one means.
              */
             void GetArgumentSeparations(
-                bool &allowJoinedShortArgument,
-                bool &allowJoinedLongArgument,
-                bool &allowSeparateShortArgument,
-                bool &allowSeparateLongArgument) const
+                bool &allowJoinedShortValue,
+                bool &allowJoinedLongValue,
+                bool &allowSeparateShortValue,
+                bool &allowSeparateLongValue) const
             {
-                allowJoinedShortArgument = this->allowJoinedShortArgument;
-                allowJoinedLongArgument = this->allowJoinedLongArgument;
-                allowSeparateShortArgument = this->allowSeparateShortArgument;
-                allowSeparateLongArgument = this->allowSeparateLongArgument;
+                allowJoinedShortValue = this->allowJoinedShortValue;
+                allowJoinedLongValue = this->allowJoinedLongValue;
+                allowSeparateShortValue = this->allowSeparateShortValue;
+                allowSeparateLongValue = this->allowSeparateLongValue;
             }
 
             /** Change allowed option separation.
              *
-             * \param allowJoinedShortArgument Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field)
-             * \param allowJoinedLongArgument Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field)
-             * \param allowSeparateShortArgument Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
-             * \param allowSeparateLongArgument Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             * \param allowJoinedShortValue Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field)
+             * \param allowJoinedLongValue Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field)
+             * \param allowSeparateShortValue Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             * \param allowSeparateLongValue Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
              */
             void SetArgumentSeparations(
-                const bool allowJoinedShortArgument,
-                const bool allowJoinedLongArgument,
-                const bool allowSeparateShortArgument,
-                const bool allowSeparateLongArgument)
+                const bool allowJoinedShortValue,
+                const bool allowJoinedLongValue,
+                const bool allowSeparateShortValue,
+                const bool allowSeparateLongValue)
             {
-                this->allowJoinedShortArgument = allowJoinedShortArgument;
-                this->allowJoinedLongArgument = allowJoinedLongArgument;
-                this->allowSeparateShortArgument = allowSeparateShortArgument;
-                this->allowSeparateLongArgument = allowSeparateLongArgument;
+                this->allowJoinedShortValue = allowJoinedShortValue;
+                this->allowJoinedLongValue = allowJoinedLongValue;
+                this->allowSeparateShortValue = allowSeparateShortValue;
+                this->allowSeparateLongValue = allowSeparateLongValue;
             }
 
             /** Pass the help menu into an ostream
@@ -1001,7 +1001,7 @@ namespace args
                 }
                 help << "\n";
                 help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
-                for (const auto &description: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortArgument ? "" : " ", allowJoinedLongArgument ? longseparator : " "))
+                for (const auto &description: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " "))
                 {
                     const unsigned int groupindent = std::get<2>(description) * helpParams.eachgroupindent;
                     const std::vector<std::string> flags(Wrap(std::get<0>(description), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter)));
@@ -1093,14 +1093,14 @@ namespace args
                         FlagBase *base = Match(arg);
                         if (base)
                         {
-                            ArgFlagBase *argbase = dynamic_cast<ArgFlagBase *>(base);
+                            ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base);
                             if (argbase)
                             {
                                 if (separator != argchunk.npos)
                                 {
-                                    if (allowJoinedLongArgument)
+                                    if (allowJoinedLongValue)
                                     {
-                                        argbase->ParseArg(argchunk.substr(separator + longseparator.size()));
+                                        argbase->ParseValue(argchunk.substr(separator + longseparator.size()));
                                     } else
                                     {
                                         std::ostringstream problem;
@@ -1117,9 +1117,9 @@ namespace args
                                         throw ParseError(problem.str().c_str());
                                     }
 
-                                    if (allowSeparateLongArgument)
+                                    if (allowSeparateLongValue)
                                     {
-                                        argbase->ParseArg(*it);
+                                        argbase->ParseValue(*it);
                                     } else
                                     {
                                         std::ostringstream problem;
@@ -1150,15 +1150,15 @@ namespace args
                             Base *base = Match(arg);
                             if (base)
                             {
-                                ArgFlagBase *argbase = dynamic_cast<ArgFlagBase *>(base);
+                                ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base);
                                 if (argbase)
                                 {
                                     const std::string arg(++argit, std::end(argchunk));
                                     if (!arg.empty())
                                     {
-                                        if (allowJoinedShortArgument)
+                                        if (allowJoinedShortValue)
                                         {
-                                            argbase->ParseArg(arg);
+                                            argbase->ParseValue(arg);
                                         } else
                                         {
                                             std::ostringstream problem;
@@ -1175,9 +1175,9 @@ namespace args
                                             throw ParseError(problem.str().c_str());
                                         }
 
-                                        if (allowSeparateShortArgument)
+                                        if (allowSeparateShortValue)
                                         {
-                                            argbase->ParseArg(*it);
+                                            argbase->ParseValue(*it);
                                         } else
                                         {
                                             std::ostringstream problem;
@@ -1200,7 +1200,7 @@ namespace args
                         PosBase *pos = GetNextPos();
                         if (pos)
                         {
-                            pos->ParseArg(chunk);
+                            pos->ParseValue(chunk);
                         } else
                         {
                             std::ostringstream problem;
@@ -1307,15 +1307,15 @@ namespace args
 
     /** A flag class that simply counts the number of times it's matched
      */
-    class Counter : public Flag
+    class CounterFlag : public Flag
     {
         private:
             int count;
 
         public:
-            Counter(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const int startcount = 0): Flag(group, name, help, std::move(matcher)), count(startcount) {}
+            CounterFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const int startcount = 0): Flag(group, name, help, std::move(matcher)), count(startcount) {}
 
-            virtual ~Counter() {}
+            virtual ~CounterFlag() {}
 
             virtual FlagBase *Match(const std::string &arg) override
             {
@@ -1351,7 +1351,7 @@ namespace args
      * raises a ParseError if there are any characters left.
      */
     template <typename T>
-    void ArgReader(const std::string &name, const std::string &value, T &destination)
+    void ValueReader(const std::string &name, const std::string &value, T &destination)
     {
         std::istringstream ss(value);
         ss >> destination;
@@ -1364,13 +1364,13 @@ namespace args
         }
     }
 
-    /** std::string specialization for ArgReader
+    /** std::string specialization for ValueReader
      *
      * By default, stream extraction into a string splits on white spaces, and
      * it is more efficient to ust copy a string into the destination.
      */
     template <>
-    void ArgReader<std::string>(const std::string &name, const std::string &value, std::string &destination)
+    void ValueReader<std::string>(const std::string &name, const std::string &value, std::string &destination)
     {
         destination.assign(value);
     }
@@ -1380,22 +1380,22 @@ namespace args
      * \tparam T the type to extract the argument as
      * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
      */
-    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
-    class ArgFlag : public ArgFlagBase
+    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    class ValueFlag : public ValueFlagBase
     {
         private:
             T value;
 
         public:
 
-            ArgFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T()): ArgFlagBase(name, help, std::move(matcher)), value(defaultValue)
+            ValueFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T()): ValueFlagBase(name, help, std::move(matcher)), value(defaultValue)
             {
                 group.Add(*this);
             }
 
-            virtual ~ArgFlag() {}
+            virtual ~ValueFlag() {}
 
-            virtual void ParseArg(const std::string &value) override
+            virtual void ParseValue(const std::string &value) override
             {
                 Reader(name, value, this->value);
             }
@@ -1417,22 +1417,22 @@ namespace args
     template <
         typename T,
         typename List = std::vector<T>,
-        void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
-    class ArgFlagList : public ArgFlagBase
+        void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    class ValueFlagList : public ValueFlagBase
     {
         private:
             List values;
 
         public:
 
-            ArgFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ArgFlagBase(name, help, std::move(matcher)), values(defaultValues)
+            ValueFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ValueFlagBase(name, help, std::move(matcher)), values(defaultValues)
             {
                 group.Add(*this);
             }
 
-            virtual ~ArgFlagList() {}
+            virtual ~ValueFlagList() {}
 
-            virtual void ParseArg(const std::string &value) override
+            virtual void ParseValue(const std::string &value) override
             {
                 values.emplace_back();
                 Reader(name, value, values.back());
@@ -1451,20 +1451,20 @@ namespace args
      * \tparam T the type to extract the argument as
      * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
      */
-    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
-    class PosArg : public PosBase
+    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    class Positional : public PosBase
     {
         private:
             T value;
         public:
-            PosArg(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PosBase(name, help), value(defaultValue)
+            Positional(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PosBase(name, help), value(defaultValue)
             {
                 group.Add(*this);
             }
 
-            virtual ~PosArg() {}
+            virtual ~Positional() {}
 
-            virtual void ParseArg(const std::string &value) override
+            virtual void ParseValue(const std::string &value) override
             {
                 Reader(name, value, this->value);
                 ready = false;
@@ -1488,21 +1488,21 @@ namespace args
     template <
         typename T,
         typename List = std::vector<T>,
-        void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
-    class PosArgList : public PosBase
+        void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    class PositionalList : public PosBase
     {
         private:
             List values;
 
         public:
-            PosArgList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PosBase(name, help), values(defaultValues)
+            PositionalList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PosBase(name, help), values(defaultValues)
             {
                 group.Add(*this);
             }
 
-            virtual ~PosArgList() {}
+            virtual ~PositionalList() {}
 
-            virtual void ParseArg(const std::string &value) override
+            virtual void ParseValue(const std::string &value) override
             {
                 values.emplace_back();
                 Reader(name, value, values.back());

@@ -5,8 +5,9 @@
 A simple, small, flexible, single-header C++11 argument parsing library, in
 about 1K lines of code.
 
-This is designed to somewhat replicate the behavior of Python's argparse, but
-in C++, with static type checking, and hopefully a lot faster.
+This is designed to appear somewhat similar to Python's argparse, but in C++,
+with static type checking, and hopefully a lot faster (also allowing fully
+nestable group logic, where Python's argparse does not).
 
 UTF-8 support is limited at best.  No normalization is performed, so non-ascii
 characters are very best kept out of flags, and combined glyphs are probably
@@ -31,16 +32,16 @@ There are also somewhat extensive examples below.
 
 It:
 
-* lets you handle flags, flag+arguments, and positional arguments simply and
-    elegently, with the full help of static typechecking.
+* lets you handle flags, flag+value, and positional arguments simply and
+  elegently, with the full help of static typechecking.
 * allows you to use your own types in a pretty simple way.
 * lets you use count flags, and lists of all argument-accepting types.
 * Allows full validation of groups of required arguments, though output isn't
-    pretty when something fails group validation.  User validation functions are
-    accepted.  Groups are fully nestable.
+  pretty when something fails group validation.  User validation functions are
+  accepted.  Groups are fully nestable.
 * Generates pretty help for you, with some good tweakable parameters.
 * Lets you customize all prefixes and most separators, allowing you to create
-    an infinite number of different argument syntaxes
+  an infinite number of different argument syntaxes
 * Lets you parse, by default, any type that has a stream extractor operator for
   it.  If this doesn't work for your uses, you can supply a function and parse
   the string yourself if you like.
@@ -56,14 +57,13 @@ There are tons of things this library does not do!
 ## It will not ever:
 
 * Allow you to create subparsers like argparse in a master parser (you can do
-    this yourself with iterators and multiple parsers)
-* Allow one argument flag to take a specific number of arguments
-    (like `--foo first second`).  You can instead split that with a flag list
-    (`--foo first --foo second`) or a custom type extraction
-    (`--foo first,second`)
+  this yourself with iterators and multiple parsers)
+* Allow one argument flag to take a specific number of arguments (like `--foo
+  first second`).  You can instead split that with a flag list (`--foo first
+  --foo second`) or a custom type extraction (`--foo first,second`)
 * Allow you to intermix multiple different prefix types (eg. `++foo` and
-    `--foo` in the same parser), though shortopt and longopt prefixes can be
-    different.
+  `--foo` in the same parser), though shortopt and longopt prefixes can be
+  different.
 * Allow you to have argument flags only optionally accept arguments
 * Allow you to make flag arguments sensitive to order (like gnu find), or make
   them sensitive to relative ordering with positional flags.  The only
@@ -72,12 +72,12 @@ There are tons of things this library does not do!
     * List positional options or flag arguments to each of their own respective
       items
 * Allow you to use a positional argument list before any other positional
-    arguments (the last argument list will slurp all subsequent positional
-    arguments).  The logic for allowing this would be a lot more code than I'd
-    like, and would make static checking much more difficult, requiring us to
-    sort std::string arguments and pair them to positional arguments before
-    assigning them, rather than what we currently do, which is assiging them as
-    we go for better simplicity and speed.
+  arguments (the last argument list will slurp all subsequent positional
+  arguments).  The logic for allowing this would be a lot more code than I'd
+  like, and would make static checking much more difficult, requiring us to
+  sort std::string arguments and pair them to positional arguments before
+  assigning them, rather than what we currently do, which is assiging them as
+  we go for better simplicity and speed.
 
 # How do I install it?
 
@@ -174,9 +174,9 @@ int main()
         {
             std::vector<std::string> arguments(carguments);
             args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-            args::ArgFlag<int> integer(parser, "integer", "The integer flag", args::Matcher{'i', "int"});
-            args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher{'c', "char"});
-            args::PosArgList<double> numbers(parser, "numbers", "The numbers position list");
+            args::ValueFlag<int> integer(parser, "integer", "The integer flag", args::Matcher{'i', "int"});
+            args::ValueFlagList<char> characters(parser, "characters", "The character flag", args::Matcher{'c', "char"});
+            args::PositionalList<double> numbers(parser, "numbers", "The numbers position list");
             parser.ParseArgs(arguments);
             const int i = args::get(integer);
             const std::vector<char> c(args::get(characters));
@@ -409,10 +409,10 @@ int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher{'h', "help"});
-    args::ArgFlag<int> integer(parser, "integer", "The integer flag", args::Matcher({'i'}));
-    args::ArgFlagList<char> characters(parser, "characters", "The character flag", args::Matcher({'c'}));
-    args::PosArg<std::string> foo(parser, "foo", "The foo position");
-    args::PosArgList<double> numbers(parser, "numbers", "The numbers position list");
+    args::ValueFlag<int> integer(parser, "integer", "The integer flag", args::Matcher({'i'}));
+    args::ValueFlagList<char> characters(parser, "characters", "The character flag", args::Matcher({'c'}));
+    args::Positional<std::string> foo(parser, "foo", "The foo position");
+    args::PositionalList<double> numbers(parser, "numbers", "The numbers position list");
     try
     {
         parser.ParseCLI(argc, argv);
@@ -511,8 +511,8 @@ void DoublesReader(const std::string &name, const std::string &value, std::tuple
 int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.");
-    args::PosArg<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
-    args::PosArg<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
+    args::Positional<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
+    args::Positional<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
     try
     {
         parser.ParseCLI(argc, argv);
@@ -589,27 +589,27 @@ int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program with a really long description that is probably going to have to be wrapped across multiple different lines.  This is a test to see how the line wrapping works", "This goes after the options.  This epilog is also long enough that it will have to be properly wrapped to display correctly on the screen");
     args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher{'h', "help"});
-    args::ArgFlag<std::string> foo(parser, "FOO", "The foo flag.", args::Matcher{'a', 'b', 'c', "a", "b", "c", "the-foo-flag"});
-    args::ArgFlag<std::string> bar(parser, "BAR", "The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.", args::Matcher{'d', 'e', 'f', "d", "e", "f"});
-    args::ArgFlag<std::string> baz(parser, "FOO", "The baz flag.  This one has a lot of options, and will need wrapping in the description, even with its short flag list.", args::Matcher({"baz"}));
-    args::PosArg<std::string> pos1(parser, "POS1", "The pos1 argument.");
-    args::PosArgList<std::string> poslist1(parser, "POSLIST1", "The poslist1 argument.");
-    args::PosArg<std::string> pos2(parser, "POS2", "The pos2 argument.");
-    args::PosArgList<std::string> poslist2(parser, "POSLIST2", "The poslist2 argument.");
-    args::PosArg<std::string> pos3(parser, "POS3", "The pos3 argument.");
-    args::PosArgList<std::string> poslist3(parser, "POSLIST3", "The poslist3 argument.");
-    args::PosArg<std::string> pos4(parser, "POS4", "The pos4 argument.");
-    args::PosArgList<std::string> poslist4(parser, "POSLIST4", "The poslist4 argument.");
-    args::PosArg<std::string> pos5(parser, "POS5", "The pos5 argument.");
-    args::PosArgList<std::string> poslist5(parser, "POSLIST5", "The poslist5 argument.");
-    args::PosArg<std::string> pos6(parser, "POS6", "The pos6 argument.");
-    args::PosArgList<std::string> poslist6(parser, "POSLIST6", "The poslist6 argument.");
-    args::PosArg<std::string> pos7(parser, "POS7", "The pos7 argument.");
-    args::PosArgList<std::string> poslist7(parser, "POSLIST7", "The poslist7 argument.");
-    args::PosArg<std::string> pos8(parser, "POS8", "The pos8 argument.");
-    args::PosArgList<std::string> poslist8(parser, "POSLIST8", "The poslist8 argument.");
-    args::PosArg<std::string> pos9(parser, "POS9", "The pos9 argument.");
-    args::PosArgList<std::string> poslist9(parser, "POSLIST9", "The poslist9 argument.");
+    args::ValueFlag<std::string> foo(parser, "FOO", "The foo flag.", args::Matcher{'a', 'b', 'c', "a", "b", "c", "the-foo-flag"});
+    args::ValueFlag<std::string> bar(parser, "BAR", "The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.", args::Matcher{'d', 'e', 'f', "d", "e", "f"});
+    args::ValueFlag<std::string> baz(parser, "FOO", "The baz flag.  This one has a lot of options, and will need wrapping in the description, even with its short flag list.", args::Matcher({"baz"}));
+    args::Positional<std::string> pos1(parser, "POS1", "The pos1 argument.");
+    args::PositionalList<std::string> poslist1(parser, "POSLIST1", "The poslist1 argument.");
+    args::Positional<std::string> pos2(parser, "POS2", "The pos2 argument.");
+    args::PositionalList<std::string> poslist2(parser, "POSLIST2", "The poslist2 argument.");
+    args::Positional<std::string> pos3(parser, "POS3", "The pos3 argument.");
+    args::PositionalList<std::string> poslist3(parser, "POSLIST3", "The poslist3 argument.");
+    args::Positional<std::string> pos4(parser, "POS4", "The pos4 argument.");
+    args::PositionalList<std::string> poslist4(parser, "POSLIST4", "The poslist4 argument.");
+    args::Positional<std::string> pos5(parser, "POS5", "The pos5 argument.");
+    args::PositionalList<std::string> poslist5(parser, "POSLIST5", "The poslist5 argument.");
+    args::Positional<std::string> pos6(parser, "POS6", "The pos6 argument.");
+    args::PositionalList<std::string> poslist6(parser, "POSLIST6", "The poslist6 argument.");
+    args::Positional<std::string> pos7(parser, "POS7", "The pos7 argument.");
+    args::PositionalList<std::string> poslist7(parser, "POSLIST7", "The poslist7 argument.");
+    args::Positional<std::string> pos8(parser, "POS8", "The pos8 argument.");
+    args::PositionalList<std::string> poslist8(parser, "POSLIST8", "The poslist8 argument.");
+    args::Positional<std::string> pos9(parser, "POS9", "The pos9 argument.");
+    args::PositionalList<std::string> poslist9(parser, "POSLIST9", "The poslist9 argument.");
     try
     {
         parser.ParseCLI(argc, argv);
@@ -697,10 +697,10 @@ int main(int argc, char **argv)
     parser.LongPrefix("");
     parser.LongSeparator("=");
     args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
-    args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
-    args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
-    args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
-    args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+    args::ValueFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
+    args::ValueFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
+    args::ValueFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
+    args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
     try
     {
         parser.ParseCLI(argc, argv);
