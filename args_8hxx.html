@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">1.2.3</span>
+   &#160;<span id="projectnumber">3.0.1</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -40,6 +40,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -83,13 +85,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
+<a href="#namespaces">Namespaces</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">args.hxx File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>This is the magic header that handles everything.  
+<p>this single-header lets you use all of the args functionality  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;exception&gt;</code><br />
@@ -99,6 +102,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <code>#include &lt;tuple&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;unordered_set&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
 </div>
 <p><a href="args_8hxx_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -112,6 +116,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Help.html">args::Help</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An exception that indicates that the user has requested help.  <a href="classargs_1_1Help.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structargs_1_1EitherOpt.html">args::EitherOpt</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A simple unified option type for unified initializer lists for the <a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">Matcher</a> class.  <a href="structargs_1_1EitherOpt.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html">args::Matcher</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A class of "matchers", specifying short and long options that can possibly be matched.  <a href="classargs_1_1Matcher.html#details">More...</a><br /></td></tr>
@@ -141,6 +148,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The main user facing command line argument parser class.  <a href="classargs_1_1ArgumentParser.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structargs_1_1ArgumentParser_1_1HelpParams.html">args::ArgumentParser::HelpParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A simple structure of parameters for easy user-modifyable help menus.  <a href="structargs_1_1ArgumentParser_1_1HelpParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Flag.html">args::Flag</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boolean argument matcher.  <a href="classargs_1_1Flag.html#details">More...</a><br /></td></tr>
@@ -164,32 +172,40 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A positional argument class that pushes the found values into a list.  <a href="classargs_1_1PosArgList.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespaceargs"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceargs.html">args</a></td></tr>
+<tr class="memdesc:namespaceargs"><td class="mdescLeft">&#160;</td><td class="mdescRight">contains all the functionality of the args library <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a7c4e2dbb1616764df0030e03e3b964a8"><td class="memItemLeft" align="right" valign="top">std::string::size_type&#160;</td><td class="memItemRight" valign="bottom"><b>args::Glyphs</b> (const std::string &amp;string)</td></tr>
+<tr class="memitem:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="memTemplParams" colspan="2"><a class="anchor" id="a6c525a2d31e8c7bef7f7798a8188bca7"></a>
+template&lt;typename Arg &gt; </td></tr>
+<tr class="memitem:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a> (Arg &amp;arg) -&gt; decltype(arg.Get())        </td></tr>
+<tr class="memdesc:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Getter to grab the value reference. <br /></td></tr>
+<tr class="separator:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c4e2dbb1616764df0030e03e3b964a8"><td class="memItemLeft" align="right" valign="top">std::string::size_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8">args::Glyphs</a> (const std::string &amp;string)</td></tr>
 <tr class="memdesc:a7c4e2dbb1616764df0030e03e3b964a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Count UTF-8 glyphs  <a href="namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8">More...</a><br /></td></tr>
 <tr class="separator:a7c4e2dbb1616764df0030e03e3b964a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea5e48b66d8f87aaa5aafd1243f616f4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>args::Wrap</b> (const std::string &amp;in, const std::string::size_type width, std::string::size_type firstlinewidth=0)</td></tr>
+<tr class="memitem:aea5e48b66d8f87aaa5aafd1243f616f4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceargs.html#aea5e48b66d8f87aaa5aafd1243f616f4">args::Wrap</a> (const std::string &amp;in, const std::string::size_type width, std::string::size_type firstlinewidth=0)</td></tr>
 <tr class="memdesc:aea5e48b66d8f87aaa5aafd1243f616f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Wrap a string into a vector of lines  <a href="namespaceargs.html#aea5e48b66d8f87aaa5aafd1243f616f4">More...</a><br /></td></tr>
 <tr class="separator:aea5e48b66d8f87aaa5aafd1243f616f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91a59f8a3b8ddabfe34994d37b12490f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a91a59f8a3b8ddabfe34994d37b12490f"></a>
-std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>args::operator&lt;&lt;</b> (std::ostream &amp;os, ArgumentParser &amp;parser)</td></tr>
-<tr class="separator:a91a59f8a3b8ddabfe34994d37b12490f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"></a>
+std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>args::operator&lt;&lt;</b> (std::ostream &amp;os, const ArgumentParser &amp;parser)</td></tr>
+<tr class="separator:aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acad436261159fda7b4af6bdb493fdd11"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:acad436261159fda7b4af6bdb493fdd11"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>args::ArgReader</b> (const std::string &amp;name, const std::string &amp;value, T &amp;destination)</td></tr>
+<tr class="memitem:acad436261159fda7b4af6bdb493fdd11"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#acad436261159fda7b4af6bdb493fdd11">args::ArgReader</a> (const std::string &amp;name, const std::string &amp;value, T &amp;destination)</td></tr>
 <tr class="memdesc:acad436261159fda7b4af6bdb493fdd11"><td class="mdescLeft">&#160;</td><td class="mdescRight">A default Reader function for argument classes.  <a href="namespaceargs.html#acad436261159fda7b4af6bdb493fdd11">More...</a><br /></td></tr>
 <tr class="separator:acad436261159fda7b4af6bdb493fdd11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa6303f275d1bafe6dcac82d3d945223c"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
-<tr class="memitem:aa6303f275d1bafe6dcac82d3d945223c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>args::ArgReader&lt; std::string &gt;</b> (const std::string &amp;name, const std::string &amp;value, std::string &amp;destination)</td></tr>
+<tr class="memitem:aa6303f275d1bafe6dcac82d3d945223c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#aa6303f275d1bafe6dcac82d3d945223c">args::ArgReader&lt; std::string &gt;</a> (const std::string &amp;name, const std::string &amp;value, std::string &amp;destination)</td></tr>
 <tr class="memdesc:aa6303f275d1bafe6dcac82d3d945223c"><td class="mdescLeft">&#160;</td><td class="mdescRight">std::string specialization for ArgReader  <a href="namespaceargs.html#aa6303f275d1bafe6dcac82d3d945223c">More...</a><br /></td></tr>
 <tr class="separator:aa6303f275d1bafe6dcac82d3d945223c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This is the magic header that handles everything. </p>
-<p>This contains everything necessary to use args. </p><dl class="section author"><dt>Author</dt><dd>Taylor C. Richberger <a href="#" onclick="location.href='mai'+'lto:'+'tay'+'we'+'e@g'+'mx'+'.co'+'m'; return false;">taywe<span style="display: none;">.nosp@m.</span>e@gm<span style="display: none;">.nosp@m.</span>x.com</a> </dd></dl>
-<dl class="section version"><dt>Version</dt><dd>1.2.4 </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>2016 </dd></dl>
-<dl class="section copyright"><dt>Copyright</dt><dd>Copyright 2016 Taylor C. Richberger <a href="#" onclick="location.href='mai'+'lto:'+'tay'+'we'+'e@g'+'mx'+'.co'+'m'; return false;">taywe<span style="display: none;">.nosp@m.</span>e@gm<span style="display: none;">.nosp@m.</span>x.com</a>, MIT licensed </dd></dl>
+<div class="textblock"><p>this single-header lets you use all of the args functionality </p>
+<p>The important stuff is done inside the args namespace </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

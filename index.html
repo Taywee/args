@@ -41,6 +41,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -85,7 +86,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>A simple, small, flexible, single-header C++11 argument parsing library, in about 1K lines of code.</p>
 <p>This is designed to somewhat replicate the behavior of Python's argparse, but in C++, with static type checking, and hopefully a lot faster.</p>
 <p>UTF-8 support is limited at best. No normalization is performed, so non-ascii characters are very best kept out of flags, and combined glyphs are probably going to mess up help output if you use it. Most UTF-8 necessary for internationalization should work for most cases, though heavily combinatory UTF alphabets may wreak havoc.</p>
-<p>This program is MIT-licensed, so you can use the header as-is with no restrictions. I'd appreciate attribution in a README, Man page, or something if you are feeling generous, but all that's required is that you don't remove the license and my name from the header of the <a class="el" href="args_8hxx_source.html">args.hxx</a> file in source redistributions (ie. don't pretend that you wrote it). I do welcome additions and updates wherever you feel like contributing code.</p>
+<p>This program is MIT-licensed, so you can use the header as-is with no restrictions. I'd appreciate attribution in a README, Man page, or something if you are feeling generous, but all that's required is that you don't remove the license and my name from the header of the <a class="el" href="args_8hxx.html" title="this single-header lets you use all of the args functionality ">args.hxx</a> file in source redistributions (ie. don't pretend that you wrote it). I do welcome additions and updates wherever you feel like contributing code.</p>
 <p>The API documentation can be found at <a href="https://taywee.github.io/args">https://taywee.github.io/args</a></p>
 <p>The code can be downloaded at <a href="https://github.com/Taywee/args">https://github.com/Taywee/args</a></p>
 <p>There are also somewhat extensive examples below.</p>
@@ -142,7 +143,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;chrono&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;cassert&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &quot;args.hxx&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="args_8hxx.html">args.hxx</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;tclap/CmdLine.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;boost/program_options.hpp&gt;</span></div>
 <div class="line"><span class="keyword">namespace </span>po = boost::program_options;</div>
@@ -168,9 +169,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">            <a class="code" href="classargs_1_1ArgFlagList.html">args::ArgFlagList&lt;char&gt;</a> characters(parser, <span class="stringliteral">&quot;characters&quot;</span>, <span class="stringliteral">&quot;The character flag&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="charliteral">&#39;c&#39;</span>, <span class="stringliteral">&quot;char&quot;</span>});</div>
 <div class="line">            <a class="code" href="classargs_1_1PosArgList.html">args::PosArgList&lt;double&gt;</a> numbers(parser, <span class="stringliteral">&quot;numbers&quot;</span>, <span class="stringliteral">&quot;The numbers position list&quot;</span>);</div>
 <div class="line">            parser.ParseArgs(arguments);</div>
-<div class="line">            <span class="keyword">const</span> <span class="keywordtype">int</span> i = args::get(integer);</div>
-<div class="line">            <span class="keyword">const</span> std::vector&lt;char&gt; c(args::get(characters));</div>
-<div class="line">            <span class="keyword">const</span> std::vector&lt;double&gt; n(args::get(numbers));</div>
+<div class="line">            <span class="keyword">const</span> <span class="keywordtype">int</span> i = <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(integer);</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;char&gt; c(<a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(characters));</div>
+<div class="line">            <span class="keyword">const</span> std::vector&lt;double&gt; n(<a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(numbers));</div>
 <div class="line">            assert(i == 7);</div>
 <div class="line">            assert(c[0] == <span class="charliteral">&#39;a&#39;</span>);</div>
 <div class="line">            assert(c[1] == <span class="charliteral">&#39;b&#39;</span>);</div>
@@ -257,7 +258,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>All the code examples here will be complete code examples, with some output.</p>
 <h2>Simple example:</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
@@ -293,7 +294,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;% </div>
 </div><!-- fragment --><h2>Boolean flags, special group types, different matcher construction:</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
@@ -364,7 +365,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; % </div>
 </div><!-- fragment --><h2>Argument flags, Positional arguments, lists</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
@@ -394,10 +395,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
-<div class="line">    <span class="keywordflow">if</span> (integer) { std::cout &lt;&lt; <span class="stringliteral">&quot;i: &quot;</span> &lt;&lt; args::get(integer) &lt;&lt; std::endl; }</div>
-<div class="line">    <span class="keywordflow">if</span> (characters) { <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> ch: args::get(characters)) { std::cout &lt;&lt; <span class="stringliteral">&quot;c: &quot;</span> &lt;&lt; ch &lt;&lt; std::endl; } }</div>
-<div class="line">    <span class="keywordflow">if</span> (foo) { std::cout &lt;&lt; <span class="stringliteral">&quot;f: &quot;</span> &lt;&lt; args::get(foo) &lt;&lt; std::endl; }</div>
-<div class="line">    <span class="keywordflow">if</span> (numbers) { <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> nm: args::get(numbers)) { std::cout &lt;&lt; <span class="stringliteral">&quot;n: &quot;</span> &lt;&lt; nm &lt;&lt; std::endl; } }</div>
+<div class="line">    <span class="keywordflow">if</span> (integer) { std::cout &lt;&lt; <span class="stringliteral">&quot;i: &quot;</span> &lt;&lt; <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(integer) &lt;&lt; std::endl; }</div>
+<div class="line">    <span class="keywordflow">if</span> (characters) { <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> ch: <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(characters)) { std::cout &lt;&lt; <span class="stringliteral">&quot;c: &quot;</span> &lt;&lt; ch &lt;&lt; std::endl; } }</div>
+<div class="line">    <span class="keywordflow">if</span> (foo) { std::cout &lt;&lt; <span class="stringliteral">&quot;f: &quot;</span> &lt;&lt; <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(foo) &lt;&lt; std::endl; }</div>
+<div class="line">    <span class="keywordflow">if</span> (numbers) { <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> nm: <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(numbers)) { std::cout &lt;&lt; <span class="stringliteral">&quot;n: &quot;</span> &lt;&lt; nm &lt;&lt; std::endl; } }</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;% ./test -h</div>
@@ -445,7 +446,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --><h1>Custom type parsers (here we use std::tuple)</h1>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;tuple&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line">std::istream&amp; operator&gt;&gt;(std::istream&amp; is, std::tuple&lt;int, int&gt;&amp; ints)</div>
 <div class="line">{</div>
 <div class="line">    is &gt;&gt; std::get&lt;0&gt;(ints);</div>
@@ -483,11 +484,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">if</span> (ints)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;ints found: &quot;</span> &lt;&lt; std::get&lt;0&gt;(args::get(ints)) &lt;&lt; <span class="stringliteral">&quot; and &quot;</span> &lt;&lt; std::get&lt;1&gt;(args::get(ints)) &lt;&lt; std::endl;</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;ints found: &quot;</span> &lt;&lt; std::get&lt;0&gt;(<a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(ints)) &lt;&lt; <span class="stringliteral">&quot; and &quot;</span> &lt;&lt; std::get&lt;1&gt;(<a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(ints)) &lt;&lt; std::endl;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">if</span> (doubles)</div>
 <div class="line">    {</div>
-<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;doubles found: &quot;</span> &lt;&lt; std::get&lt;0&gt;(args::get(doubles)) &lt;&lt; <span class="stringliteral">&quot; and &quot;</span> &lt;&lt; std::get&lt;1&gt;(args::get(doubles)) &lt;&lt; std::endl;</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;doubles found: &quot;</span> &lt;&lt; std::get&lt;0&gt;(<a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(doubles)) &lt;&lt; <span class="stringliteral">&quot; and &quot;</span> &lt;&lt; std::get&lt;1&gt;(<a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(doubles)) &lt;&lt; std::endl;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
@@ -526,7 +527,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --><p>As you can see, with your own types, validation can get a little weird. Make sure to check and throw a parsing error (or whatever error you want to catch) if you can't fully deduce your type. The built-in validator will only throw if there are unextracted characters left in the stream.</p>
 <h2>Long descriptions and proper wrapping and listing</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program with a really long description that is probably going to have to be wrapped across multiple different lines.  This is a test to see how the line wrapping works&quot;</span>, <span class="stringliteral">&quot;This goes after the options.  This epilog is also long enough that it will have to be properly wrapped to display correctly on the screen&quot;</span>);</div>
@@ -624,7 +625,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --><h2>Customizing parser prefixes</h2>
 <h3>dd-style</h3>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This command likes to break your disks&quot;</span>);</div>
@@ -656,10 +657,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">        std::cerr &lt;&lt; parser;</div>
 <div class="line">        <span class="keywordflow">return</span> 1;</div>
 <div class="line">    }</div>
-<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;bs = &quot;</span> &lt;&lt; args::get(bs) &lt;&lt; std::endl;</div>
-<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;skip = &quot;</span> &lt;&lt; args::get(skip) &lt;&lt; std::endl;</div>
-<div class="line">    <span class="keywordflow">if</span> (input) { std::cout &lt;&lt; <span class="stringliteral">&quot;if = &quot;</span> &lt;&lt; args::get(input) &lt;&lt; std::endl; }</div>
-<div class="line">    <span class="keywordflow">if</span> (output) { std::cout &lt;&lt; <span class="stringliteral">&quot;of = &quot;</span> &lt;&lt; args::get(output) &lt;&lt; std::endl; }</div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;bs = &quot;</span> &lt;&lt; <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(bs) &lt;&lt; std::endl;</div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;skip = &quot;</span> &lt;&lt; <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(skip) &lt;&lt; std::endl;</div>
+<div class="line">    <span class="keywordflow">if</span> (input) { std::cout &lt;&lt; <span class="stringliteral">&quot;if = &quot;</span> &lt;&lt; <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(input) &lt;&lt; std::endl; }</div>
+<div class="line">    <span class="keywordflow">if</span> (output) { std::cout &lt;&lt; <span class="stringliteral">&quot;of = &quot;</span> &lt;&lt; <a class="code" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">args::get</a>(output) &lt;&lt; std::endl; }</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160; % ./test help</div>
@@ -703,7 +704,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; % </div>
 </div><!-- fragment --><h2>Group nesting help menu text</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;args.hxx&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
