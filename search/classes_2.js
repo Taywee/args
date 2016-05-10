@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['counter',['Counter',['../classargs_1_1Counter.html',1,'args']]]
+  ['counterflag',['CounterFlag',['../classargs_1_1CounterFlag.html',1,'args']]]
 ];

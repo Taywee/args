@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">3.0.4</span>
+   &#160;<span id="projectnumber">4.0.1</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -99,7 +99,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="classargs_1_1Base.html" title="Base class for all match types. ">Base</a> class for all flag arguments.  
+<p><a class="el" href="classargs_1_1Base.html" title="Base class for all match types. ">Base</a> class for all flag options.  
  <a href="classargs_1_1FlagBase.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="args_8hxx_source.html">args.hxx</a>&gt;</code></p>
@@ -109,14 +109,14 @@ Inheritance diagram for args::FlagBase:</div>
  <div class="center">
   <img src="classargs_1_1FlagBase.png" usemap="#args::FlagBase_map" alt=""/>
   <map id="args::FlagBase_map" name="args::FlagBase_map">
-<area href="classargs_1_1NamedBase.html" title="Base class for all match types that have a name. " alt="args::NamedBase" shape="rect" coords="340,56,557,80"/>
-<area href="classargs_1_1Base.html" title="Base class for all match types. " alt="args::Base" shape="rect" coords="340,0,557,24"/>
-<area href="classargs_1_1ArgFlagBase.html" title="Base class for argument-accepting flag arguments. " alt="args::ArgFlagBase" shape="rect" coords="113,168,330,192"/>
-<area href="classargs_1_1Flag.html" title="Boolean argument matcher. " alt="args::Flag" shape="rect" coords="567,168,784,192"/>
-<area href="classargs_1_1ArgFlag.html" title="An argument-accepting flag class. " alt="args::ArgFlag&lt; T, Reader &gt;" shape="rect" coords="0,224,217,248"/>
-<area href="classargs_1_1ArgFlagList.html" title="An argument-accepting flag class that pushes the found values into a list. " alt="args::ArgFlagList&lt; T, List, Reader &gt;" shape="rect" coords="227,224,444,248"/>
-<area href="classargs_1_1Counter.html" title="A flag class that simply counts the number of times it&#39;s matched. " alt="args::Counter" shape="rect" coords="454,224,671,248"/>
-<area href="classargs_1_1HelpFlag.html" title="Help flag class. " alt="args::HelpFlag" shape="rect" coords="681,224,898,248"/>
+<area href="classargs_1_1NamedBase.html" title="Base class for all match types that have a name. " alt="args::NamedBase" shape="rect" coords="358,56,587,80"/>
+<area href="classargs_1_1Base.html" title="Base class for all match types. " alt="args::Base" shape="rect" coords="358,0,587,24"/>
+<area href="classargs_1_1Flag.html" title="Boolean argument matcher. " alt="args::Flag" shape="rect" coords="119,168,348,192"/>
+<area href="classargs_1_1ValueFlagBase.html" title="Base class for value-accepting flag options. " alt="args::ValueFlagBase" shape="rect" coords="597,168,826,192"/>
+<area href="classargs_1_1CounterFlag.html" title="A flag class that simply counts the number of times it&#39;s matched. " alt="args::CounterFlag" shape="rect" coords="0,224,229,248"/>
+<area href="classargs_1_1HelpFlag.html" title="Help flag class. " alt="args::HelpFlag" shape="rect" coords="239,224,468,248"/>
+<area href="classargs_1_1ValueFlag.html" title="An argument-accepting flag class. " alt="args::ValueFlag&lt; T, Reader &gt;" shape="rect" coords="478,224,707,248"/>
+<area href="classargs_1_1ValueFlagList.html" title="An argument-accepting flag class that pushes the found values into a list. " alt="args::ValueFlagList&lt; T, List, Reader &gt;" shape="rect" coords="717,224,946,248"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -125,12 +125,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a691cfbfa7445f997a9581a7f7d32505a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a691cfbfa7445f997a9581a7f7d32505a"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>FlagBase</b> (const std::string &amp;name, const std::string &amp;help, <a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher)</td></tr>
 <tr class="separator:a691cfbfa7445f997a9581a7f7d32505a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8633bb4e1cba32cdab8b043bd75b1781"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8633bb4e1cba32cdab8b043bd75b1781"></a>
-virtual <a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>Match</b> (const std::string &amp;arg)</td></tr>
-<tr class="separator:a8633bb4e1cba32cdab8b043bd75b1781"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5a1333b6676fa10fcfcd0fa07e525fe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac5a1333b6676fa10fcfcd0fa07e525fe"></a>
-virtual <a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>Match</b> (const char arg)</td></tr>
-<tr class="separator:ac5a1333b6676fa10fcfcd0fa07e525fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd21da88c8006557588f6f16ef486066"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd21da88c8006557588f6f16ef486066"></a>
+virtual <a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>Match</b> (const std::string &amp;flag)</td></tr>
+<tr class="separator:acd21da88c8006557588f6f16ef486066"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c667a6dcd2d77282fc6d2d2a0537080"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3c667a6dcd2d77282fc6d2d2a0537080"></a>
+virtual <a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>Match</b> (const char flag)</td></tr>
+<tr class="separator:a3c667a6dcd2d77282fc6d2d2a0537080"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa803a73b44deb5ce9b7db68abf181605"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa803a73b44deb5ce9b7db68abf181605"></a>
 virtual std::tuple&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>GetDescription</b> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator) const  override</td></tr>
 <tr class="separator:aa803a73b44deb5ce9b7db68abf181605"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -173,7 +173,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 <tr class="separator:a9cdbbcdfa8e764c25f94dfe2c99c3b24 inherit pro_attribs_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classargs_1_1Base.html" title="Base class for all match types. ">Base</a> class for all flag arguments. </p>
+<div class="textblock"><p><a class="el" href="classargs_1_1Base.html" title="Base class for all match types. ">Base</a> class for all flag options. </p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="args_8hxx_source.html">args.hxx</a></li>
 </ul>

@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">3.0.4</span>
+   &#160;<span id="projectnumber">4.0.1</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -98,49 +98,49 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p>A class of "matchers", specifying short and long options that can possibly be matched.  
+<p>A class of "matchers", specifying short and flags that can possibly be matched.  
  <a href="classargs_1_1Matcher.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="args_8hxx_source.html">args.hxx</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="memTemplParams" colspan="2">template&lt;typename ShortIt , typename LongIt &gt; </td></tr>
-<tr class="memitem:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#ae987e1bb6aeae36ed66da02c5c2846ac">Matcher</a> (ShortIt shortOptsStart, ShortIt shortOptsEnd, LongIt longOptsStart, LongIt longOptsEnd)</td></tr>
-<tr class="memdesc:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short and long opts separately as iterators.  <a href="#ae987e1bb6aeae36ed66da02c5c2846ac">More...</a><br /></td></tr>
-<tr class="separator:ae987e1bb6aeae36ed66da02c5c2846ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87fc200d9a51b3be654e0ec551304ec5"><td class="memTemplParams" colspan="2">template&lt;typename ShortIt , typename LongIt &gt; </td></tr>
+<tr class="memitem:a87fc200d9a51b3be654e0ec551304ec5"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a87fc200d9a51b3be654e0ec551304ec5">Matcher</a> (ShortIt shortFlagsStart, ShortIt shortFlagsEnd, LongIt longFlagsStart, LongIt longFlagsEnd)</td></tr>
+<tr class="memdesc:a87fc200d9a51b3be654e0ec551304ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short and long flags separately as iterators.  <a href="#a87fc200d9a51b3be654e0ec551304ec5">More...</a><br /></td></tr>
+<tr class="separator:a87fc200d9a51b3be654e0ec551304ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62cfbb3db70f623153f8317abb5421dc"><td class="memTemplParams" colspan="2">template&lt;typename Short , typename Long &gt; </td></tr>
 <tr class="memitem:a62cfbb3db70f623153f8317abb5421dc"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a62cfbb3db70f623153f8317abb5421dc">Matcher</a> (Short &amp;&amp;shortIn, Long &amp;&amp;longIn)</td></tr>
-<tr class="memdesc:a62cfbb3db70f623153f8317abb5421dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short and long opts separately as iterables.  <a href="#a62cfbb3db70f623153f8317abb5421dc">More...</a><br /></td></tr>
+<tr class="memdesc:a62cfbb3db70f623153f8317abb5421dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify short and long flags separately as iterables.  <a href="#a62cfbb3db70f623153f8317abb5421dc">More...</a><br /></td></tr>
 <tr class="separator:a62cfbb3db70f623153f8317abb5421dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71749800086bc38d725047a653607ae6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a71749800086bc38d725047a653607ae6">Matcher</a> (std::initializer_list&lt; <a class="el" href="structargs_1_1EitherOpt.html">EitherOpt</a> &gt; in)</td></tr>
-<tr class="memdesc:a71749800086bc38d725047a653607ae6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify a mixed single initializer-list of both short and long opts.  <a href="#a71749800086bc38d725047a653607ae6">More...</a><br /></td></tr>
-<tr class="separator:a71749800086bc38d725047a653607ae6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad70f96e5475d9020773b429e9f79cb2d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#ad70f96e5475d9020773b429e9f79cb2d">Matcher</a> (std::initializer_list&lt; <a class="el" href="structargs_1_1EitherFlag.html">EitherFlag</a> &gt; in)</td></tr>
+<tr class="memdesc:ad70f96e5475d9020773b429e9f79cb2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specify a mixed single initializer-list of both short and long flags.  <a href="#ad70f96e5475d9020773b429e9f79cb2d">More...</a><br /></td></tr>
+<tr class="separator:ad70f96e5475d9020773b429e9f79cb2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29ef34a8f70f00dfb52c9d5d15886625"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a29ef34a8f70f00dfb52c9d5d15886625"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Matcher</b> (<a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;other)</td></tr>
 <tr class="separator:a29ef34a8f70f00dfb52c9d5d15886625"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0795d7ad361fc3f50974390a76ae7db1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0795d7ad361fc3f50974390a76ae7db1"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a0795d7ad361fc3f50974390a76ae7db1">Match</a> (const char opt) const </td></tr>
-<tr class="memdesc:a0795d7ad361fc3f50974390a76ae7db1"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Check if there is a match of a short opt <br /></td></tr>
-<tr class="separator:a0795d7ad361fc3f50974390a76ae7db1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5add523db9b61489783443f677dc1d4e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5add523db9b61489783443f677dc1d4e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a5add523db9b61489783443f677dc1d4e">Match</a> (const std::string &amp;opt) const </td></tr>
-<tr class="memdesc:a5add523db9b61489783443f677dc1d4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Check if there is a match of a long opt <br /></td></tr>
-<tr class="separator:a5add523db9b61489783443f677dc1d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa568c30ccb60200be5f0a0549b222ecc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa568c30ccb60200be5f0a0549b222ecc"></a>
-std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#aa568c30ccb60200be5f0a0549b222ecc">GetOptionStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const </td></tr>
-<tr class="memdesc:aa568c30ccb60200be5f0a0549b222ecc"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all option strings as a vector, with the prefixes embedded <br /></td></tr>
-<tr class="separator:aa568c30ccb60200be5f0a0549b222ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ffb66597877d323f8245439e005c1c6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6ffb66597877d323f8245439e005c1c6"></a>
-std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a6ffb66597877d323f8245439e005c1c6">GetOptionStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;name, const std::string &amp;shortSeparator, const std::string longSeparator) const </td></tr>
-<tr class="memdesc:a6ffb66597877d323f8245439e005c1c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all option strings as a vector, with the prefixes and names embedded <br /></td></tr>
-<tr class="separator:a6ffb66597877d323f8245439e005c1c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7768277ed9ab02ba5afaa74ad6db0c5a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7768277ed9ab02ba5afaa74ad6db0c5a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a7768277ed9ab02ba5afaa74ad6db0c5a">Match</a> (const char flag) const </td></tr>
+<tr class="memdesc:a7768277ed9ab02ba5afaa74ad6db0c5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Check if there is a match of a short flag <br /></td></tr>
+<tr class="separator:a7768277ed9ab02ba5afaa74ad6db0c5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f82c4cd0ec6dc72ccdb84358baa7f56"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1f82c4cd0ec6dc72ccdb84358baa7f56"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a1f82c4cd0ec6dc72ccdb84358baa7f56">Match</a> (const std::string &amp;flag) const </td></tr>
+<tr class="memdesc:a1f82c4cd0ec6dc72ccdb84358baa7f56"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Check if there is a match of a long flag <br /></td></tr>
+<tr class="separator:a1f82c4cd0ec6dc72ccdb84358baa7f56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3253a6757de0ff2d313cecdb8a3df44d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3253a6757de0ff2d313cecdb8a3df44d"></a>
+std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a3253a6757de0ff2d313cecdb8a3df44d">GetFlagStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const </td></tr>
+<tr class="memdesc:a3253a6757de0ff2d313cecdb8a3df44d"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all flag strings as a vector, with the prefixes embedded <br /></td></tr>
+<tr class="separator:a3253a6757de0ff2d313cecdb8a3df44d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d2920c7c82ac9306e70b5be8ffee933"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9d2920c7c82ac9306e70b5be8ffee933"></a>
+std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Matcher.html#a9d2920c7c82ac9306e70b5be8ffee933">GetFlagStrings</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;name, const std::string &amp;shortSeparator, const std::string longSeparator) const </td></tr>
+<tr class="memdesc:a9d2920c7c82ac9306e70b5be8ffee933"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Get all flag strings as a vector, with the prefixes and names embedded <br /></td></tr>
+<tr class="separator:a9d2920c7c82ac9306e70b5be8ffee933"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A class of "matchers", specifying short and long options that can possibly be matched. </p>
+<div class="textblock"><p>A class of "matchers", specifying short and flags that can possibly be matched. </p>
 <p>This is supposed to be constructed and then passed in, not used directly from user code. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ae987e1bb6aeae36ed66da02c5c2846ac"></a>
+<a class="anchor" id="a87fc200d9a51b3be654e0ec551304ec5"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -153,25 +153,25 @@ template&lt;typename ShortIt , typename LongIt &gt; </div>
           <td class="memname">args::Matcher::Matcher </td>
           <td>(</td>
           <td class="paramtype">ShortIt&#160;</td>
-          <td class="paramname"><em>shortOptsStart</em>, </td>
+          <td class="paramname"><em>shortFlagsStart</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">ShortIt&#160;</td>
-          <td class="paramname"><em>shortOptsEnd</em>, </td>
+          <td class="paramname"><em>shortFlagsEnd</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">LongIt&#160;</td>
-          <td class="paramname"><em>longOptsStart</em>, </td>
+          <td class="paramname"><em>longFlagsStart</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">LongIt&#160;</td>
-          <td class="paramname"><em>longOptsEnd</em>&#160;</td>
+          <td class="paramname"><em>longFlagsEnd</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -186,8 +186,8 @@ template&lt;typename ShortIt , typename LongIt &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Specify short and long opts separately as iterators. </p>
-<p>ex: <code><a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">args::Matcher</a>(shortOpts.begin(), shortOpts.end(), longOpts.begin(), longOpts.end())</code> </p>
+<p>Specify short and long flags separately as iterators. </p>
+<p>ex: <code><a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and flags that can possibly be matched. ">args::Matcher</a>(shortFlags.begin(), shortFlags.end(), longFlags.begin(), longFlags.end())</code> </p>
 
 </div>
 </div>
@@ -225,12 +225,12 @@ template&lt;typename Short , typename Long &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Specify short and long opts separately as iterables. </p>
-<p>ex: <code><a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">args::Matcher(shortOpts, longOpts)</a></code> </p>
+<p>Specify short and long flags separately as iterables. </p>
+<p>ex: <code><a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and flags that can possibly be matched. ">args::Matcher(shortFlags, longFlags)</a></code> </p>
 
 </div>
 </div>
-<a class="anchor" id="a71749800086bc38d725047a653607ae6"></a>
+<a class="anchor" id="ad70f96e5475d9020773b429e9f79cb2d"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -240,7 +240,7 @@ template&lt;typename Short , typename Long &gt; </div>
         <tr>
           <td class="memname">args::Matcher::Matcher </td>
           <td>(</td>
-          <td class="paramtype">std::initializer_list&lt; <a class="el" href="structargs_1_1EitherOpt.html">EitherOpt</a> &gt;&#160;</td>
+          <td class="paramtype">std::initializer_list&lt; <a class="el" href="structargs_1_1EitherFlag.html">EitherFlag</a> &gt;&#160;</td>
           <td class="paramname"><em>in</em></td><td>)</td>
           <td></td>
         </tr>
@@ -252,8 +252,8 @@ template&lt;typename Short , typename Long &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Specify a mixed single initializer-list of both short and long opts. </p>
-<p>This is the fancy one. It takes a single initializer list of any number of any mixed kinds of options. Chars are automatically interpreted as short options, and strings are automatically interpreted as long options: </p><pre class="fragment">args::Matcher{'a'}
+<p>Specify a mixed single initializer-list of both short and long flags. </p>
+<p>This is the fancy one. It takes a single initializer list of any number of any mixed kinds of flags. Chars are automatically interpreted as short flags, and strings are automatically interpreted as long flags: </p><pre class="fragment">args::Matcher{'a'}
 args::Matcher{"foo"}
 args::Matcher{'h', "help"}
 args::Matcher{"foo", 'f', 'F', "FoO"}</pre> 

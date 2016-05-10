@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['eitheropt',['EitherOpt',['../structargs_1_1EitherOpt.html',1,'args']]]
+  ['eitherflag',['EitherFlag',['../structargs_1_1EitherFlag.html',1,'args']]]
 ];

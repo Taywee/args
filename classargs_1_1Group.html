@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">3.0.4</span>
+   &#160;<span id="projectnumber">4.0.1</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -128,17 +128,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5120fe6afc7f6df3c6410d97e2b35c29"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5120fe6afc7f6df3c6410d97e2b35c29"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Group</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;help, const std::function&lt; bool(const <a class="el" href="classargs_1_1Group.html">Group</a> &amp;)&gt; &amp;validator=Validators::DontCare)</td></tr>
 <tr class="separator:a5120fe6afc7f6df3c6410d97e2b35c29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5bdb4fe74389ded50da90b4feb7bf82f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a5bdb4fe74389ded50da90b4feb7bf82f">Match</a> (const std::string &amp;arg)</td></tr>
-<tr class="memdesc:a5bdb4fe74389ded50da90b4feb7bf82f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> that matches arg, or nullptr.  <a href="#a5bdb4fe74389ded50da90b4feb7bf82f">More...</a><br /></td></tr>
-<tr class="separator:a5bdb4fe74389ded50da90b4feb7bf82f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa81531e8c203d1f780e3aa35aa4b1564"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#aa81531e8c203d1f780e3aa35aa4b1564">Match</a> (const char arg)</td></tr>
-<tr class="memdesc:aa81531e8c203d1f780e3aa35aa4b1564"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> that matches arg, or nullptr.  <a href="#aa81531e8c203d1f780e3aa35aa4b1564">More...</a><br /></td></tr>
-<tr class="separator:aa81531e8c203d1f780e3aa35aa4b1564"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac458709409f03b05fd6f87aa431f8bac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#ac458709409f03b05fd6f87aa431f8bac">Match</a> (const std::string &amp;flag)</td></tr>
+<tr class="memdesc:ac458709409f03b05fd6f87aa431f8bac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr.  <a href="#ac458709409f03b05fd6f87aa431f8bac">More...</a><br /></td></tr>
+<tr class="separator:ac458709409f03b05fd6f87aa431f8bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94fb9566620de414632a85c4b6e52404"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a94fb9566620de414632a85c4b6e52404">Match</a> (const char flag)</td></tr>
+<tr class="memdesc:a94fb9566620de414632a85c4b6e52404"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr.  <a href="#a94fb9566620de414632a85c4b6e52404">More...</a><br /></td></tr>
+<tr class="separator:a94fb9566620de414632a85c4b6e52404"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93fa3460026c13e264388d314068fdfe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1PosBase.html">PosBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a93fa3460026c13e264388d314068fdfe">GetNextPos</a> ()</td></tr>
-<tr class="memdesc:a93fa3460026c13e264388d314068fdfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the next ready positional parameter, or nullptr if there is none.  <a href="#a93fa3460026c13e264388d314068fdfe">More...</a><br /></td></tr>
+<tr class="memdesc:a93fa3460026c13e264388d314068fdfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the next ready positional, or nullptr if there is none.  <a href="#a93fa3460026c13e264388d314068fdfe">More...</a><br /></td></tr>
 <tr class="separator:a93fa3460026c13e264388d314068fdfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5f70246abc2d2f266751077e804a27a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#ad5f70246abc2d2f266751077e804a27a">HasFlag</a> () const </td></tr>
-<tr class="memdesc:ad5f70246abc2d2f266751077e804a27a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get whether this has any <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> children.  <a href="#ad5f70246abc2d2f266751077e804a27a">More...</a><br /></td></tr>
+<tr class="memdesc:ad5f70246abc2d2f266751077e804a27a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get whether this has any <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> children.  <a href="#ad5f70246abc2d2f266751077e804a27a">More...</a><br /></td></tr>
 <tr class="separator:ad5f70246abc2d2f266751077e804a27a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5951da80c2ca072299740021c43bf6b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae5951da80c2ca072299740021c43bf6b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a> (<a class="el" href="classargs_1_1Base.html">Base</a> &amp;child)</td></tr>
@@ -216,8 +216,8 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 </table>
 </div><div class="memdoc">
 
-<p>Get the next ready positional parameter, or nullptr if there is none. </p>
-<dl class="section return"><dt>Returns</dt><dd>the first ready <a class="el" href="classargs_1_1PosBase.html" title="Base class for positional arguments. ">PosBase</a> pointer, or nullptr if there is no match </dd></dl>
+<p>Get the next ready positional, or nullptr if there is none. </p>
+<dl class="section return"><dt>Returns</dt><dd>the first ready <a class="el" href="classargs_1_1PosBase.html" title="Base class for positional options. ">PosBase</a> pointer, or nullptr if there is no match </dd></dl>
 
 </div>
 </div>
@@ -242,12 +242,12 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 </table>
 </div><div class="memdoc">
 
-<p>Get whether this has any <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> children. </p>
-<dl class="section return"><dt>Returns</dt><dd>Whether or not there are any <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> children </dd></dl>
+<p>Get whether this has any <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> children. </p>
+<dl class="section return"><dt>Returns</dt><dd>Whether or not there are any <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> children </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a5bdb4fe74389ded50da90b4feb7bf82f"></a>
+<a class="anchor" id="ac458709409f03b05fd6f87aa431f8bac"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -258,7 +258,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
           <td class="memname"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a>* args::Group::Match </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td class="paramname"><em>flag</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -269,18 +269,18 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 </table>
 </div><div class="memdoc">
 
-<p>Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> that matches arg, or nullptr. </p>
+<p>Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">arg</td><td>The argument with prefixes stripped </td></tr>
+    <tr><td class="paramname">flag</td><td>The flag with prefixes stripped </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the first matching <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> pointer, or nullptr if there is no match </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the first matching <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> pointer, or nullptr if there is no match </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="aa81531e8c203d1f780e3aa35aa4b1564"></a>
+<a class="anchor" id="a94fb9566620de414632a85c4b6e52404"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -291,7 +291,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
           <td class="memname"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a>* args::Group::Match </td>
           <td>(</td>
           <td class="paramtype">const char&#160;</td>
-          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td class="paramname"><em>flag</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -302,14 +302,14 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 </table>
 </div><div class="memdoc">
 
-<p>Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> that matches arg, or nullptr. </p>
+<p>Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">arg</td><td>The argument with prefixes stripped </td></tr>
+    <tr><td class="paramname">flag</td><td>The flag with prefixes stripped </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the first matching <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag arguments. ">FlagBase</a> pointer, or nullptr if there is no match </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the first matching <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> pointer, or nullptr if there is no match </dd></dl>
 
 </div>
 </div>
