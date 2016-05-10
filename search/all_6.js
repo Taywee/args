@@ -5,7 +5,7 @@ var searchData=
   ['getchilddescriptions',['GetChildDescriptions',['../classargs_1_1Group.html#a7ef395fc1d98bd88c02f0df7ed422bf7',1,'args::Group']]],
   ['getflagstrings',['GetFlagStrings',['../classargs_1_1Matcher.html#a3253a6757de0ff2d313cecdb8a3df44d',1,'args::Matcher::GetFlagStrings(const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const '],['../classargs_1_1Matcher.html#a9d2920c7c82ac9306e70b5be8ffee933',1,'args::Matcher::GetFlagStrings(const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;name, const std::string &amp;shortSeparator, const std::string longSeparator) const ']]],
   ['getlong',['GetLong',['../structargs_1_1EitherFlag.html#adfbd76246674351b77adadb99c1f961e',1,'args::EitherFlag']]],
-  ['getnextpos',['GetNextPos',['../classargs_1_1Group.html#a93fa3460026c13e264388d314068fdfe',1,'args::Group']]],
+  ['getnextpositional',['GetNextPositional',['../classargs_1_1Group.html#a12dde32d01b2f10ad554888faf1449bb',1,'args::Group']]],
   ['getposnames',['GetPosNames',['../classargs_1_1Group.html#a85382243f31e08ef0ce5df807d82d102',1,'args::Group']]],
   ['getshort',['GetShort',['../structargs_1_1EitherFlag.html#ae08b6f663ad7f00b441443a2376411e9',1,'args::EitherFlag']]],
   ['glyphs',['Glyphs',['../namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8',1,'args']]],
