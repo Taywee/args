@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['args',['args',['../index.html',1,'']]]
+  ['contributing',['CONTRIBUTING',['../md_CONTRIBUTING.html',1,'']]]
 ];
