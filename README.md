@@ -112,8 +112,10 @@ documentation.
 Then you can either call it with args::ArgumentParser::ParseCLI for the full
 command line with program name, or args::ArgumentParser::ParseArgs with
 just the arguments to be parsed.  The argument and group variables can then be
-interpreted as a boolean to see if they've been matched, and their arguments
-can be pulled from their value and values attributes, if applicable.
+interpreted as a boolean to see if they've been matched.
+
+All variables can be pulled (including the boolean match status) with
+args::get.
 
 # How fast is it?
 
