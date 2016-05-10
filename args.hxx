@@ -765,6 +765,7 @@ namespace args
     {
         private:
             std::string prog;
+            std::string proglinePostfix;
             std::string description;
             std::string epilog;
 
@@ -814,6 +815,14 @@ namespace args
                 /** Show the terminator when both options and positional parameters are present
                  */
                 bool showTerminator = true;
+
+                /** Show the {OPTIONS} on the prog line when this is true
+                 */
+                bool showProglineOptions = true;
+
+                /** Show the positionals on the prog line when this is true
+                 */
+                bool showProglinePositionals = true;
             } helpParams;
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
                 Group("arguments", Group::Validators::AllChildGroups),
@@ -836,6 +845,15 @@ namespace args
              */
             void Prog(const std::string &prog)
             { this->prog = prog; }
+
+            /** The description that appears on the prog line after options and positionals
+             */
+            const std::string &ProglinePostfix() const
+            { return proglinePostfix; }
+            /** The description that appears on the prog line after options and positionals
+             */
+            void ProglinePostfix(const std::string &proglinePostfix)
+            { this->proglinePostfix = proglinePostfix; }
 
             /** The description that appears above options
              */
@@ -946,12 +964,22 @@ namespace args
                 if (HasFlag())
                 {
                     hasoptions = true;
-                    prognameline << " {OPTIONS}";
+                    if (helpParams.showProglineOptions)
+                    {
+                        prognameline << " {OPTIONS}";
+                    }
                 }
                 for (const std::string &posname: GetPosNames())
                 {
                     hasarguments = true;
-                    prognameline << " [" << posname << ']';
+                    if (helpParams.showProglinePositionals)
+                    {
+                        prognameline << " [" << posname << ']';
+                    }
+                }
+                if (!proglinePostfix.empty())
+                {
+                    prognameline << ' ' << proglinePostfix;
                 }
                 const std::vector<std::string> proglines(Wrap(prognameline.str(), helpParams.width - (helpParams.progindent + 4), helpParams.width - helpParams.progindent));
                 auto progit = std::begin(proglines);
