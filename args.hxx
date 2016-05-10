@@ -810,6 +810,10 @@ namespace args
                 /** The minimum gutter between each flag and its help
                  */
                 unsigned int gutter = 1;
+
+                /** Show the terminator when both options and positional parameters are present
+                 */
+                bool showTerminator = true;
             } helpParams;
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
                 Group("arguments", Group::Validators::AllChildGroups),
@@ -1002,7 +1006,7 @@ namespace args
                         help << std::string(groupindent + helpParams.helpindent, ' ') << *infoit << '\n';
                     }
                 }
-                if (hasoptions && hasarguments)
+                if (hasoptions && hasarguments && helpParams.showTerminator)
                 {
                     for (const std::string &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
                     {
