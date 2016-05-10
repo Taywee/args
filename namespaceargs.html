@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">3.0.1</span>
+   &#160;<span id="projectnumber">3.0.2</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -157,10 +157,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="memTemplParams" colspan="2"><a class="anchor" id="a6c525a2d31e8c7bef7f7798a8188bca7"></a>
-template&lt;typename Arg &gt; </td></tr>
+<tr class="memitem:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="memTemplParams" colspan="2">template&lt;typename Arg &gt; </td></tr>
 <tr class="memitem:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7">get</a> (Arg &amp;arg) -&gt; decltype(arg.Get())        </td></tr>
-<tr class="memdesc:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Getter to grab the value reference. <br /></td></tr>
+<tr class="memdesc:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Getter to grab the value from the argument type.  <a href="#a6c525a2d31e8c7bef7f7798a8188bca7">More...</a><br /></td></tr>
 <tr class="separator:a6c525a2d31e8c7bef7f7798a8188bca7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c4e2dbb1616764df0030e03e3b964a8"><td class="memItemLeft" align="right" valign="top">std::string::size_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8">Glyphs</a> (const std::string &amp;string)</td></tr>
 <tr class="memdesc:a7c4e2dbb1616764df0030e03e3b964a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">(INTERNAL) Count UTF-8 glyphs  <a href="#a7c4e2dbb1616764df0030e03e3b964a8">More...</a><br /></td></tr>
@@ -254,6 +253,28 @@ template&lt;&gt; </div>
 
 <p>std::string specialization for ArgReader </p>
 <p>By default, stream extraction into a string splits on white spaces, and it is more efficient to ust copy a string into the destination. </p>
+
+</div>
+</div>
+<a class="anchor" id="a6c525a2d31e8c7bef7f7798a8188bca7"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Arg &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">auto args::get </td>
+          <td>(</td>
+          <td class="paramtype">Arg &amp;&#160;</td>
+          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td> -&gt; decltype(arg.Get())
+    </td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Getter to grab the value from the argument type. </p>
+<p>If the Get() function of the type returns a reference, so does this, and the value will be modifiable. </p>
 
 </div>
 </div>

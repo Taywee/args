@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">3.0.1</span>
+   &#160;<span id="projectnumber">3.0.2</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -127,7 +127,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --><p>This requires Doxygen</p>
 <h1>How do I use it?</h1>
 <p>Create an ArgumentParser, modify its attributes to fit your needs, add arguments through regular argument objects (or create your own), and match them with an <a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and long options that can possibly be matched. ">args::Matcher</a> object (check its construction details in the doxygen documentation.</p>
-<p>Then you can either call it with <a class="el" href="classargs_1_1ArgumentParser.html#aa5477da47401025c5c05d1fac84da016" title="Convenience function to parse the CLI from argc and argv. ">args::ArgumentParser::ParseCLI</a> for the full command line with program name, or <a class="el" href="classargs_1_1ArgumentParser.html#ac2852678eece00f5ac0689381f26a204" title="Parse all arguments. ">args::ArgumentParser::ParseArgs</a> with just the arguments to be parsed. The argument and group variables can then be interpreted as a boolean to see if they've been matched, and their arguments can be pulled from their value and values attributes, if applicable.</p>
+<p>Then you can either call it with <a class="el" href="classargs_1_1ArgumentParser.html#aa5477da47401025c5c05d1fac84da016" title="Convenience function to parse the CLI from argc and argv. ">args::ArgumentParser::ParseCLI</a> for the full command line with program name, or <a class="el" href="classargs_1_1ArgumentParser.html#ac2852678eece00f5ac0689381f26a204" title="Parse all arguments. ">args::ArgumentParser::ParseArgs</a> with just the arguments to be parsed. The argument and group variables can then be interpreted as a boolean to see if they've been matched.</p>
+<p>All variables can be pulled (including the boolean match status) with <a class="el" href="namespaceargs.html#a6c525a2d31e8c7bef7f7798a8188bca7" title="Getter to grab the value from the argument type. ">args::get</a>.</p>
 <h1>How fast is it?</h1>
 <p>This should not really be a question you ask when you are looking for an argument-parsing library, but every test I've done shows args as being about 65% faster than TCLAP and 220% faster than boost::program_options.</p>
 <p>The simplest benchmark I threw together is the following one, which parses the command line <code>-i 7 -c a 2.7 --char b 8.4 -c c 8.8 --char d</code> with a parser that parses -i as an int, -c as a list of chars, and the positional parameters as a list of doubles (the command line was originally much more complex, but TCLAP's limitations made me trim it down so I could use a common command line across all libraries. I also have to copy in the arguments list with every run, because TCLAP permutes its argument list as it runs (and comparison would have been unfair without comparing all about equally), but that surprisingly didn't affect much. Also tested is pulling the arguments out, but that was fast compared to parsing, as would be expected.</p>
