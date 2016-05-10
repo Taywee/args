@@ -1,0 +1,11 @@
+* 4.0.0
+Changed all wording:
+
+ArgFlag -> ValueFlag
+Counter -> CounterFlag
+PosArg -> Positional
+
+Argument now solely refers to command line arguments.
+Value refers to the argument that flags or positionals can take and store.
+Positional is a positional option, which contains a value.
+Option refers to flags and positionals, which can contain values.

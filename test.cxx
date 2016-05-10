@@ -52,9 +52,9 @@ TEST_CASE("Boolean flags work as expected, with clustering", "[args]")
 TEST_CASE("Count flag works as expected", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::Counter foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
-    args::Counter bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"}, 7);
-    args::Counter baz(parser, "BAZ", "test flag", args::Matcher{'z', "baz"}, 7);
+    args::CounterFlag foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::CounterFlag bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"}, 7);
+    args::CounterFlag baz(parser, "BAZ", "test flag", args::Matcher{'z', "baz"}, 7);
     parser.ParseArgs(std::vector<std::string>{"--foo", "-fb", "--bar", "-b", "-f", "--foo"});
     REQUIRE(foo);
     REQUIRE(bar);
@@ -67,10 +67,10 @@ TEST_CASE("Count flag works as expected", "[args]")
 TEST_CASE("Argument flags work as expected, with clustering", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::ValueFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
     args::Flag bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"});
-    args::ArgFlag<double> baz(parser, "BAZ", "test flag", args::Matcher{'a', "baz"});
-    args::ArgFlag<char> bim(parser, "BAZ", "test flag", args::Matcher{'B', "bim"});
+    args::ValueFlag<double> baz(parser, "BAZ", "test flag", args::Matcher{'a', "baz"});
+    args::ValueFlag<char> bim(parser, "BAZ", "test flag", args::Matcher{'B', "bim"});
     args::Flag bix(parser, "BAZ", "test flag", args::Matcher{'x', "bix"});
     parser.ParseArgs(std::vector<std::string>{"-bftest", "--baz=7.555e2", "--bim", "c"});
     REQUIRE(foo);
@@ -93,10 +93,10 @@ TEST_CASE("Passing an argument to a non-argument flag throws an error", "[args]"
 TEST_CASE("Unified argument lists for match work", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::ValueFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
     args::Flag bar(parser, "BAR", "test flag", args::Matcher{"bar", 'b'});
-    args::ArgFlag<double> baz(parser, "BAZ", "test flag", args::Matcher{'a', "baz"});
-    args::ArgFlag<char> bim(parser, "BAZ", "test flag", args::Matcher{'B', "bim"});
+    args::ValueFlag<double> baz(parser, "BAZ", "test flag", args::Matcher{'a', "baz"});
+    args::ValueFlag<char> bim(parser, "BAZ", "test flag", args::Matcher{'B', "bim"});
     args::Flag bix(parser, "BAZ", "test flag", args::Matcher{"bix"});
     parser.ParseArgs(std::vector<std::string>{"-bftest", "--baz=7.555e2", "--bim", "c"});
     REQUIRE(foo);
@@ -112,7 +112,7 @@ TEST_CASE("Unified argument lists for match work", "[args]")
 TEST_CASE("Get can be assigned to for non-reference types", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::ValueFlag<std::string> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
     parser.ParseArgs(std::vector<std::string>{"--foo=test"});
     REQUIRE(foo);
     REQUIRE(args::get(foo) == "test");
@@ -123,7 +123,7 @@ TEST_CASE("Get can be assigned to for non-reference types", "[args]")
 TEST_CASE("Invalid argument parsing throws parsing exceptions", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlag<int> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::ValueFlag<int> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo=7.5"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "7a"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "7e4"}), args::ParseError);
@@ -132,7 +132,7 @@ TEST_CASE("Invalid argument parsing throws parsing exceptions", "[args]")
 TEST_CASE("Argument flag lists work as expected", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlagList<int> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
+    args::ValueFlagList<int> foo(parser, "FOO", "test flag", args::Matcher{'f', "foo"});
     parser.ParseArgs(std::vector<std::string>{"--foo=7", "-f2", "-f", "9", "--foo", "42"});
     REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
 }
@@ -140,9 +140,9 @@ TEST_CASE("Argument flag lists work as expected", "[args]")
 TEST_CASE("Positional arguments and positional argument lists work as expected", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::PosArg<std::string> foo(parser, "FOO", "test flag");
-    args::PosArg<bool> bar(parser, "BAR", "test flag");
-    args::PosArgList<char> baz(parser, "BAZ", "test flag");
+    args::Positional<std::string> foo(parser, "FOO", "test flag");
+    args::Positional<bool> bar(parser, "BAR", "test flag");
+    args::PositionalList<char> baz(parser, "BAZ", "test flag");
     parser.ParseArgs(std::vector<std::string>{"this is a test flag", "0", "a", "b", "c", "x", "y", "z"});
     REQUIRE(foo);
     REQUIRE((args::get(foo) == "this is a test flag"));
@@ -155,9 +155,9 @@ TEST_CASE("Positional arguments and positional argument lists work as expected",
 TEST_CASE("Positionals that are unspecified evaluate false", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::PosArg<std::string> foo(parser, "FOO", "test flag");
-    args::PosArg<bool> bar(parser, "BAR", "test flag");
-    args::PosArgList<char> baz(parser, "BAZ", "test flag");
+    args::Positional<std::string> foo(parser, "FOO", "test flag");
+    args::Positional<bool> bar(parser, "BAR", "test flag");
+    args::PositionalList<char> baz(parser, "BAZ", "test flag");
     parser.ParseArgs(std::vector<std::string>{"this is a test flag again"});
     REQUIRE(foo);
     REQUIRE((args::get(foo) == "this is a test flag again"));
@@ -168,8 +168,8 @@ TEST_CASE("Positionals that are unspecified evaluate false", "[args]")
 TEST_CASE("Additional positionals throw an exception", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::PosArg<std::string> foo(parser, "FOO", "test flag");
-    args::PosArg<bool> bar(parser, "BAR", "test flag");
+    args::Positional<std::string> foo(parser, "FOO", "test flag");
+    args::Positional<bool> bar(parser, "BAR", "test flag");
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"this is a test flag again", "1", "this has no positional available"}), args::ParseError);
 }
 
@@ -243,13 +243,13 @@ TEST_CASE("Custom types work", "[args]")
 {
     {
         args::ArgumentParser parser("This is a test program.");
-        args::PosArg<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
-        args::PosArg<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
+        args::Positional<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
+        args::Positional<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
         REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"1.2,2", "3.8,4"}), args::ParseError);
     }
     args::ArgumentParser parser("This is a test program.");
-    args::PosArg<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
-    args::PosArg<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
+    args::Positional<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
+    args::Positional<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
     parser.ParseArgs(std::vector<std::string>{"1,2", "3.8,4"});
     REQUIRE(std::get<0>(args::get(ints)) == 1);
     REQUIRE(std::get<1>(args::get(ints)) == 2);
@@ -263,10 +263,10 @@ TEST_CASE("Custom parser prefixes (dd-style)", "[args]")
     parser.LongPrefix("");
     parser.LongSeparator("=");
     args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
-    args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
-    args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
-    args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
-    args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+    args::ValueFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
+    args::ValueFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
+    args::ValueFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
+    args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
     parser.ParseArgs(std::vector<std::string>{"skip=8", "if=/dev/null"});
     REQUIRE_FALSE(bs);
     REQUIRE(args::get(bs) == 512);
@@ -283,10 +283,10 @@ TEST_CASE("Custom parser prefixes (Some Windows styles)", "[args]")
     parser.LongPrefix("/");
     parser.LongSeparator(":");
     args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
-    args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
-    args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
-    args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
-    args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+    args::ValueFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
+    args::ValueFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
+    args::ValueFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
+    args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
     parser.ParseArgs(std::vector<std::string>{"/skip:8", "/if:/dev/null"});
     REQUIRE_FALSE(bs);
     REQUIRE(args::get(bs) == 512);
@@ -302,10 +302,10 @@ TEST_CASE("Help menu can be grabbed as a string, passed into a stream, or by usi
     std::ostream null(nullptr);
     args::ArgumentParser parser("This command likes to break your disks");
     args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
-    args::ArgFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
-    args::ArgFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
-    args::ArgFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
-    args::ArgFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+    args::ValueFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
+    args::ValueFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
+    args::ValueFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
+    args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
     parser.ParseArgs(std::vector<std::string>{"--skip=8", "--if=/dev/null"});
     null << parser.Help();
     parser.Help(null);
@@ -315,7 +315,7 @@ TEST_CASE("Help menu can be grabbed as a string, passed into a stream, or by usi
 TEST_CASE("Required argument separation being violated throws an error", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ArgFlag<std::string> bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"});
+    args::ValueFlag<std::string> bar(parser, "BAR", "test flag", args::Matcher{'b', "bar"});
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-btest"}));
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--bar=test"}));
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "test"}));
