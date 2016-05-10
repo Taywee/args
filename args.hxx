@@ -27,9 +27,18 @@
 #include <tuple>
 #include <vector>
 #include <unordered_set>
+#include <type_traits>
 
 namespace args
 {
+    /** Getter to grab the value reference
+     */
+    template <typename Arg>
+    auto get(Arg &arg) -> decltype(arg.Get())
+    {
+        return arg.Get();
+    }
+
     /** (INTERNAL) Count UTF-8 glyphs
      *
      * This is not reliable, and will fail for combinatory glyphs, but it's
@@ -611,6 +620,13 @@ namespace args
             virtual bool Matched() const noexcept override
             {
                 return validator(*this);
+            }
+
+            /** Get validation
+             */
+            bool Get() const
+            {
+                return Matched();
             }
 
             /** Get all the child descriptions for help generation
@@ -1199,6 +1215,13 @@ namespace args
             }
 
             virtual ~Flag() {}
+
+            /** Get whether this was matched
+             */
+            bool Get() const
+            {
+                return Matched();
+            }
     };
 
     /** Help flag class
@@ -1229,17 +1252,25 @@ namespace args
                 }
                 return nullptr;
             }
+
+            /** Get whether this was matched
+             */
+            bool Get() const noexcept
+            {
+                return Matched();
+            }
     };
 
     /** A flag class that simply counts the number of times it's matched
      */
     class Counter : public Flag
     {
-        public:
-            /** The public count variable.  Can be changed at will, but probably shouldn't be.
-             */
+        friend int get(Counter &);
+
+        private:
             int count;
 
+        public:
             Counter(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const int startcount = 0): Flag(group, name, help, std::move(matcher)), count(startcount) {}
 
             virtual ~Counter() {}
@@ -1262,6 +1293,13 @@ namespace args
                     ++count;
                 }
                 return me;
+            }
+
+            /** Get the count
+             */
+            int &Get() noexcept
+            {
+                return count;
             }
     };
 
@@ -1303,12 +1341,12 @@ namespace args
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class ArgFlag : public ArgFlagBase
     {
-        public:
-            /** The publicly accessible value member
-             *
-             * You can change this, but you probably shouldn't.
-             */
+        friend T &get(ArgFlag &);
+
+        private:
             T value;
+
+        public:
 
             ArgFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T()): ArgFlagBase(name, help, std::move(matcher)), value(defaultValue)
             {
@@ -1320,6 +1358,13 @@ namespace args
             virtual void ParseArg(const std::string &value) override
             {
                 Reader(name, value, this->value);
+            }
+
+            /** Get the value
+             */
+            T &Get() noexcept
+            {
+                return value;
             }
     };
 
@@ -1335,12 +1380,11 @@ namespace args
         void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class ArgFlagList : public ArgFlagBase
     {
-        public:
-            /** The publicly accessible value member list
-             *
-             * You can change this, but you probably shouldn't.
-             */
+        friend List &get(ArgFlagList &);
+        private:
             List values;
+
+        public:
 
             ArgFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ArgFlagBase(name, help, std::move(matcher)), values(defaultValues)
             {
@@ -1354,6 +1398,13 @@ namespace args
                 values.emplace_back();
                 Reader(name, value, values.back());
             }
+
+            /** Get the values
+             */
+            List &Get() noexcept
+            {
+                return values;
+            }
     };
 
     /** A positional argument class
@@ -1364,13 +1415,10 @@ namespace args
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class PosArg : public PosBase
     {
-        public:
-            /** The publicly accessible value member
-             *
-             * You can change this, but you probably shouldn't.
-             */
+        friend T &get(PosArg &);
+        private:
             T value;
-
+        public:
             PosArg(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PosBase(name, help), value(defaultValue)
             {
                 group.Add(*this);
@@ -1383,6 +1431,13 @@ namespace args
                 Reader(name, value, this->value);
                 ready = false;
                 matched = true;
+            }
+
+            /** Get the value
+             */
+            T &Get() noexcept
+            {
+                return value;
             }
     };
 
@@ -1398,13 +1453,11 @@ namespace args
         void (*Reader)(const std::string &, const std::string &, T&) = ArgReader<T>>
     class PosArgList : public PosBase
     {
-        public:
-            /** The publicly accessible value member list
-             *
-             * You can change this, but you probably shouldn't.
-             */
+        friend List &get(PosArgList &);
+        private:
             List values;
 
+        public:
             PosArgList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PosBase(name, help), values(defaultValues)
             {
                 group.Add(*this);
@@ -1422,6 +1475,13 @@ namespace args
             virtual std::string Name() const override
             {
                 return name + std::string("...");
+            }
+
+            /** Get the values
+             */
+            List &Get() noexcept
+            {
+                return values;
             }
     };
 }
