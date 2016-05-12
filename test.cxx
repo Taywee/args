@@ -341,3 +341,55 @@ TEST_CASE("Required argument separation being violated throws an error", "[args]
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-b", "test"}), args::ParseError);
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--bar", "test"}));
 }
+
+enum class MappingEnum
+{
+    def,
+    foo,
+    bar,
+    red,
+    yellow,
+    green
+};
+
+#include <unordered_map>
+#include <algorithm>
+#include <string>
+
+void ToLowerReader(const std::string &name, const std::string &value, std::string &destination)
+{
+    destination = value;
+    std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);
+}
+
+TEST_CASE("Mapping types work as needed", "[args]")
+{
+    std::unordered_map<std::string, MappingEnum> map{
+        {"default", MappingEnum::def},
+        {"foo", MappingEnum::foo},
+        {"bar", MappingEnum::bar},
+        {"red", MappingEnum::red},
+        {"yellow", MappingEnum::yellow},
+        {"green", MappingEnum::green}};
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::MapFlag<std::string, MappingEnum> dmf(parser, "DMF", "Maps string to an enum", args::Matcher{"dmf"}, map);
+    args::MapFlag<std::string, MappingEnum> mf(parser, "MF", "Maps string to an enum", args::Matcher{"mf"}, map);
+    args::MapFlag<std::string, MappingEnum, ToLowerReader> cimf(parser, "CIMF", "Maps string to an enum case-insensitively", args::Matcher{"cimf"}, map);
+    args::MapFlagList<std::string, MappingEnum> mfl(parser, "MFL", "Maps string to an enum list", args::Matcher{"mfl"}, map);
+    args::MapPositional<std::string, MappingEnum> mp(parser, "MP", "Maps string to an enum", map);
+    args::MapPositionalList<std::string, MappingEnum> mpl(parser, "MPL", "Maps string to an enum list", map);
+    parser.ParseArgs(std::vector<std::string>{"--mf=red", "--cimf=YeLLoW", "--mfl=bar", "foo", "--mfl=green", "red", "--mfl", "bar", "default"});
+    REQUIRE_FALSE(dmf);
+    REQUIRE(args::get(dmf) == MappingEnum::def);
+    REQUIRE(mf);
+    REQUIRE(args::get(mf) == MappingEnum::red);
+    REQUIRE(cimf);
+    REQUIRE(args::get(cimf) == MappingEnum::yellow);
+    REQUIRE(mfl);
+    REQUIRE((args::get(mfl) == std::vector<MappingEnum>{MappingEnum::bar, MappingEnum::green, MappingEnum::bar}));
+    REQUIRE(mp);
+    REQUIRE((args::get(mp) == MappingEnum::foo));
+    REQUIRE(mpl);
+    REQUIRE((args::get(mpl) == std::vector<MappingEnum>{MappingEnum::red, MappingEnum::def}));
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--mf=YeLLoW"}), args::MapError);
+}
