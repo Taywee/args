@@ -512,19 +512,15 @@ namespace args
             {
                 for (Base *child: children)
                 {
-                    FlagBase *flagBase = dynamic_cast<FlagBase *>(child);
-                    Group *group = dynamic_cast<Group *>(child);
-                    if (flagBase)
+                    if (FlagBase *flagBase = dynamic_cast<FlagBase *>(child))
                     {
-                        FlagBase *match = flagBase->Match(flag);
-                        if (match)
+                        if (FlagBase *match = flagBase->Match(flag))
                         {
                             return match;
                         }
-                    } else if (group)
+                    } else if (Group *group = dynamic_cast<Group *>(child))
                     {
-                        FlagBase *match = group->Match(flag);
-                        if (match)
+                        if (FlagBase *match = group->Match(flag))
                         {
                             return match;
                         }
@@ -542,19 +538,15 @@ namespace args
             {
                 for (Base *child: children)
                 {
-                    FlagBase *flagBase = dynamic_cast<FlagBase *>(child);
-                    Group *group = dynamic_cast<Group *>(child);
-                    if (flagBase)
+                    if (FlagBase *flagBase = dynamic_cast<FlagBase *>(child))
                     {
-                        FlagBase *match = flagBase->Match(flag);
-                        if (match)
+                        if (FlagBase *match = flagBase->Match(flag))
                         {
                             return match;
                         }
-                    } else if (group)
+                    } else if (Group *group = dynamic_cast<Group *>(child))
                     {
-                        FlagBase *match = group->Match(flag);
-                        if (match)
+                        if (FlagBase *match = group->Match(flag))
                         {
                             return match;
                         }
@@ -593,13 +585,11 @@ namespace args
             {
                 for (Base *child: children)
                 {
-                    FlagBase *flag = dynamic_cast<FlagBase *>(child);
-                    Group *group = dynamic_cast<Group *>(child);
-                    if (flag)
+                    if (dynamic_cast<FlagBase *>(child))
                     {
                         return true;
                     }
-                    if (group)
+                    if (Group *group = dynamic_cast<Group *>(child))
                     {
                         if (group->HasFlag())
                         {
@@ -660,9 +650,7 @@ namespace args
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
                 {
-                    const Group *group = dynamic_cast<Group *>(child);
-                    const NamedBase *named = dynamic_cast<NamedBase *>(child);
-                    if (group)
+                    if (const Group *group = dynamic_cast<Group *>(child))
                     {
                         // Push that group description on the back:
                         descriptions.emplace_back(group->help, "", indent);
@@ -671,7 +659,7 @@ namespace args
                             std::end(descriptions),
                             std::make_move_iterator(std::begin(groupDescriptions)),
                             std::make_move_iterator(std::end(groupDescriptions)));
-                    } else if (named)
+                    } else if (const NamedBase *named = dynamic_cast<NamedBase *>(child))
                     {
                         const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator));
                         descriptions.emplace_back(std::get<0>(description), std::get<1>(description), indent);
@@ -687,16 +675,14 @@ namespace args
                 std::vector <std::string> names;
                 for (const auto &child: children)
                 {
-                    const Group *group = dynamic_cast<Group *>(child);
-                    const PositionalBase *pos = dynamic_cast<PositionalBase *>(child);
-                    if (group)
+                    if (const Group *group = dynamic_cast<Group *>(child))
                     {
                         std::vector<std::string> groupNames(group->GetPosNames());
                         names.insert(
                             std::end(names),
                             std::make_move_iterator(std::begin(groupNames)),
                             std::make_move_iterator(std::end(groupNames)));
-                    } else if (pos)
+                    } else if (const PositionalBase *pos = dynamic_cast<PositionalBase *>(child))
                     {
                         names.emplace_back(pos->Name());
                     }
@@ -745,10 +731,12 @@ namespace args
                 {
                     for (const auto child: group.Children())
                     {
-                        const Group *group = dynamic_cast<Group *>(child);
-                        if (group && (!group->Matched()))
+                        if (const Group *group = dynamic_cast<Group *>(child))
                         {
-                            return false;
+                            if (!group->Matched())
+                            {
+                                return false;
+                            }
                         }
                     }
                     return true;
@@ -1102,11 +1090,9 @@ namespace args
                             std::string(argchunk, 0, separator)
                             : argchunk);
 
-                        FlagBase *base = Match(arg);
-                        if (base)
+                        if (FlagBase *base = Match(arg))
                         {
-                            ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base);
-                            if (argbase)
+                            if (ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base))
                             {
                                 if (separator != argchunk.npos)
                                 {
@@ -1159,11 +1145,9 @@ namespace args
                         {
                             const char arg = *argit;
 
-                            Base *base = Match(arg);
-                            if (base)
+                            if (Base *base = Match(arg))
                             {
-                                ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base);
-                                if (argbase)
+                                if (ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base))
                                 {
                                     const std::string arg(++argit, std::end(argchunk));
                                     if (!arg.empty())
