@@ -492,7 +492,7 @@ Argument 'numbers' received invalid value type 'a'
 ```cpp
 #include <iostream>
 #include <tuple>
-#include <args.hxx>
+
 std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
 {
     is >> std::get<0>(ints);
@@ -500,6 +500,8 @@ std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
     is >> std::get<1>(ints);
     return is;
 }
+
+#include <args.hxx>
 
 void DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
 {

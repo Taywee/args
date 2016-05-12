@@ -32,6 +32,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <unordered_map>
 #include <unordered_set>
 #include <type_traits>
 
@@ -172,6 +173,13 @@ namespace args
         public:
             UsageError(const std::string &problem) : Error(problem) {}
             virtual ~UsageError() {};
+    };
+
+    class MapError : public Error
+    {
+        public:
+            MapError(const std::string &problem) : Error(problem) {}
+            virtual ~MapError() {};
     };
 
     /** An exception that indicates that the user has requested help
@@ -1409,6 +1417,52 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 Reader(name, value, this->value);
+            }
+
+            /** Get the value
+             */
+            T &Get() noexcept
+            {
+                return value;
+            }
+    };
+
+    /** A mapping value flag class
+     * 
+     * \tparam K the type to extract the argument as
+     * \tparam T the type to store the result map as
+     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     */
+    template <typename K, typename T, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    class MapFlag : public ValueFlagBase
+    {
+        private:
+            const Map map;
+            T value;
+
+        public:
+
+            MapFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map &map, const T &defaultValue = T()): ValueFlagBase(name, help, std::move(matcher)), map(map), value(defaultValue)
+            {
+                group.Add(*this);
+            }
+
+            virtual ~MapFlag() {}
+
+            virtual void ParseValue(const std::string &value) override
+            {
+                K key;
+                Reader(name, value, key);
+                auto it = map.find(key);
+                if (it == std::end(map))
+                {
+                    std::ostringstream problem;
+                    problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+                    throw MapError(problem.str());
+                } else
+                {
+                    this->value = it->second;
+                }
             }
 
             /** Get the value
