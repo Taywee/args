@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">4.0.2</span>
+   &#160;<span id="projectnumber">4.1.1</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -90,6 +90,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>The API documentation can be found at <a href="https://taywee.github.io/args">https://taywee.github.io/args</a></p>
 <p>The code can be downloaded at <a href="https://github.com/Taywee/args">https://github.com/Taywee/args</a></p>
 <p>There are also somewhat extensive examples below.</p>
+<p>You can find the complete test cases at <a href="https://github.com/Taywee/args/blob/master/test.cxx,">https://github.com/Taywee/args/blob/master/test.cxx,</a> which should very well describe the usage, as it's built to push the boundaries.</p>
 <h1>What does it do?</h1>
 <p>It:</p>
 <ul>
@@ -447,7 +448,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --><h1>Custom type parsers (here we use std::tuple)</h1>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;tuple&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
+<div class="line"></div>
 <div class="line">std::istream&amp; operator&gt;&gt;(std::istream&amp; is, std::tuple&lt;int, int&gt;&amp; ints)</div>
 <div class="line">{</div>
 <div class="line">    is &gt;&gt; std::get&lt;0&gt;(ints);</div>
@@ -455,6 +456,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">    is &gt;&gt; std::get&lt;1&gt;(ints);</div>
 <div class="line">    <span class="keywordflow">return</span> is;</div>
 <div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> DoublesReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::tuple&lt;double, double&gt; &amp;destination)</div>
 <div class="line">{</div>
@@ -782,6 +785,45 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;   This goes after the options. </div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;%                                                                                </div>
+</div><!-- fragment --><h1>Mapping arguments</h1>
+<p>I haven't written out a long example for this, but here's the test case you should be able to discern the meaning from:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> ToLowerReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::string &amp;destination)</div>
+<div class="line">{</div>
+<div class="line">    destination = value;</div>
+<div class="line">    std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line">TEST_CASE(<span class="stringliteral">&quot;Mapping types work as needed&quot;</span>, <span class="stringliteral">&quot;[args]&quot;</span>)</div>
+<div class="line">{</div>
+<div class="line">    std::unordered_map&lt;std::string, MappingEnum&gt; map{</div>
+<div class="line">        {<span class="stringliteral">&quot;default&quot;</span>, MappingEnum::def},</div>
+<div class="line">        {<span class="stringliteral">&quot;foo&quot;</span>, MappingEnum::foo},</div>
+<div class="line">        {<span class="stringliteral">&quot;bar&quot;</span>, MappingEnum::bar},</div>
+<div class="line">        {<span class="stringliteral">&quot;red&quot;</span>, MappingEnum::red},</div>
+<div class="line">        {<span class="stringliteral">&quot;yellow&quot;</span>, MappingEnum::yellow},</div>
+<div class="line">        {<span class="stringliteral">&quot;green&quot;</span>, MappingEnum::green}};</div>
+<div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>, <span class="stringliteral">&quot;This goes after the options.&quot;</span>);</div>
+<div class="line">    <a class="code" href="classargs_1_1MapFlag.html">args::MapFlag&lt;std::string, MappingEnum&gt;</a> dmf(parser, <span class="stringliteral">&quot;DMF&quot;</span>, <span class="stringliteral">&quot;Maps string to an enum&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="stringliteral">&quot;dmf&quot;</span>}, map);</div>
+<div class="line">    <a class="code" href="classargs_1_1MapFlag.html">args::MapFlag&lt;std::string, MappingEnum&gt;</a> mf(parser, <span class="stringliteral">&quot;MF&quot;</span>, <span class="stringliteral">&quot;Maps string to an enum&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="stringliteral">&quot;mf&quot;</span>}, map);</div>
+<div class="line">    <a class="code" href="classargs_1_1MapFlag.html">args::MapFlag&lt;std::string, MappingEnum, ToLowerReader&gt;</a> cimf(parser, <span class="stringliteral">&quot;CIMF&quot;</span>, <span class="stringliteral">&quot;Maps string to an enum case-insensitively&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="stringliteral">&quot;cimf&quot;</span>}, map);</div>
+<div class="line">    <a class="code" href="classargs_1_1MapFlagList.html">args::MapFlagList&lt;std::string, MappingEnum&gt;</a> mfl(parser, <span class="stringliteral">&quot;MFL&quot;</span>, <span class="stringliteral">&quot;Maps string to an enum list&quot;</span>, <a class="code" href="classargs_1_1Matcher.html">args::Matcher</a>{<span class="stringliteral">&quot;mfl&quot;</span>}, map);</div>
+<div class="line">    <a class="code" href="classargs_1_1MapPositional.html">args::MapPositional&lt;std::string, MappingEnum&gt;</a> mp(parser, <span class="stringliteral">&quot;MP&quot;</span>, <span class="stringliteral">&quot;Maps string to an enum&quot;</span>, map);</div>
+<div class="line">    <a class="code" href="classargs_1_1MapPositionalList.html">args::MapPositionalList&lt;std::string, MappingEnum&gt;</a> mpl(parser, <span class="stringliteral">&quot;MPL&quot;</span>, <span class="stringliteral">&quot;Maps string to an enum list&quot;</span>, map);</div>
+<div class="line">    parser.ParseArgs(std::vector&lt;std::string&gt;{<span class="stringliteral">&quot;--mf=red&quot;</span>, <span class="stringliteral">&quot;--cimf=YeLLoW&quot;</span>, <span class="stringliteral">&quot;--mfl=bar&quot;</span>, <span class="stringliteral">&quot;foo&quot;</span>, <span class="stringliteral">&quot;--mfl=green&quot;</span>, <span class="stringliteral">&quot;red&quot;</span>, <span class="stringliteral">&quot;--mfl&quot;</span>, <span class="stringliteral">&quot;bar&quot;</span>, <span class="stringliteral">&quot;default&quot;</span>});</div>
+<div class="line">    REQUIRE_FALSE(dmf);</div>
+<div class="line">    REQUIRE(<a class="code" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc">args::get</a>(dmf) == MappingEnum::def);</div>
+<div class="line">    REQUIRE(mf);</div>
+<div class="line">    REQUIRE(<a class="code" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc">args::get</a>(mf) == MappingEnum::red);</div>
+<div class="line">    REQUIRE(cimf);</div>
+<div class="line">    REQUIRE(<a class="code" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc">args::get</a>(cimf) == MappingEnum::yellow);</div>
+<div class="line">    REQUIRE(mfl);</div>
+<div class="line">    REQUIRE((<a class="code" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc">args::get</a>(mfl) == std::vector&lt;MappingEnum&gt;{MappingEnum::bar, MappingEnum::green, MappingEnum::bar}));</div>
+<div class="line">    REQUIRE(mp);</div>
+<div class="line">    REQUIRE((<a class="code" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc">args::get</a>(mp) == MappingEnum::foo));</div>
+<div class="line">    REQUIRE(mpl);</div>
+<div class="line">    REQUIRE((<a class="code" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc">args::get</a>(mpl) == std::vector&lt;MappingEnum&gt;{MappingEnum::red, MappingEnum::def}));</div>
+<div class="line">    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector&lt;std::string&gt;{<span class="stringliteral">&quot;--mf=YeLLoW&quot;</span>}), <a class="code" href="classargs_1_1MapError.html">args::MapError</a>);</div>
+<div class="line">}</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

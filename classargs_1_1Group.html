@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">4.0.2</span>
+   &#160;<span id="projectnumber">4.1.1</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -134,9 +134,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a94fb9566620de414632a85c4b6e52404"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a94fb9566620de414632a85c4b6e52404">Match</a> (const char flag)</td></tr>
 <tr class="memdesc:a94fb9566620de414632a85c4b6e52404"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr.  <a href="#a94fb9566620de414632a85c4b6e52404">More...</a><br /></td></tr>
 <tr class="separator:a94fb9566620de414632a85c4b6e52404"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12dde32d01b2f10ad554888faf1449bb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1PosBase.html">PosBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a12dde32d01b2f10ad554888faf1449bb">GetNextPositional</a> ()</td></tr>
-<tr class="memdesc:a12dde32d01b2f10ad554888faf1449bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the next ready positional, or nullptr if there is none.  <a href="#a12dde32d01b2f10ad554888faf1449bb">More...</a><br /></td></tr>
-<tr class="separator:a12dde32d01b2f10ad554888faf1449bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ac0360507e7e5d4bb57bc8081839b68"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1PositionalBase.html">PositionalBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a9ac0360507e7e5d4bb57bc8081839b68">GetNextPositional</a> ()</td></tr>
+<tr class="memdesc:a9ac0360507e7e5d4bb57bc8081839b68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the next ready positional, or nullptr if there is none.  <a href="#a9ac0360507e7e5d4bb57bc8081839b68">More...</a><br /></td></tr>
+<tr class="separator:a9ac0360507e7e5d4bb57bc8081839b68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5f70246abc2d2f266751077e804a27a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#ad5f70246abc2d2f266751077e804a27a">HasFlag</a> () const </td></tr>
 <tr class="memdesc:ad5f70246abc2d2f266751077e804a27a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get whether this has any <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> children.  <a href="#ad5f70246abc2d2f266751077e804a27a">More...</a><br /></td></tr>
 <tr class="separator:ad5f70246abc2d2f266751077e804a27a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -195,7 +195,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for all kinds of validating groups, including <a class="el" href="classargs_1_1ArgumentParser.html" title="The main user facing command line argument parser class. ">ArgumentParser</a>. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a12dde32d01b2f10ad554888faf1449bb"></a>
+<a class="anchor" id="a9ac0360507e7e5d4bb57bc8081839b68"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -203,7 +203,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classargs_1_1PosBase.html">PosBase</a>* args::Group::GetNextPositional </td>
+          <td class="memname"><a class="el" href="classargs_1_1PositionalBase.html">PositionalBase</a>* args::Group::GetNextPositional </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -217,7 +217,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 </div><div class="memdoc">
 
 <p>Get the next ready positional, or nullptr if there is none. </p>
-<dl class="section return"><dt>Returns</dt><dd>the first ready <a class="el" href="classargs_1_1PosBase.html" title="Base class for positional options. ">PosBase</a> pointer, or nullptr if there is no match </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the first ready <a class="el" href="classargs_1_1PositionalBase.html" title="Base class for positional options. ">PositionalBase</a> pointer, or nullptr if there is no match </dd></dl>
 
 </div>
 </div>
