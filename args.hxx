@@ -386,7 +386,7 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                std::get<0>(description) = name;
+                std::get<0>(description) = Name();
                 std::get<1>(description) = help;
                 return description;
             }
@@ -459,7 +459,7 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::vector<std::string> flagStrings(matcher.GetFlagStrings(shortPrefix, longPrefix, name, shortSeparator, longSeparator));
+                const std::vector<std::string> flagStrings(matcher.GetFlagStrings(shortPrefix, longPrefix, Name(), shortSeparator, longSeparator));
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
@@ -477,14 +477,14 @@ namespace args
 
     /** Base class for positional options
      */
-    class PosBase : public NamedBase
+    class PositionalBase : public NamedBase
     {
         protected:
             bool ready;
 
         public:
-            PosBase(const std::string &name, const std::string &help) : NamedBase(name, help), ready(true) {}
-            virtual ~PosBase() {}
+            PositionalBase(const std::string &name, const std::string &help) : NamedBase(name, help), ready(true) {}
+            virtual ~PositionalBase() {}
 
             bool Ready()
             {
@@ -572,13 +572,13 @@ namespace args
 
             /** Get the next ready positional, or nullptr if there is none
              *
-             * \return the first ready PosBase pointer, or nullptr if there is no match
+             * \return the first ready PositionalBase pointer, or nullptr if there is no match
              */
-            PosBase *GetNextPositional()
+            PositionalBase *GetNextPositional()
             {
                 for (Base *child: children)
                 {
-                    PosBase *next = dynamic_cast<PosBase *>(child);
+                    PositionalBase *next = dynamic_cast<PositionalBase *>(child);
                     Group *group = dynamic_cast<Group *>(child);
                     if (group)
                     {
@@ -695,7 +695,7 @@ namespace args
                 for (const auto &child: children)
                 {
                     const Group *group = dynamic_cast<Group *>(child);
-                    const PosBase *pos = dynamic_cast<PosBase *>(child);
+                    const PositionalBase *pos = dynamic_cast<PositionalBase *>(child);
                     if (group)
                     {
                         std::vector<std::string> groupNames(group->GetPosNames());
@@ -1216,7 +1216,7 @@ namespace args
                         }
                     } else
                     {
-                        PosBase *pos = GetNextPositional();
+                        PositionalBase *pos = GetNextPositional();
                         if (pos)
                         {
                             pos->ParseValue(chunk);
@@ -1427,11 +1427,55 @@ namespace args
             }
     };
 
+    /** An argument-accepting flag class that pushes the found values into a list
+     * 
+     * \tparam T the type to extract the argument as
+     * \tparam List the list type that houses the values
+     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     */
+    template <
+        typename T,
+        typename List = std::vector<T>,
+        void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    class ValueFlagList : public ValueFlagBase
+    {
+        private:
+            List values;
+
+        public:
+
+            ValueFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ValueFlagBase(name, help, std::move(matcher)), values(defaultValues)
+            {
+                group.Add(*this);
+            }
+
+            virtual ~ValueFlagList() {}
+
+            virtual void ParseValue(const std::string &value) override
+            {
+                values.emplace_back();
+                Reader(name, value, values.back());
+            }
+
+            /** Get the values
+             */
+            List &Get() noexcept
+            {
+                return values;
+            }
+
+            virtual std::string Name() const override
+            {
+                return name + std::string("...");
+            }
+    };
+
     /** A mapping value flag class
      * 
      * \tparam K the type to extract the argument as
-     * \tparam T the type to store the result map as
-     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     * \tparam T the type to store the result as
+     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
     template <typename K, typename T, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
     class MapFlag : public ValueFlagBase
@@ -1473,41 +1517,56 @@ namespace args
             }
     };
 
-    /** An argument-accepting flag class that pushes the found values into a list
+    /** A mapping value flag class
      * 
-     * \tparam T the type to extract the argument as
+     * \tparam K the type to extract the argument as
+     * \tparam T the type to store the result as
      * \tparam List the list type that houses the values
-     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <
-        typename T,
-        typename List = std::vector<T>,
-        void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
-    class ValueFlagList : public ValueFlagBase
+    template <typename K, typename T, typename List = std::vector<T>, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    class MapFlagList : public ValueFlagBase
     {
         private:
+            const Map map;
             List values;
 
         public:
 
-            ValueFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ValueFlagBase(name, help, std::move(matcher)), values(defaultValues)
+            MapFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map &map, const List &defaultValues = List()): ValueFlagBase(name, help, std::move(matcher)), map(map), values(defaultValues)
             {
                 group.Add(*this);
             }
 
-            virtual ~ValueFlagList() {}
+            virtual ~MapFlagList() {}
 
             virtual void ParseValue(const std::string &value) override
             {
-                values.emplace_back();
-                Reader(name, value, values.back());
+                K key;
+                Reader(name, value, key);
+                auto it = map.find(key);
+                if (it == std::end(map))
+                {
+                    std::ostringstream problem;
+                    problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+                    throw MapError(problem.str());
+                } else
+                {
+                    this->values.emplace_back(it->second);
+                }
             }
 
-            /** Get the values
+            /** Get the value
              */
             List &Get() noexcept
             {
                 return values;
+            }
+
+            virtual std::string Name() const override
+            {
+                return name + std::string("...");
             }
     };
 
@@ -1517,12 +1576,12 @@ namespace args
      * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
      */
     template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
-    class Positional : public PosBase
+    class Positional : public PositionalBase
     {
         private:
             T value;
         public:
-            Positional(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PosBase(name, help), value(defaultValue)
+            Positional(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PositionalBase(name, help), value(defaultValue)
             {
                 group.Add(*this);
             }
@@ -1554,13 +1613,13 @@ namespace args
         typename T,
         typename List = std::vector<T>,
         void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
-    class PositionalList : public PosBase
+    class PositionalList : public PositionalBase
     {
         private:
             List values;
 
         public:
-            PositionalList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PosBase(name, help), values(defaultValues)
+            PositionalList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PositionalBase(name, help), values(defaultValues)
             {
                 group.Add(*this);
             }
@@ -1584,6 +1643,109 @@ namespace args
             List &Get() noexcept
             {
                 return values;
+            }
+    };
+
+    /** A positional argument mapping class
+     * 
+     * \tparam K the type to extract the argument as
+     * \tparam T the type to store the result as
+     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
+     */
+    template <typename K, typename T, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    class MapPositional : public PositionalBase
+    {
+        private:
+            const Map map;
+            T value;
+
+        public:
+
+            MapPositional(Group &group, const std::string &name, const std::string &help, const Map &map, const T &defaultValue = T()): PositionalBase(name, help), map(map), value(defaultValue)
+            {
+                group.Add(*this);
+            }
+
+            virtual ~MapPositional() {}
+
+            virtual void ParseValue(const std::string &value) override
+            {
+                K key;
+                Reader(name, value, key);
+                auto it = map.find(key);
+                if (it == std::end(map))
+                {
+                    std::ostringstream problem;
+                    problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+                    throw MapError(problem.str());
+                } else
+                {
+                    this->value = it->second;
+                    ready = false;
+                    matched = true;
+                }
+            }
+
+            /** Get the value
+             */
+            T &Get() noexcept
+            {
+                return value;
+            }
+    };
+
+    /** A mapping value flag class
+     * 
+     * \tparam K the type to extract the argument as
+     * \tparam T the type to store the result as
+     * \tparam List the list type that houses the values
+     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
+     */
+    template <typename K, typename T, typename List = std::vector<T>, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    class MapPositionalList : public PositionalBase
+    {
+        private:
+            const Map map;
+            List values;
+
+        public:
+
+            MapPositionalList(Group &group, const std::string &name, const std::string &help, const Map &map, const List &defaultValues = List()): PositionalBase(name, help), map(map), values(defaultValues)
+            {
+                group.Add(*this);
+            }
+
+            virtual ~MapPositionalList() {}
+
+            virtual void ParseValue(const std::string &value) override
+            {
+                K key;
+                Reader(name, value, key);
+                auto it = map.find(key);
+                if (it == std::end(map))
+                {
+                    std::ostringstream problem;
+                    problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+                    throw MapError(problem.str());
+                } else
+                {
+                    this->values.emplace_back(it->second);
+                    matched = true;
+                }
+            }
+
+            /** Get the value
+             */
+            List &Get() noexcept
+            {
+                return values;
+            }
+
+            virtual std::string Name() const override
+            {
+                return name + std::string("...");
             }
     };
 }
