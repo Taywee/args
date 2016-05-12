@@ -3,7 +3,7 @@
 [![build status](https://gitgud.io/Taywee/args/badges/master/build.svg)](https://gitgud.io/Taywee/args/commits/master)
 
 A simple, small, flexible, single-header C++11 argument parsing library, in
-about 1K lines of code.
+fewer than 2K lines of code.
 
 This is designed to appear somewhat similar to Python's argparse, but in C++,
 with static type checking, and hopefully a lot faster (also allowing fully

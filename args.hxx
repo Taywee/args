@@ -166,19 +166,12 @@ namespace args
             virtual ~ValidationError() {};
     };
 
-    /** Errors that are caused by invalid use of this library
+    /** Errors in map lookups
      */
-    class UsageError : public Error
+    class MapError : public ParseError
     {
         public:
-            UsageError(const std::string &problem) : Error(problem) {}
-            virtual ~UsageError() {};
-    };
-
-    class MapError : public Error
-    {
-        public:
-            MapError(const std::string &problem) : Error(problem) {}
+            MapError(const std::string &problem) : ParseError(problem) {}
             virtual ~MapError() {};
     };
 
@@ -1517,7 +1510,7 @@ namespace args
             }
     };
 
-    /** A mapping value flag class
+    /** A mapping value flag list class
      * 
      * \tparam K the type to extract the argument as
      * \tparam T the type to store the result as
@@ -1695,7 +1688,7 @@ namespace args
             }
     };
 
-    /** A mapping value flag class
+    /** A positional argument mapping list class
      * 
      * \tparam K the type to extract the argument as
      * \tparam T the type to store the result as
