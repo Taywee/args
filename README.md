@@ -872,7 +872,7 @@ int main(int argc, char **argv)
  %                                                                                
 ```
 
-# Mapping positionals
+# Mapping arguments
 
 I haven't written out a long example for this, but here's the test case you should be able to discern the meaning from:
 
