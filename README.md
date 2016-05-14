@@ -738,17 +738,17 @@ int main(int argc, char **argv)
 
 ```shell
  % ./test help
-  ./test {OPTIONS} 
+  ./test {OPTIONS}
 
-    This command likes to break your disks 
+    This command likes to break your disks
 
   OPTIONS:
 
-      help               Show this help menu. 
-      bs BYTES           Block size 
-      skip BYTES         Bytes to skip 
-      if BLOCK_SIZE      Block size 
-      of BLOCK_SIZE      Block size 
+      help                              Show this help menu.
+      bs=[BYTES]                        Block size
+      skip=[BYTES]                      Bytes to skip
+      if=[BLOCK SIZE]                   Block size
+      of=[BLOCK SIZE]                   Block size
 
  % ./test bs=1024 skip=7 if=/tmp/input
 bs = 1024
@@ -767,17 +767,17 @@ parser.LongSeparator(":");
 
 ```shell
  % ./test /help     
-  ./test {OPTIONS} 
+  ./test {OPTIONS}
 
-    This command likes to break your disks 
+    This command likes to break your disks
 
   OPTIONS:
 
-      /help              Show this help menu. 
-      /bs BYTES          Block size 
-      /skip BYTES        Bytes to skip 
-      /if BLOCK_SIZE     Block size 
-      /of BLOCK_SIZE     Block size 
+      /help                             Show this help menu.
+      /bs:[BYTES]                       Block size
+      /skip:[BYTES]                     Bytes to skip
+      /if:[BLOCK SIZE]                  Block size
+      /of:[BLOCK SIZE]                  Block size
 
  % ./test /bs:72 /skip:87 /if:/tmp/test.txt
 bs = 72
