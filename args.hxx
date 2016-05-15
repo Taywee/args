@@ -496,8 +496,8 @@ namespace args
             std::function<bool(const Group &)> validator;
 
         public:
-            Group(const std::string &help, const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
-            Group(Group &group, const std::string &help, const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator)
+            Group(const std::string &help = std::string(), const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
+            Group(Group &group, const std::string &help = std::string(), const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator)
             {
                 group.Add(*this);
             }
@@ -645,16 +645,21 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, unsigned int indent = 0) const
+            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, const unsigned int indent = 0) const
             {
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
                 {
                     if (const Group *group = dynamic_cast<Group *>(child))
                     {
-                        // Push that group description on the back:
-                        descriptions.emplace_back(group->help, "", indent);
-                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + 1));
+                        // Push that group description on the back if not empty
+                        unsigned char addindent = 0;
+                        if (!group->help.empty())
+                        {
+                            descriptions.emplace_back(group->help, "", indent);
+                            addindent = 1;
+                        }
+                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + addindent));
                         descriptions.insert(
                             std::end(descriptions),
                             std::make_move_iterator(std::begin(groupDescriptions)),
@@ -825,7 +830,7 @@ namespace args
                 bool showProglinePositionals = true;
             } helpParams;
             ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
-                Group("options", Group::Validators::AllChildGroups),
+                Group("", Group::Validators::AllChildGroups),
                 description(description),
                 epilog(epilog),
                 longprefix("--"),
