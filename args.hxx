@@ -1435,8 +1435,9 @@ namespace args
 
             virtual void ParseValue(const std::string &value) override
             {
-                values.emplace_back();
-                Reader(name, value, values.back());
+                T v;
+                Reader(name, value, v);
+                values.insert(std::end(values), v);
             }
 
             /** Get the values
@@ -1610,8 +1611,9 @@ namespace args
 
             virtual void ParseValue(const std::string &value) override
             {
-                values.emplace_back();
-                Reader(name, value, values.back());
+                T v;
+                Reader(name, value, v);
+                values.insert(std::end(values), v);
                 matched = true;
             }
 
