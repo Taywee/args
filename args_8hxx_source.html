@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">4.1.4</span>
+   &#160;<span id="projectnumber">4.1.5</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -1272,258 +1272,260 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l01435"></a><span class="lineno"> 1435</span>&#160;</div>
 <div class="line"><a name="l01436"></a><span class="lineno"> 1436</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
 <div class="line"><a name="l01437"></a><span class="lineno"> 1437</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01438"></a><span class="lineno"> 1438</span>&#160;                values.emplace_back();</div>
-<div class="line"><a name="l01439"></a><span class="lineno"> 1439</span>&#160;                Reader(name, value, values.back());</div>
-<div class="line"><a name="l01440"></a><span class="lineno"> 1440</span>&#160;            }</div>
-<div class="line"><a name="l01441"></a><span class="lineno"> 1441</span>&#160;</div>
-<div class="line"><a name="l01444"></a><span class="lineno"><a class="line" href="classargs_1_1ValueFlagList.html#a65c73bb70c999ca150fa9334bd216ef7"> 1444</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1ValueFlagList.html#a65c73bb70c999ca150fa9334bd216ef7">Get</a>() noexcept</div>
-<div class="line"><a name="l01445"></a><span class="lineno"> 1445</span>&#160;            {</div>
-<div class="line"><a name="l01446"></a><span class="lineno"> 1446</span>&#160;                <span class="keywordflow">return</span> values;</div>
-<div class="line"><a name="l01447"></a><span class="lineno"> 1447</span>&#160;            }</div>
-<div class="line"><a name="l01448"></a><span class="lineno"> 1448</span>&#160;</div>
-<div class="line"><a name="l01449"></a><span class="lineno"> 1449</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
-<div class="line"><a name="l01450"></a><span class="lineno"> 1450</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01451"></a><span class="lineno"> 1451</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
-<div class="line"><a name="l01452"></a><span class="lineno"> 1452</span>&#160;            }</div>
-<div class="line"><a name="l01453"></a><span class="lineno"> 1453</span>&#160;    };</div>
-<div class="line"><a name="l01454"></a><span class="lineno"> 1454</span>&#160;</div>
-<div class="line"><a name="l01462"></a><span class="lineno"> 1462</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
-<div class="line"><a name="l01463"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlag.html"> 1463</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapFlag.html">MapFlag</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a></div>
-<div class="line"><a name="l01464"></a><span class="lineno"> 1464</span>&#160;    {</div>
-<div class="line"><a name="l01465"></a><span class="lineno"> 1465</span>&#160;        <span class="keyword">private</span>:</div>
-<div class="line"><a name="l01466"></a><span class="lineno"> 1466</span>&#160;            <span class="keyword">const</span> Map map;</div>
-<div class="line"><a name="l01467"></a><span class="lineno"> 1467</span>&#160;            T value;</div>
-<div class="line"><a name="l01468"></a><span class="lineno"> 1468</span>&#160;</div>
-<div class="line"><a name="l01469"></a><span class="lineno"> 1469</span>&#160;        <span class="keyword">public</span>:</div>
-<div class="line"><a name="l01470"></a><span class="lineno"> 1470</span>&#160;</div>
-<div class="line"><a name="l01471"></a><span class="lineno"> 1471</span>&#160;            <a class="code" href="classargs_1_1MapFlag.html">MapFlag</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <a class="code" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> T &amp;defaultValue = T()): <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a>(name, help, std::move(matcher)), map(map), value(defaultValue)</div>
-<div class="line"><a name="l01472"></a><span class="lineno"> 1472</span>&#160;            {</div>
-<div class="line"><a name="l01473"></a><span class="lineno"> 1473</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a name="l01474"></a><span class="lineno"> 1474</span>&#160;            }</div>
-<div class="line"><a name="l01475"></a><span class="lineno"> 1475</span>&#160;</div>
-<div class="line"><a name="l01476"></a><span class="lineno"> 1476</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapFlag.html">MapFlag</a>() {}</div>
-<div class="line"><a name="l01477"></a><span class="lineno"> 1477</span>&#160;</div>
-<div class="line"><a name="l01478"></a><span class="lineno"> 1478</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
-<div class="line"><a name="l01479"></a><span class="lineno"> 1479</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01480"></a><span class="lineno"> 1480</span>&#160;                K key;</div>
-<div class="line"><a name="l01481"></a><span class="lineno"> 1481</span>&#160;                Reader(name, value, key);</div>
-<div class="line"><a name="l01482"></a><span class="lineno"> 1482</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
-<div class="line"><a name="l01483"></a><span class="lineno"> 1483</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
-<div class="line"><a name="l01484"></a><span class="lineno"> 1484</span>&#160;                {</div>
-<div class="line"><a name="l01485"></a><span class="lineno"> 1485</span>&#160;                    std::ostringstream problem;</div>
-<div class="line"><a name="l01486"></a><span class="lineno"> 1486</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
-<div class="line"><a name="l01487"></a><span class="lineno"> 1487</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
-<div class="line"><a name="l01488"></a><span class="lineno"> 1488</span>&#160;                } <span class="keywordflow">else</span></div>
-<div class="line"><a name="l01489"></a><span class="lineno"> 1489</span>&#160;                {</div>
-<div class="line"><a name="l01490"></a><span class="lineno"> 1490</span>&#160;                    this-&gt;value = it-&gt;second;</div>
-<div class="line"><a name="l01491"></a><span class="lineno"> 1491</span>&#160;                }</div>
-<div class="line"><a name="l01492"></a><span class="lineno"> 1492</span>&#160;            }</div>
-<div class="line"><a name="l01493"></a><span class="lineno"> 1493</span>&#160;</div>
-<div class="line"><a name="l01496"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlag.html#ad4f1db59b839e44157c5eba9b482b75c"> 1496</a></span>&#160;            T &amp;<a class="code" href="classargs_1_1MapFlag.html#ad4f1db59b839e44157c5eba9b482b75c">Get</a>() noexcept</div>
-<div class="line"><a name="l01497"></a><span class="lineno"> 1497</span>&#160;            {</div>
-<div class="line"><a name="l01498"></a><span class="lineno"> 1498</span>&#160;                <span class="keywordflow">return</span> value;</div>
-<div class="line"><a name="l01499"></a><span class="lineno"> 1499</span>&#160;            }</div>
-<div class="line"><a name="l01500"></a><span class="lineno"> 1500</span>&#160;    };</div>
-<div class="line"><a name="l01501"></a><span class="lineno"> 1501</span>&#160;</div>
-<div class="line"><a name="l01510"></a><span class="lineno"> 1510</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keyword">typename</span> List = std::vector&lt;T&gt;, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
-<div class="line"><a name="l01511"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlagList.html"> 1511</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapFlagList.html">MapFlagList</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a></div>
-<div class="line"><a name="l01512"></a><span class="lineno"> 1512</span>&#160;    {</div>
-<div class="line"><a name="l01513"></a><span class="lineno"> 1513</span>&#160;        <span class="keyword">private</span>:</div>
-<div class="line"><a name="l01514"></a><span class="lineno"> 1514</span>&#160;            <span class="keyword">const</span> Map map;</div>
-<div class="line"><a name="l01515"></a><span class="lineno"> 1515</span>&#160;            List values;</div>
-<div class="line"><a name="l01516"></a><span class="lineno"> 1516</span>&#160;</div>
-<div class="line"><a name="l01517"></a><span class="lineno"> 1517</span>&#160;        <span class="keyword">public</span>:</div>
-<div class="line"><a name="l01518"></a><span class="lineno"> 1518</span>&#160;</div>
-<div class="line"><a name="l01519"></a><span class="lineno"> 1519</span>&#160;            <a class="code" href="classargs_1_1MapFlagList.html">MapFlagList</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <a class="code" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> List &amp;defaultValues = List()): <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a>(name, help, std::move(matcher)), map(map), values(defaultValues)</div>
-<div class="line"><a name="l01520"></a><span class="lineno"> 1520</span>&#160;            {</div>
-<div class="line"><a name="l01521"></a><span class="lineno"> 1521</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a name="l01522"></a><span class="lineno"> 1522</span>&#160;            }</div>
-<div class="line"><a name="l01523"></a><span class="lineno"> 1523</span>&#160;</div>
-<div class="line"><a name="l01524"></a><span class="lineno"> 1524</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapFlagList.html">MapFlagList</a>() {}</div>
-<div class="line"><a name="l01525"></a><span class="lineno"> 1525</span>&#160;</div>
-<div class="line"><a name="l01526"></a><span class="lineno"> 1526</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
-<div class="line"><a name="l01527"></a><span class="lineno"> 1527</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01528"></a><span class="lineno"> 1528</span>&#160;                K key;</div>
-<div class="line"><a name="l01529"></a><span class="lineno"> 1529</span>&#160;                Reader(name, value, key);</div>
-<div class="line"><a name="l01530"></a><span class="lineno"> 1530</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
-<div class="line"><a name="l01531"></a><span class="lineno"> 1531</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
-<div class="line"><a name="l01532"></a><span class="lineno"> 1532</span>&#160;                {</div>
-<div class="line"><a name="l01533"></a><span class="lineno"> 1533</span>&#160;                    std::ostringstream problem;</div>
-<div class="line"><a name="l01534"></a><span class="lineno"> 1534</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
-<div class="line"><a name="l01535"></a><span class="lineno"> 1535</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
-<div class="line"><a name="l01536"></a><span class="lineno"> 1536</span>&#160;                } <span class="keywordflow">else</span></div>
-<div class="line"><a name="l01537"></a><span class="lineno"> 1537</span>&#160;                {</div>
-<div class="line"><a name="l01538"></a><span class="lineno"> 1538</span>&#160;                    this-&gt;values.emplace_back(it-&gt;second);</div>
-<div class="line"><a name="l01539"></a><span class="lineno"> 1539</span>&#160;                }</div>
-<div class="line"><a name="l01540"></a><span class="lineno"> 1540</span>&#160;            }</div>
-<div class="line"><a name="l01541"></a><span class="lineno"> 1541</span>&#160;</div>
-<div class="line"><a name="l01544"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlagList.html#a2524f5b58aa7978b65a572431a594c25"> 1544</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1MapFlagList.html#a2524f5b58aa7978b65a572431a594c25">Get</a>() noexcept</div>
-<div class="line"><a name="l01545"></a><span class="lineno"> 1545</span>&#160;            {</div>
-<div class="line"><a name="l01546"></a><span class="lineno"> 1546</span>&#160;                <span class="keywordflow">return</span> values;</div>
-<div class="line"><a name="l01547"></a><span class="lineno"> 1547</span>&#160;            }</div>
-<div class="line"><a name="l01548"></a><span class="lineno"> 1548</span>&#160;</div>
-<div class="line"><a name="l01549"></a><span class="lineno"> 1549</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
-<div class="line"><a name="l01550"></a><span class="lineno"> 1550</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01551"></a><span class="lineno"> 1551</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
-<div class="line"><a name="l01552"></a><span class="lineno"> 1552</span>&#160;            }</div>
-<div class="line"><a name="l01553"></a><span class="lineno"> 1553</span>&#160;    };</div>
-<div class="line"><a name="l01554"></a><span class="lineno"> 1554</span>&#160;</div>
-<div class="line"><a name="l01560"></a><span class="lineno"> 1560</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, T&amp;) = ValueReader&lt;T&gt;&gt;</div>
-<div class="line"><a name="l01561"></a><span class="lineno"><a class="line" href="classargs_1_1Positional.html"> 1561</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1Positional.html">Positional</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
-<div class="line"><a name="l01562"></a><span class="lineno"> 1562</span>&#160;    {</div>
-<div class="line"><a name="l01563"></a><span class="lineno"> 1563</span>&#160;        <span class="keyword">private</span>:</div>
-<div class="line"><a name="l01564"></a><span class="lineno"> 1564</span>&#160;            T value;</div>
-<div class="line"><a name="l01565"></a><span class="lineno"> 1565</span>&#160;        <span class="keyword">public</span>:</div>
-<div class="line"><a name="l01566"></a><span class="lineno"> 1566</span>&#160;            <a class="code" href="classargs_1_1Positional.html">Positional</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> T &amp;defaultValue = T()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), value(defaultValue)</div>
-<div class="line"><a name="l01567"></a><span class="lineno"> 1567</span>&#160;            {</div>
-<div class="line"><a name="l01568"></a><span class="lineno"> 1568</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a name="l01569"></a><span class="lineno"> 1569</span>&#160;            }</div>
-<div class="line"><a name="l01570"></a><span class="lineno"> 1570</span>&#160;</div>
-<div class="line"><a name="l01571"></a><span class="lineno"> 1571</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1Positional.html">Positional</a>() {}</div>
-<div class="line"><a name="l01572"></a><span class="lineno"> 1572</span>&#160;</div>
-<div class="line"><a name="l01573"></a><span class="lineno"> 1573</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
-<div class="line"><a name="l01574"></a><span class="lineno"> 1574</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01575"></a><span class="lineno"> 1575</span>&#160;                Reader(name, value, this-&gt;value);</div>
-<div class="line"><a name="l01576"></a><span class="lineno"> 1576</span>&#160;                ready = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l01577"></a><span class="lineno"> 1577</span>&#160;                matched = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l01578"></a><span class="lineno"> 1578</span>&#160;            }</div>
-<div class="line"><a name="l01579"></a><span class="lineno"> 1579</span>&#160;</div>
-<div class="line"><a name="l01582"></a><span class="lineno"><a class="line" href="classargs_1_1Positional.html#ad96c622414ac070fe2ac95363ee1810a"> 1582</a></span>&#160;            T &amp;<a class="code" href="classargs_1_1Positional.html#ad96c622414ac070fe2ac95363ee1810a">Get</a>() noexcept</div>
-<div class="line"><a name="l01583"></a><span class="lineno"> 1583</span>&#160;            {</div>
-<div class="line"><a name="l01584"></a><span class="lineno"> 1584</span>&#160;                <span class="keywordflow">return</span> value;</div>
-<div class="line"><a name="l01585"></a><span class="lineno"> 1585</span>&#160;            }</div>
-<div class="line"><a name="l01586"></a><span class="lineno"> 1586</span>&#160;    };</div>
-<div class="line"><a name="l01587"></a><span class="lineno"> 1587</span>&#160;</div>
-<div class="line"><a name="l01594"></a><span class="lineno"> 1594</span>&#160;    <span class="keyword">template</span> &lt;</div>
-<div class="line"><a name="l01595"></a><span class="lineno"> 1595</span>&#160;        <span class="keyword">typename</span> T,</div>
-<div class="line"><a name="l01596"></a><span class="lineno"> 1596</span>&#160;        <span class="keyword">typename</span> List = std::vector&lt;T&gt;,</div>
-<div class="line"><a name="l01597"></a><span class="lineno"> 1597</span>&#160;        void (*Reader)(<span class="keyword">const</span> std::string &amp;, <span class="keyword">const</span> std::string &amp;, T&amp;) = ValueReader&lt;T&gt;&gt;</div>
-<div class="line"><a name="l01598"></a><span class="lineno"><a class="line" href="classargs_1_1PositionalList.html"> 1598</a></span>&#160;    <span class="keyword">class</span> <a class="code" href="classargs_1_1PositionalList.html">PositionalList</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
-<div class="line"><a name="l01599"></a><span class="lineno"> 1599</span>&#160;    {</div>
-<div class="line"><a name="l01600"></a><span class="lineno"> 1600</span>&#160;        <span class="keyword">private</span>:</div>
-<div class="line"><a name="l01601"></a><span class="lineno"> 1601</span>&#160;            List values;</div>
-<div class="line"><a name="l01602"></a><span class="lineno"> 1602</span>&#160;</div>
-<div class="line"><a name="l01603"></a><span class="lineno"> 1603</span>&#160;        <span class="keyword">public</span>:</div>
-<div class="line"><a name="l01604"></a><span class="lineno"> 1604</span>&#160;            <a class="code" href="classargs_1_1PositionalList.html">PositionalList</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> List &amp;defaultValues = List()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), values(defaultValues)</div>
-<div class="line"><a name="l01605"></a><span class="lineno"> 1605</span>&#160;            {</div>
-<div class="line"><a name="l01606"></a><span class="lineno"> 1606</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a name="l01607"></a><span class="lineno"> 1607</span>&#160;            }</div>
-<div class="line"><a name="l01608"></a><span class="lineno"> 1608</span>&#160;</div>
-<div class="line"><a name="l01609"></a><span class="lineno"> 1609</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1PositionalList.html">PositionalList</a>() {}</div>
-<div class="line"><a name="l01610"></a><span class="lineno"> 1610</span>&#160;</div>
-<div class="line"><a name="l01611"></a><span class="lineno"> 1611</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
-<div class="line"><a name="l01612"></a><span class="lineno"> 1612</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01613"></a><span class="lineno"> 1613</span>&#160;                values.emplace_back();</div>
-<div class="line"><a name="l01614"></a><span class="lineno"> 1614</span>&#160;                Reader(name, value, values.back());</div>
-<div class="line"><a name="l01615"></a><span class="lineno"> 1615</span>&#160;                matched = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l01616"></a><span class="lineno"> 1616</span>&#160;            }</div>
-<div class="line"><a name="l01617"></a><span class="lineno"> 1617</span>&#160;</div>
-<div class="line"><a name="l01618"></a><span class="lineno"> 1618</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
-<div class="line"><a name="l01619"></a><span class="lineno"> 1619</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01620"></a><span class="lineno"> 1620</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
-<div class="line"><a name="l01621"></a><span class="lineno"> 1621</span>&#160;            }</div>
-<div class="line"><a name="l01622"></a><span class="lineno"> 1622</span>&#160;</div>
-<div class="line"><a name="l01625"></a><span class="lineno"><a class="line" href="classargs_1_1PositionalList.html#a3326d6ead9deb09f0ed3e42af66d970a"> 1625</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1PositionalList.html#a3326d6ead9deb09f0ed3e42af66d970a">Get</a>() noexcept</div>
-<div class="line"><a name="l01626"></a><span class="lineno"> 1626</span>&#160;            {</div>
-<div class="line"><a name="l01627"></a><span class="lineno"> 1627</span>&#160;                <span class="keywordflow">return</span> values;</div>
-<div class="line"><a name="l01628"></a><span class="lineno"> 1628</span>&#160;            }</div>
-<div class="line"><a name="l01629"></a><span class="lineno"> 1629</span>&#160;    };</div>
-<div class="line"><a name="l01630"></a><span class="lineno"> 1630</span>&#160;</div>
-<div class="line"><a name="l01638"></a><span class="lineno"> 1638</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
-<div class="line"><a name="l01639"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositional.html"> 1639</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapPositional.html">MapPositional</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
-<div class="line"><a name="l01640"></a><span class="lineno"> 1640</span>&#160;    {</div>
-<div class="line"><a name="l01641"></a><span class="lineno"> 1641</span>&#160;        <span class="keyword">private</span>:</div>
-<div class="line"><a name="l01642"></a><span class="lineno"> 1642</span>&#160;            <span class="keyword">const</span> Map map;</div>
-<div class="line"><a name="l01643"></a><span class="lineno"> 1643</span>&#160;            T value;</div>
-<div class="line"><a name="l01644"></a><span class="lineno"> 1644</span>&#160;</div>
-<div class="line"><a name="l01645"></a><span class="lineno"> 1645</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01438"></a><span class="lineno"> 1438</span>&#160;                T v;</div>
+<div class="line"><a name="l01439"></a><span class="lineno"> 1439</span>&#160;                Reader(name, value, v);</div>
+<div class="line"><a name="l01440"></a><span class="lineno"> 1440</span>&#160;                values.insert(std::end(values), v);</div>
+<div class="line"><a name="l01441"></a><span class="lineno"> 1441</span>&#160;            }</div>
+<div class="line"><a name="l01442"></a><span class="lineno"> 1442</span>&#160;</div>
+<div class="line"><a name="l01445"></a><span class="lineno"><a class="line" href="classargs_1_1ValueFlagList.html#a65c73bb70c999ca150fa9334bd216ef7"> 1445</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1ValueFlagList.html#a65c73bb70c999ca150fa9334bd216ef7">Get</a>() noexcept</div>
+<div class="line"><a name="l01446"></a><span class="lineno"> 1446</span>&#160;            {</div>
+<div class="line"><a name="l01447"></a><span class="lineno"> 1447</span>&#160;                <span class="keywordflow">return</span> values;</div>
+<div class="line"><a name="l01448"></a><span class="lineno"> 1448</span>&#160;            }</div>
+<div class="line"><a name="l01449"></a><span class="lineno"> 1449</span>&#160;</div>
+<div class="line"><a name="l01450"></a><span class="lineno"> 1450</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
+<div class="line"><a name="l01451"></a><span class="lineno"> 1451</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01452"></a><span class="lineno"> 1452</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
+<div class="line"><a name="l01453"></a><span class="lineno"> 1453</span>&#160;            }</div>
+<div class="line"><a name="l01454"></a><span class="lineno"> 1454</span>&#160;    };</div>
+<div class="line"><a name="l01455"></a><span class="lineno"> 1455</span>&#160;</div>
+<div class="line"><a name="l01463"></a><span class="lineno"> 1463</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
+<div class="line"><a name="l01464"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlag.html"> 1464</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapFlag.html">MapFlag</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a></div>
+<div class="line"><a name="l01465"></a><span class="lineno"> 1465</span>&#160;    {</div>
+<div class="line"><a name="l01466"></a><span class="lineno"> 1466</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l01467"></a><span class="lineno"> 1467</span>&#160;            <span class="keyword">const</span> Map map;</div>
+<div class="line"><a name="l01468"></a><span class="lineno"> 1468</span>&#160;            T value;</div>
+<div class="line"><a name="l01469"></a><span class="lineno"> 1469</span>&#160;</div>
+<div class="line"><a name="l01470"></a><span class="lineno"> 1470</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01471"></a><span class="lineno"> 1471</span>&#160;</div>
+<div class="line"><a name="l01472"></a><span class="lineno"> 1472</span>&#160;            <a class="code" href="classargs_1_1MapFlag.html">MapFlag</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <a class="code" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> T &amp;defaultValue = T()): <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a>(name, help, std::move(matcher)), map(map), value(defaultValue)</div>
+<div class="line"><a name="l01473"></a><span class="lineno"> 1473</span>&#160;            {</div>
+<div class="line"><a name="l01474"></a><span class="lineno"> 1474</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a name="l01475"></a><span class="lineno"> 1475</span>&#160;            }</div>
+<div class="line"><a name="l01476"></a><span class="lineno"> 1476</span>&#160;</div>
+<div class="line"><a name="l01477"></a><span class="lineno"> 1477</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapFlag.html">MapFlag</a>() {}</div>
+<div class="line"><a name="l01478"></a><span class="lineno"> 1478</span>&#160;</div>
+<div class="line"><a name="l01479"></a><span class="lineno"> 1479</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
+<div class="line"><a name="l01480"></a><span class="lineno"> 1480</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01481"></a><span class="lineno"> 1481</span>&#160;                K key;</div>
+<div class="line"><a name="l01482"></a><span class="lineno"> 1482</span>&#160;                Reader(name, value, key);</div>
+<div class="line"><a name="l01483"></a><span class="lineno"> 1483</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
+<div class="line"><a name="l01484"></a><span class="lineno"> 1484</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
+<div class="line"><a name="l01485"></a><span class="lineno"> 1485</span>&#160;                {</div>
+<div class="line"><a name="l01486"></a><span class="lineno"> 1486</span>&#160;                    std::ostringstream problem;</div>
+<div class="line"><a name="l01487"></a><span class="lineno"> 1487</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
+<div class="line"><a name="l01488"></a><span class="lineno"> 1488</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
+<div class="line"><a name="l01489"></a><span class="lineno"> 1489</span>&#160;                } <span class="keywordflow">else</span></div>
+<div class="line"><a name="l01490"></a><span class="lineno"> 1490</span>&#160;                {</div>
+<div class="line"><a name="l01491"></a><span class="lineno"> 1491</span>&#160;                    this-&gt;value = it-&gt;second;</div>
+<div class="line"><a name="l01492"></a><span class="lineno"> 1492</span>&#160;                }</div>
+<div class="line"><a name="l01493"></a><span class="lineno"> 1493</span>&#160;            }</div>
+<div class="line"><a name="l01494"></a><span class="lineno"> 1494</span>&#160;</div>
+<div class="line"><a name="l01497"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlag.html#ad4f1db59b839e44157c5eba9b482b75c"> 1497</a></span>&#160;            T &amp;<a class="code" href="classargs_1_1MapFlag.html#ad4f1db59b839e44157c5eba9b482b75c">Get</a>() noexcept</div>
+<div class="line"><a name="l01498"></a><span class="lineno"> 1498</span>&#160;            {</div>
+<div class="line"><a name="l01499"></a><span class="lineno"> 1499</span>&#160;                <span class="keywordflow">return</span> value;</div>
+<div class="line"><a name="l01500"></a><span class="lineno"> 1500</span>&#160;            }</div>
+<div class="line"><a name="l01501"></a><span class="lineno"> 1501</span>&#160;    };</div>
+<div class="line"><a name="l01502"></a><span class="lineno"> 1502</span>&#160;</div>
+<div class="line"><a name="l01511"></a><span class="lineno"> 1511</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keyword">typename</span> List = std::vector&lt;T&gt;, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
+<div class="line"><a name="l01512"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlagList.html"> 1512</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapFlagList.html">MapFlagList</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a></div>
+<div class="line"><a name="l01513"></a><span class="lineno"> 1513</span>&#160;    {</div>
+<div class="line"><a name="l01514"></a><span class="lineno"> 1514</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l01515"></a><span class="lineno"> 1515</span>&#160;            <span class="keyword">const</span> Map map;</div>
+<div class="line"><a name="l01516"></a><span class="lineno"> 1516</span>&#160;            List values;</div>
+<div class="line"><a name="l01517"></a><span class="lineno"> 1517</span>&#160;</div>
+<div class="line"><a name="l01518"></a><span class="lineno"> 1518</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01519"></a><span class="lineno"> 1519</span>&#160;</div>
+<div class="line"><a name="l01520"></a><span class="lineno"> 1520</span>&#160;            <a class="code" href="classargs_1_1MapFlagList.html">MapFlagList</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <a class="code" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> List &amp;defaultValues = List()): <a class="code" href="classargs_1_1ValueFlagBase.html">ValueFlagBase</a>(name, help, std::move(matcher)), map(map), values(defaultValues)</div>
+<div class="line"><a name="l01521"></a><span class="lineno"> 1521</span>&#160;            {</div>
+<div class="line"><a name="l01522"></a><span class="lineno"> 1522</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a name="l01523"></a><span class="lineno"> 1523</span>&#160;            }</div>
+<div class="line"><a name="l01524"></a><span class="lineno"> 1524</span>&#160;</div>
+<div class="line"><a name="l01525"></a><span class="lineno"> 1525</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapFlagList.html">MapFlagList</a>() {}</div>
+<div class="line"><a name="l01526"></a><span class="lineno"> 1526</span>&#160;</div>
+<div class="line"><a name="l01527"></a><span class="lineno"> 1527</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
+<div class="line"><a name="l01528"></a><span class="lineno"> 1528</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01529"></a><span class="lineno"> 1529</span>&#160;                K key;</div>
+<div class="line"><a name="l01530"></a><span class="lineno"> 1530</span>&#160;                Reader(name, value, key);</div>
+<div class="line"><a name="l01531"></a><span class="lineno"> 1531</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
+<div class="line"><a name="l01532"></a><span class="lineno"> 1532</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
+<div class="line"><a name="l01533"></a><span class="lineno"> 1533</span>&#160;                {</div>
+<div class="line"><a name="l01534"></a><span class="lineno"> 1534</span>&#160;                    std::ostringstream problem;</div>
+<div class="line"><a name="l01535"></a><span class="lineno"> 1535</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
+<div class="line"><a name="l01536"></a><span class="lineno"> 1536</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
+<div class="line"><a name="l01537"></a><span class="lineno"> 1537</span>&#160;                } <span class="keywordflow">else</span></div>
+<div class="line"><a name="l01538"></a><span class="lineno"> 1538</span>&#160;                {</div>
+<div class="line"><a name="l01539"></a><span class="lineno"> 1539</span>&#160;                    this-&gt;values.emplace_back(it-&gt;second);</div>
+<div class="line"><a name="l01540"></a><span class="lineno"> 1540</span>&#160;                }</div>
+<div class="line"><a name="l01541"></a><span class="lineno"> 1541</span>&#160;            }</div>
+<div class="line"><a name="l01542"></a><span class="lineno"> 1542</span>&#160;</div>
+<div class="line"><a name="l01545"></a><span class="lineno"><a class="line" href="classargs_1_1MapFlagList.html#a2524f5b58aa7978b65a572431a594c25"> 1545</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1MapFlagList.html#a2524f5b58aa7978b65a572431a594c25">Get</a>() noexcept</div>
+<div class="line"><a name="l01546"></a><span class="lineno"> 1546</span>&#160;            {</div>
+<div class="line"><a name="l01547"></a><span class="lineno"> 1547</span>&#160;                <span class="keywordflow">return</span> values;</div>
+<div class="line"><a name="l01548"></a><span class="lineno"> 1548</span>&#160;            }</div>
+<div class="line"><a name="l01549"></a><span class="lineno"> 1549</span>&#160;</div>
+<div class="line"><a name="l01550"></a><span class="lineno"> 1550</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
+<div class="line"><a name="l01551"></a><span class="lineno"> 1551</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01552"></a><span class="lineno"> 1552</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
+<div class="line"><a name="l01553"></a><span class="lineno"> 1553</span>&#160;            }</div>
+<div class="line"><a name="l01554"></a><span class="lineno"> 1554</span>&#160;    };</div>
+<div class="line"><a name="l01555"></a><span class="lineno"> 1555</span>&#160;</div>
+<div class="line"><a name="l01561"></a><span class="lineno"> 1561</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, T&amp;) = ValueReader&lt;T&gt;&gt;</div>
+<div class="line"><a name="l01562"></a><span class="lineno"><a class="line" href="classargs_1_1Positional.html"> 1562</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1Positional.html">Positional</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
+<div class="line"><a name="l01563"></a><span class="lineno"> 1563</span>&#160;    {</div>
+<div class="line"><a name="l01564"></a><span class="lineno"> 1564</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l01565"></a><span class="lineno"> 1565</span>&#160;            T value;</div>
+<div class="line"><a name="l01566"></a><span class="lineno"> 1566</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01567"></a><span class="lineno"> 1567</span>&#160;            <a class="code" href="classargs_1_1Positional.html">Positional</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> T &amp;defaultValue = T()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), value(defaultValue)</div>
+<div class="line"><a name="l01568"></a><span class="lineno"> 1568</span>&#160;            {</div>
+<div class="line"><a name="l01569"></a><span class="lineno"> 1569</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a name="l01570"></a><span class="lineno"> 1570</span>&#160;            }</div>
+<div class="line"><a name="l01571"></a><span class="lineno"> 1571</span>&#160;</div>
+<div class="line"><a name="l01572"></a><span class="lineno"> 1572</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1Positional.html">Positional</a>() {}</div>
+<div class="line"><a name="l01573"></a><span class="lineno"> 1573</span>&#160;</div>
+<div class="line"><a name="l01574"></a><span class="lineno"> 1574</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
+<div class="line"><a name="l01575"></a><span class="lineno"> 1575</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01576"></a><span class="lineno"> 1576</span>&#160;                Reader(name, value, this-&gt;value);</div>
+<div class="line"><a name="l01577"></a><span class="lineno"> 1577</span>&#160;                ready = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l01578"></a><span class="lineno"> 1578</span>&#160;                matched = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l01579"></a><span class="lineno"> 1579</span>&#160;            }</div>
+<div class="line"><a name="l01580"></a><span class="lineno"> 1580</span>&#160;</div>
+<div class="line"><a name="l01583"></a><span class="lineno"><a class="line" href="classargs_1_1Positional.html#ad96c622414ac070fe2ac95363ee1810a"> 1583</a></span>&#160;            T &amp;<a class="code" href="classargs_1_1Positional.html#ad96c622414ac070fe2ac95363ee1810a">Get</a>() noexcept</div>
+<div class="line"><a name="l01584"></a><span class="lineno"> 1584</span>&#160;            {</div>
+<div class="line"><a name="l01585"></a><span class="lineno"> 1585</span>&#160;                <span class="keywordflow">return</span> value;</div>
+<div class="line"><a name="l01586"></a><span class="lineno"> 1586</span>&#160;            }</div>
+<div class="line"><a name="l01587"></a><span class="lineno"> 1587</span>&#160;    };</div>
+<div class="line"><a name="l01588"></a><span class="lineno"> 1588</span>&#160;</div>
+<div class="line"><a name="l01595"></a><span class="lineno"> 1595</span>&#160;    <span class="keyword">template</span> &lt;</div>
+<div class="line"><a name="l01596"></a><span class="lineno"> 1596</span>&#160;        <span class="keyword">typename</span> T,</div>
+<div class="line"><a name="l01597"></a><span class="lineno"> 1597</span>&#160;        <span class="keyword">typename</span> List = std::vector&lt;T&gt;,</div>
+<div class="line"><a name="l01598"></a><span class="lineno"> 1598</span>&#160;        void (*Reader)(<span class="keyword">const</span> std::string &amp;, <span class="keyword">const</span> std::string &amp;, T&amp;) = ValueReader&lt;T&gt;&gt;</div>
+<div class="line"><a name="l01599"></a><span class="lineno"><a class="line" href="classargs_1_1PositionalList.html"> 1599</a></span>&#160;    <span class="keyword">class</span> <a class="code" href="classargs_1_1PositionalList.html">PositionalList</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
+<div class="line"><a name="l01600"></a><span class="lineno"> 1600</span>&#160;    {</div>
+<div class="line"><a name="l01601"></a><span class="lineno"> 1601</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l01602"></a><span class="lineno"> 1602</span>&#160;            List values;</div>
+<div class="line"><a name="l01603"></a><span class="lineno"> 1603</span>&#160;</div>
+<div class="line"><a name="l01604"></a><span class="lineno"> 1604</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01605"></a><span class="lineno"> 1605</span>&#160;            <a class="code" href="classargs_1_1PositionalList.html">PositionalList</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> List &amp;defaultValues = List()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), values(defaultValues)</div>
+<div class="line"><a name="l01606"></a><span class="lineno"> 1606</span>&#160;            {</div>
+<div class="line"><a name="l01607"></a><span class="lineno"> 1607</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a name="l01608"></a><span class="lineno"> 1608</span>&#160;            }</div>
+<div class="line"><a name="l01609"></a><span class="lineno"> 1609</span>&#160;</div>
+<div class="line"><a name="l01610"></a><span class="lineno"> 1610</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1PositionalList.html">PositionalList</a>() {}</div>
+<div class="line"><a name="l01611"></a><span class="lineno"> 1611</span>&#160;</div>
+<div class="line"><a name="l01612"></a><span class="lineno"> 1612</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
+<div class="line"><a name="l01613"></a><span class="lineno"> 1613</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01614"></a><span class="lineno"> 1614</span>&#160;                T v;</div>
+<div class="line"><a name="l01615"></a><span class="lineno"> 1615</span>&#160;                Reader(name, value, v);</div>
+<div class="line"><a name="l01616"></a><span class="lineno"> 1616</span>&#160;                values.insert(std::end(values), v);</div>
+<div class="line"><a name="l01617"></a><span class="lineno"> 1617</span>&#160;                matched = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l01618"></a><span class="lineno"> 1618</span>&#160;            }</div>
+<div class="line"><a name="l01619"></a><span class="lineno"> 1619</span>&#160;</div>
+<div class="line"><a name="l01620"></a><span class="lineno"> 1620</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
+<div class="line"><a name="l01621"></a><span class="lineno"> 1621</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01622"></a><span class="lineno"> 1622</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
+<div class="line"><a name="l01623"></a><span class="lineno"> 1623</span>&#160;            }</div>
+<div class="line"><a name="l01624"></a><span class="lineno"> 1624</span>&#160;</div>
+<div class="line"><a name="l01627"></a><span class="lineno"><a class="line" href="classargs_1_1PositionalList.html#a3326d6ead9deb09f0ed3e42af66d970a"> 1627</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1PositionalList.html#a3326d6ead9deb09f0ed3e42af66d970a">Get</a>() noexcept</div>
+<div class="line"><a name="l01628"></a><span class="lineno"> 1628</span>&#160;            {</div>
+<div class="line"><a name="l01629"></a><span class="lineno"> 1629</span>&#160;                <span class="keywordflow">return</span> values;</div>
+<div class="line"><a name="l01630"></a><span class="lineno"> 1630</span>&#160;            }</div>
+<div class="line"><a name="l01631"></a><span class="lineno"> 1631</span>&#160;    };</div>
+<div class="line"><a name="l01632"></a><span class="lineno"> 1632</span>&#160;</div>
+<div class="line"><a name="l01640"></a><span class="lineno"> 1640</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
+<div class="line"><a name="l01641"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositional.html"> 1641</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapPositional.html">MapPositional</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
+<div class="line"><a name="l01642"></a><span class="lineno"> 1642</span>&#160;    {</div>
+<div class="line"><a name="l01643"></a><span class="lineno"> 1643</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l01644"></a><span class="lineno"> 1644</span>&#160;            <span class="keyword">const</span> Map map;</div>
+<div class="line"><a name="l01645"></a><span class="lineno"> 1645</span>&#160;            T value;</div>
 <div class="line"><a name="l01646"></a><span class="lineno"> 1646</span>&#160;</div>
-<div class="line"><a name="l01647"></a><span class="lineno"> 1647</span>&#160;            <a class="code" href="classargs_1_1MapPositional.html">MapPositional</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> T &amp;defaultValue = T()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), map(map), value(defaultValue)</div>
-<div class="line"><a name="l01648"></a><span class="lineno"> 1648</span>&#160;            {</div>
-<div class="line"><a name="l01649"></a><span class="lineno"> 1649</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a name="l01650"></a><span class="lineno"> 1650</span>&#160;            }</div>
-<div class="line"><a name="l01651"></a><span class="lineno"> 1651</span>&#160;</div>
-<div class="line"><a name="l01652"></a><span class="lineno"> 1652</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapPositional.html">MapPositional</a>() {}</div>
+<div class="line"><a name="l01647"></a><span class="lineno"> 1647</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01648"></a><span class="lineno"> 1648</span>&#160;</div>
+<div class="line"><a name="l01649"></a><span class="lineno"> 1649</span>&#160;            <a class="code" href="classargs_1_1MapPositional.html">MapPositional</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> T &amp;defaultValue = T()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), map(map), value(defaultValue)</div>
+<div class="line"><a name="l01650"></a><span class="lineno"> 1650</span>&#160;            {</div>
+<div class="line"><a name="l01651"></a><span class="lineno"> 1651</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a name="l01652"></a><span class="lineno"> 1652</span>&#160;            }</div>
 <div class="line"><a name="l01653"></a><span class="lineno"> 1653</span>&#160;</div>
-<div class="line"><a name="l01654"></a><span class="lineno"> 1654</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
-<div class="line"><a name="l01655"></a><span class="lineno"> 1655</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01656"></a><span class="lineno"> 1656</span>&#160;                K key;</div>
-<div class="line"><a name="l01657"></a><span class="lineno"> 1657</span>&#160;                Reader(name, value, key);</div>
-<div class="line"><a name="l01658"></a><span class="lineno"> 1658</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
-<div class="line"><a name="l01659"></a><span class="lineno"> 1659</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
-<div class="line"><a name="l01660"></a><span class="lineno"> 1660</span>&#160;                {</div>
-<div class="line"><a name="l01661"></a><span class="lineno"> 1661</span>&#160;                    std::ostringstream problem;</div>
-<div class="line"><a name="l01662"></a><span class="lineno"> 1662</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
-<div class="line"><a name="l01663"></a><span class="lineno"> 1663</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
-<div class="line"><a name="l01664"></a><span class="lineno"> 1664</span>&#160;                } <span class="keywordflow">else</span></div>
-<div class="line"><a name="l01665"></a><span class="lineno"> 1665</span>&#160;                {</div>
-<div class="line"><a name="l01666"></a><span class="lineno"> 1666</span>&#160;                    this-&gt;value = it-&gt;second;</div>
-<div class="line"><a name="l01667"></a><span class="lineno"> 1667</span>&#160;                    ready = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l01668"></a><span class="lineno"> 1668</span>&#160;                    matched = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l01669"></a><span class="lineno"> 1669</span>&#160;                }</div>
-<div class="line"><a name="l01670"></a><span class="lineno"> 1670</span>&#160;            }</div>
-<div class="line"><a name="l01671"></a><span class="lineno"> 1671</span>&#160;</div>
-<div class="line"><a name="l01674"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositional.html#a46e4f230ddbca26b7eb849fd3d87510d"> 1674</a></span>&#160;            T &amp;<a class="code" href="classargs_1_1MapPositional.html#a46e4f230ddbca26b7eb849fd3d87510d">Get</a>() noexcept</div>
-<div class="line"><a name="l01675"></a><span class="lineno"> 1675</span>&#160;            {</div>
-<div class="line"><a name="l01676"></a><span class="lineno"> 1676</span>&#160;                <span class="keywordflow">return</span> value;</div>
-<div class="line"><a name="l01677"></a><span class="lineno"> 1677</span>&#160;            }</div>
-<div class="line"><a name="l01678"></a><span class="lineno"> 1678</span>&#160;    };</div>
-<div class="line"><a name="l01679"></a><span class="lineno"> 1679</span>&#160;</div>
-<div class="line"><a name="l01688"></a><span class="lineno"> 1688</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keyword">typename</span> List = std::vector&lt;T&gt;, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
-<div class="line"><a name="l01689"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositionalList.html"> 1689</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapPositionalList.html">MapPositionalList</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
-<div class="line"><a name="l01690"></a><span class="lineno"> 1690</span>&#160;    {</div>
-<div class="line"><a name="l01691"></a><span class="lineno"> 1691</span>&#160;        <span class="keyword">private</span>:</div>
-<div class="line"><a name="l01692"></a><span class="lineno"> 1692</span>&#160;            <span class="keyword">const</span> Map map;</div>
-<div class="line"><a name="l01693"></a><span class="lineno"> 1693</span>&#160;            List values;</div>
-<div class="line"><a name="l01694"></a><span class="lineno"> 1694</span>&#160;</div>
-<div class="line"><a name="l01695"></a><span class="lineno"> 1695</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01654"></a><span class="lineno"> 1654</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapPositional.html">MapPositional</a>() {}</div>
+<div class="line"><a name="l01655"></a><span class="lineno"> 1655</span>&#160;</div>
+<div class="line"><a name="l01656"></a><span class="lineno"> 1656</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
+<div class="line"><a name="l01657"></a><span class="lineno"> 1657</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01658"></a><span class="lineno"> 1658</span>&#160;                K key;</div>
+<div class="line"><a name="l01659"></a><span class="lineno"> 1659</span>&#160;                Reader(name, value, key);</div>
+<div class="line"><a name="l01660"></a><span class="lineno"> 1660</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
+<div class="line"><a name="l01661"></a><span class="lineno"> 1661</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
+<div class="line"><a name="l01662"></a><span class="lineno"> 1662</span>&#160;                {</div>
+<div class="line"><a name="l01663"></a><span class="lineno"> 1663</span>&#160;                    std::ostringstream problem;</div>
+<div class="line"><a name="l01664"></a><span class="lineno"> 1664</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
+<div class="line"><a name="l01665"></a><span class="lineno"> 1665</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
+<div class="line"><a name="l01666"></a><span class="lineno"> 1666</span>&#160;                } <span class="keywordflow">else</span></div>
+<div class="line"><a name="l01667"></a><span class="lineno"> 1667</span>&#160;                {</div>
+<div class="line"><a name="l01668"></a><span class="lineno"> 1668</span>&#160;                    this-&gt;value = it-&gt;second;</div>
+<div class="line"><a name="l01669"></a><span class="lineno"> 1669</span>&#160;                    ready = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l01670"></a><span class="lineno"> 1670</span>&#160;                    matched = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l01671"></a><span class="lineno"> 1671</span>&#160;                }</div>
+<div class="line"><a name="l01672"></a><span class="lineno"> 1672</span>&#160;            }</div>
+<div class="line"><a name="l01673"></a><span class="lineno"> 1673</span>&#160;</div>
+<div class="line"><a name="l01676"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositional.html#a46e4f230ddbca26b7eb849fd3d87510d"> 1676</a></span>&#160;            T &amp;<a class="code" href="classargs_1_1MapPositional.html#a46e4f230ddbca26b7eb849fd3d87510d">Get</a>() noexcept</div>
+<div class="line"><a name="l01677"></a><span class="lineno"> 1677</span>&#160;            {</div>
+<div class="line"><a name="l01678"></a><span class="lineno"> 1678</span>&#160;                <span class="keywordflow">return</span> value;</div>
+<div class="line"><a name="l01679"></a><span class="lineno"> 1679</span>&#160;            }</div>
+<div class="line"><a name="l01680"></a><span class="lineno"> 1680</span>&#160;    };</div>
+<div class="line"><a name="l01681"></a><span class="lineno"> 1681</span>&#160;</div>
+<div class="line"><a name="l01690"></a><span class="lineno"> 1690</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> T, <span class="keyword">typename</span> List = std::vector&lt;T&gt;, <span class="keywordtype">void</span> (*Reader)(const std::<span class="keywordtype">string</span> &amp;, const std::<span class="keywordtype">string</span> &amp;, K&amp;) = ValueReader&lt;K&gt;, <span class="keyword">typename</span> Map = std::unordered_map&lt;K, T&gt;&gt;</div>
+<div class="line"><a name="l01691"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositionalList.html"> 1691</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classargs_1_1MapPositionalList.html">MapPositionalList</a> : <span class="keyword">public</span> <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a></div>
+<div class="line"><a name="l01692"></a><span class="lineno"> 1692</span>&#160;    {</div>
+<div class="line"><a name="l01693"></a><span class="lineno"> 1693</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l01694"></a><span class="lineno"> 1694</span>&#160;            <span class="keyword">const</span> Map map;</div>
+<div class="line"><a name="l01695"></a><span class="lineno"> 1695</span>&#160;            List values;</div>
 <div class="line"><a name="l01696"></a><span class="lineno"> 1696</span>&#160;</div>
-<div class="line"><a name="l01697"></a><span class="lineno"> 1697</span>&#160;            <a class="code" href="classargs_1_1MapPositionalList.html">MapPositionalList</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> List &amp;defaultValues = List()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), map(map), values(defaultValues)</div>
-<div class="line"><a name="l01698"></a><span class="lineno"> 1698</span>&#160;            {</div>
-<div class="line"><a name="l01699"></a><span class="lineno"> 1699</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a name="l01700"></a><span class="lineno"> 1700</span>&#160;            }</div>
-<div class="line"><a name="l01701"></a><span class="lineno"> 1701</span>&#160;</div>
-<div class="line"><a name="l01702"></a><span class="lineno"> 1702</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapPositionalList.html">MapPositionalList</a>() {}</div>
+<div class="line"><a name="l01697"></a><span class="lineno"> 1697</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l01698"></a><span class="lineno"> 1698</span>&#160;</div>
+<div class="line"><a name="l01699"></a><span class="lineno"> 1699</span>&#160;            <a class="code" href="classargs_1_1MapPositionalList.html">MapPositionalList</a>(<a class="code" href="classargs_1_1Group.html">Group</a> &amp;group, <span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;help, <span class="keyword">const</span> Map &amp;map, <span class="keyword">const</span> List &amp;defaultValues = List()): <a class="code" href="classargs_1_1PositionalBase.html">PositionalBase</a>(name, help), map(map), values(defaultValues)</div>
+<div class="line"><a name="l01700"></a><span class="lineno"> 1700</span>&#160;            {</div>
+<div class="line"><a name="l01701"></a><span class="lineno"> 1701</span>&#160;                group.<a class="code" href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">Add</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a name="l01702"></a><span class="lineno"> 1702</span>&#160;            }</div>
 <div class="line"><a name="l01703"></a><span class="lineno"> 1703</span>&#160;</div>
-<div class="line"><a name="l01704"></a><span class="lineno"> 1704</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
-<div class="line"><a name="l01705"></a><span class="lineno"> 1705</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01706"></a><span class="lineno"> 1706</span>&#160;                K key;</div>
-<div class="line"><a name="l01707"></a><span class="lineno"> 1707</span>&#160;                Reader(name, value, key);</div>
-<div class="line"><a name="l01708"></a><span class="lineno"> 1708</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
-<div class="line"><a name="l01709"></a><span class="lineno"> 1709</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
-<div class="line"><a name="l01710"></a><span class="lineno"> 1710</span>&#160;                {</div>
-<div class="line"><a name="l01711"></a><span class="lineno"> 1711</span>&#160;                    std::ostringstream problem;</div>
-<div class="line"><a name="l01712"></a><span class="lineno"> 1712</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
-<div class="line"><a name="l01713"></a><span class="lineno"> 1713</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
-<div class="line"><a name="l01714"></a><span class="lineno"> 1714</span>&#160;                } <span class="keywordflow">else</span></div>
-<div class="line"><a name="l01715"></a><span class="lineno"> 1715</span>&#160;                {</div>
-<div class="line"><a name="l01716"></a><span class="lineno"> 1716</span>&#160;                    this-&gt;values.emplace_back(it-&gt;second);</div>
-<div class="line"><a name="l01717"></a><span class="lineno"> 1717</span>&#160;                    matched = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l01718"></a><span class="lineno"> 1718</span>&#160;                }</div>
-<div class="line"><a name="l01719"></a><span class="lineno"> 1719</span>&#160;            }</div>
-<div class="line"><a name="l01720"></a><span class="lineno"> 1720</span>&#160;</div>
-<div class="line"><a name="l01723"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositionalList.html#a4c6205ee24d49b256ff52e009532e858"> 1723</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1MapPositionalList.html#a4c6205ee24d49b256ff52e009532e858">Get</a>() noexcept</div>
-<div class="line"><a name="l01724"></a><span class="lineno"> 1724</span>&#160;            {</div>
-<div class="line"><a name="l01725"></a><span class="lineno"> 1725</span>&#160;                <span class="keywordflow">return</span> values;</div>
-<div class="line"><a name="l01726"></a><span class="lineno"> 1726</span>&#160;            }</div>
-<div class="line"><a name="l01727"></a><span class="lineno"> 1727</span>&#160;</div>
-<div class="line"><a name="l01728"></a><span class="lineno"> 1728</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
-<div class="line"><a name="l01729"></a><span class="lineno"> 1729</span>&#160;<span class="keyword">            </span>{</div>
-<div class="line"><a name="l01730"></a><span class="lineno"> 1730</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
-<div class="line"><a name="l01731"></a><span class="lineno"> 1731</span>&#160;            }</div>
-<div class="line"><a name="l01732"></a><span class="lineno"> 1732</span>&#160;    };</div>
-<div class="line"><a name="l01733"></a><span class="lineno"> 1733</span>&#160;}</div>
+<div class="line"><a name="l01704"></a><span class="lineno"> 1704</span>&#160;            <span class="keyword">virtual</span> ~<a class="code" href="classargs_1_1MapPositionalList.html">MapPositionalList</a>() {}</div>
+<div class="line"><a name="l01705"></a><span class="lineno"> 1705</span>&#160;</div>
+<div class="line"><a name="l01706"></a><span class="lineno"> 1706</span>&#160;            <span class="keyword">virtual</span> <span class="keywordtype">void</span> ParseValue(<span class="keyword">const</span> std::string &amp;value)<span class="keyword"> override</span></div>
+<div class="line"><a name="l01707"></a><span class="lineno"> 1707</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01708"></a><span class="lineno"> 1708</span>&#160;                K key;</div>
+<div class="line"><a name="l01709"></a><span class="lineno"> 1709</span>&#160;                Reader(name, value, key);</div>
+<div class="line"><a name="l01710"></a><span class="lineno"> 1710</span>&#160;                <span class="keyword">auto</span> it = map.find(key);</div>
+<div class="line"><a name="l01711"></a><span class="lineno"> 1711</span>&#160;                <span class="keywordflow">if</span> (it == std::end(map))</div>
+<div class="line"><a name="l01712"></a><span class="lineno"> 1712</span>&#160;                {</div>
+<div class="line"><a name="l01713"></a><span class="lineno"> 1713</span>&#160;                    std::ostringstream problem;</div>
+<div class="line"><a name="l01714"></a><span class="lineno"> 1714</span>&#160;                    problem &lt;&lt; <span class="stringliteral">&quot;Could not find key &#39;&quot;</span> &lt;&lt; key &lt;&lt; <span class="stringliteral">&quot;&#39; in map for arg &#39;&quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
+<div class="line"><a name="l01715"></a><span class="lineno"> 1715</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classargs_1_1MapError.html">MapError</a>(problem.str());</div>
+<div class="line"><a name="l01716"></a><span class="lineno"> 1716</span>&#160;                } <span class="keywordflow">else</span></div>
+<div class="line"><a name="l01717"></a><span class="lineno"> 1717</span>&#160;                {</div>
+<div class="line"><a name="l01718"></a><span class="lineno"> 1718</span>&#160;                    this-&gt;values.emplace_back(it-&gt;second);</div>
+<div class="line"><a name="l01719"></a><span class="lineno"> 1719</span>&#160;                    matched = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l01720"></a><span class="lineno"> 1720</span>&#160;                }</div>
+<div class="line"><a name="l01721"></a><span class="lineno"> 1721</span>&#160;            }</div>
+<div class="line"><a name="l01722"></a><span class="lineno"> 1722</span>&#160;</div>
+<div class="line"><a name="l01725"></a><span class="lineno"><a class="line" href="classargs_1_1MapPositionalList.html#a4c6205ee24d49b256ff52e009532e858"> 1725</a></span>&#160;            List &amp;<a class="code" href="classargs_1_1MapPositionalList.html#a4c6205ee24d49b256ff52e009532e858">Get</a>() noexcept</div>
+<div class="line"><a name="l01726"></a><span class="lineno"> 1726</span>&#160;            {</div>
+<div class="line"><a name="l01727"></a><span class="lineno"> 1727</span>&#160;                <span class="keywordflow">return</span> values;</div>
+<div class="line"><a name="l01728"></a><span class="lineno"> 1728</span>&#160;            }</div>
+<div class="line"><a name="l01729"></a><span class="lineno"> 1729</span>&#160;</div>
+<div class="line"><a name="l01730"></a><span class="lineno"> 1730</span>&#160;            <span class="keyword">virtual</span> std::string Name()<span class="keyword"> const override</span></div>
+<div class="line"><a name="l01731"></a><span class="lineno"> 1731</span>&#160;<span class="keyword">            </span>{</div>
+<div class="line"><a name="l01732"></a><span class="lineno"> 1732</span>&#160;                <span class="keywordflow">return</span> name + std::string(<span class="stringliteral">&quot;...&quot;</span>);</div>
+<div class="line"><a name="l01733"></a><span class="lineno"> 1733</span>&#160;            }</div>
+<div class="line"><a name="l01734"></a><span class="lineno"> 1734</span>&#160;    };</div>
+<div class="line"><a name="l01735"></a><span class="lineno"> 1735</span>&#160;}</div>
 <div class="ttc" id="structargs_1_1ArgumentParser_1_1HelpParams_html_acf0bcba32e3aaa92e26f28d48ce05fea"><div class="ttname"><a href="structargs_1_1ArgumentParser_1_1HelpParams.html#acf0bcba32e3aaa92e26f28d48ce05fea">args::ArgumentParser::HelpParams::showProglinePositionals</a></div><div class="ttdeci">bool showProglinePositionals</div><div class="ttdoc">Show the positionals on the prog line when this is true. </div><div class="ttdef"><b>Definition:</b> args.hxx:830</div></div>
 <div class="ttc" id="classargs_1_1Error_html"><div class="ttname"><a href="classargs_1_1Error.html">args::Error</a></div><div class="ttdoc">Base error class. </div><div class="ttdef"><b>Definition:</b> args.hxx:144</div></div>
-<div class="ttc" id="classargs_1_1ValueFlagList_html_a65c73bb70c999ca150fa9334bd216ef7"><div class="ttname"><a href="classargs_1_1ValueFlagList.html#a65c73bb70c999ca150fa9334bd216ef7">args::ValueFlagList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the values. </div><div class="ttdef"><b>Definition:</b> args.hxx:1444</div></div>
+<div class="ttc" id="classargs_1_1ValueFlagList_html_a65c73bb70c999ca150fa9334bd216ef7"><div class="ttname"><a href="classargs_1_1ValueFlagList.html#a65c73bb70c999ca150fa9334bd216ef7">args::ValueFlagList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the values. </div><div class="ttdef"><b>Definition:</b> args.hxx:1445</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a1ff0ec0f671be914bf2dd058b163f8e1"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a1ff0ec0f671be914bf2dd058b163f8e1">args::ArgumentParser::Epilog</a></div><div class="ttdeci">const std::string &amp; Epilog() const </div><div class="ttdoc">The description that appears below options. </div><div class="ttdef"><b>Definition:</b> args.hxx:874</div></div>
 <div class="ttc" id="classargs_1_1HelpFlag_html"><div class="ttname"><a href="classargs_1_1HelpFlag.html">args::HelpFlag</a></div><div class="ttdoc">Help flag class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1276</div></div>
 <div class="ttc" id="namespaceargs_html"><div class="ttname"><a href="namespaceargs.html">args</a></div><div class="ttdoc">contains all the functionality of the args library </div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_ad91e57f7c5bedf4c8c09e55d396d8a2e"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#ad91e57f7c5bedf4c8c09e55d396d8a2e">args::ArgumentParser::LongSeparator</a></div><div class="ttdeci">void LongSeparator(const std::string &amp;longseparator)</div><div class="ttdoc">The separator for long flags. </div><div class="ttdef"><b>Definition:</b> args.hxx:905</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a18de0a26d9f252cec2119d0d54647755"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a18de0a26d9f252cec2119d0d54647755">args::ArgumentParser::Help</a></div><div class="ttdeci">std::string Help() const </div><div class="ttdoc">Generate a help menu as a string. </div><div class="ttdef"><b>Definition:</b> args.hxx:1061</div></div>
 <div class="ttc" id="classargs_1_1Matcher_html_a87fc200d9a51b3be654e0ec551304ec5"><div class="ttname"><a href="classargs_1_1Matcher.html#a87fc200d9a51b3be654e0ec551304ec5">args::Matcher::Matcher</a></div><div class="ttdeci">Matcher(ShortIt shortFlagsStart, ShortIt shortFlagsEnd, LongIt longFlagsStart, LongIt longFlagsEnd)</div><div class="ttdoc">Specify short and long flags separately as iterators. </div><div class="ttdef"><b>Definition:</b> args.hxx:249</div></div>
-<div class="ttc" id="classargs_1_1Positional_html_ad96c622414ac070fe2ac95363ee1810a"><div class="ttname"><a href="classargs_1_1Positional.html#ad96c622414ac070fe2ac95363ee1810a">args::Positional::Get</a></div><div class="ttdeci">T &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1582</div></div>
-<div class="ttc" id="classargs_1_1MapPositional_html"><div class="ttname"><a href="classargs_1_1MapPositional.html">args::MapPositional</a></div><div class="ttdoc">A positional argument mapping class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1639</div></div>
+<div class="ttc" id="classargs_1_1Positional_html_ad96c622414ac070fe2ac95363ee1810a"><div class="ttname"><a href="classargs_1_1Positional.html#ad96c622414ac070fe2ac95363ee1810a">args::Positional::Get</a></div><div class="ttdeci">T &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1583</div></div>
+<div class="ttc" id="classargs_1_1MapPositional_html"><div class="ttname"><a href="classargs_1_1MapPositional.html">args::MapPositional</a></div><div class="ttdoc">A positional argument mapping class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1641</div></div>
 <div class="ttc" id="classargs_1_1ValidationError_html"><div class="ttname"><a href="classargs_1_1ValidationError.html">args::ValidationError</a></div><div class="ttdoc">Errors that are detected from group validation after parsing finishes. </div><div class="ttdef"><b>Definition:</b> args.hxx:162</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a5afcbfc91b88572c83091a8d6f964da9"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a5afcbfc91b88572c83091a8d6f964da9">args::ArgumentParser::LongPrefix</a></div><div class="ttdeci">const std::string &amp; LongPrefix() const </div><div class="ttdoc">The prefix for long flags. </div><div class="ttdef"><b>Definition:</b> args.hxx:883</div></div>
 <div class="ttc" id="classargs_1_1ValueFlagList_html"><div class="ttname"><a href="classargs_1_1ValueFlagList.html">args::ValueFlagList</a></div><div class="ttdoc">An argument-accepting flag class that pushes the found values into a list. </div><div class="ttdef"><b>Definition:</b> args.hxx:1422</div></div>
@@ -1552,7 +1554,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a422f77bb16552118d6fb7fdeff16feb4"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a422f77bb16552118d6fb7fdeff16feb4">args::ArgumentParser::Prog</a></div><div class="ttdeci">const std::string &amp; Prog() const </div><div class="ttdoc">The program name for help generation. </div><div class="ttdef"><b>Definition:</b> args.hxx:847</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a27c66514e6dbcaa4853a5cefff4e0300"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a27c66514e6dbcaa4853a5cefff4e0300">args::ArgumentParser::Terminator</a></div><div class="ttdeci">void Terminator(const std::string &amp;terminator)</div><div class="ttdoc">The terminator that forcibly separates flags from positionals. </div><div class="ttdef"><b>Definition:</b> args.hxx:920</div></div>
 <div class="ttc" id="namespaceargs_html_a5688bc41dd8cfd8979dbfa9881248b28"><div class="ttname"><a href="namespaceargs.html#a5688bc41dd8cfd8979dbfa9881248b28">args::ValueReader</a></div><div class="ttdeci">void ValueReader(const std::string &amp;name, const std::string &amp;value, T &amp;destination)</div><div class="ttdoc">A default Reader function for argument classes. </div><div class="ttdef"><b>Definition:</b> args.hxx:1355</div></div>
-<div class="ttc" id="classargs_1_1Positional_html"><div class="ttname"><a href="classargs_1_1Positional.html">args::Positional</a></div><div class="ttdoc">A positional argument class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1561</div></div>
+<div class="ttc" id="classargs_1_1Positional_html"><div class="ttname"><a href="classargs_1_1Positional.html">args::Positional</a></div><div class="ttdoc">A positional argument class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1562</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html"><div class="ttname"><a href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a></div><div class="ttdoc">The main user facing command line argument parser class. </div><div class="ttdef"><b>Definition:</b> args.hxx:769</div></div>
 <div class="ttc" id="classargs_1_1Group_html_ae5951da80c2ca072299740021c43bf6b"><div class="ttname"><a href="classargs_1_1Group.html#ae5951da80c2ca072299740021c43bf6b">args::Group::Add</a></div><div class="ttdeci">void Add(Base &amp;child)</div><div class="ttdoc">Append a child to this Group. </div><div class="ttdef"><b>Definition:</b> args.hxx:605</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a421a87c3431f1a2f98b85acd93bd476e"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a421a87c3431f1a2f98b85acd93bd476e">args::ArgumentParser::Description</a></div><div class="ttdeci">const std::string &amp; Description() const </div><div class="ttdoc">The description that appears above options. </div><div class="ttdef"><b>Definition:</b> args.hxx:865</div></div>
@@ -1562,19 +1564,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a6c634efff4ba52ec00d50f8fb85469bd"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a6c634efff4ba52ec00d50f8fb85469bd">args::ArgumentParser::Description</a></div><div class="ttdeci">void Description(const std::string &amp;description)</div><div class="ttdoc">The description that appears above options. </div><div class="ttdef"><b>Definition:</b> args.hxx:869</div></div>
 <div class="ttc" id="classargs_1_1PositionalBase_html"><div class="ttname"><a href="classargs_1_1PositionalBase.html">args::PositionalBase</a></div><div class="ttdoc">Base class for positional options. </div><div class="ttdef"><b>Definition:</b> args.hxx:473</div></div>
 <div class="ttc" id="structargs_1_1ArgumentParser_1_1HelpParams_html_a3cd0047cf6e3d9e8d276143969786d48"><div class="ttname"><a href="structargs_1_1ArgumentParser_1_1HelpParams.html#a3cd0047cf6e3d9e8d276143969786d48">args::ArgumentParser::HelpParams::descriptionindent</a></div><div class="ttdeci">unsigned int descriptionindent</div><div class="ttdoc">The indent of the description and epilogs. </div><div class="ttdef"><b>Definition:</b> args.hxx:805</div></div>
-<div class="ttc" id="classargs_1_1PositionalList_html_a3326d6ead9deb09f0ed3e42af66d970a"><div class="ttname"><a href="classargs_1_1PositionalList.html#a3326d6ead9deb09f0ed3e42af66d970a">args::PositionalList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the values. </div><div class="ttdef"><b>Definition:</b> args.hxx:1625</div></div>
+<div class="ttc" id="classargs_1_1PositionalList_html_a3326d6ead9deb09f0ed3e42af66d970a"><div class="ttname"><a href="classargs_1_1PositionalList.html#a3326d6ead9deb09f0ed3e42af66d970a">args::PositionalList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the values. </div><div class="ttdef"><b>Definition:</b> args.hxx:1627</div></div>
 <div class="ttc" id="structargs_1_1ArgumentParser_1_1HelpParams_html_a311fcfa4f8636e304238357cc0d1547d"><div class="ttname"><a href="structargs_1_1ArgumentParser_1_1HelpParams.html#a311fcfa4f8636e304238357cc0d1547d">args::ArgumentParser::HelpParams::width</a></div><div class="ttdeci">unsigned int width</div><div class="ttdoc">The width of the help menu. </div><div class="ttdef"><b>Definition:</b> args.hxx:796</div></div>
 <div class="ttc" id="structargs_1_1ArgumentParser_1_1HelpParams_html_a39e31bcfc82a687ed8290783546ffd05"><div class="ttname"><a href="structargs_1_1ArgumentParser_1_1HelpParams.html#a39e31bcfc82a687ed8290783546ffd05">args::ArgumentParser::HelpParams::eachgroupindent</a></div><div class="ttdeci">unsigned int eachgroupindent</div><div class="ttdoc">The additional indent each group adds. </div><div class="ttdef"><b>Definition:</b> args.hxx:814</div></div>
 <div class="ttc" id="classargs_1_1Group_html_a5796a6270afc0cc535a59b5fe2e51c67"><div class="ttname"><a href="classargs_1_1Group.html#a5796a6270afc0cc535a59b5fe2e51c67">args::Group::Get</a></div><div class="ttdeci">bool Get() const </div><div class="ttdoc">Get validation. </div><div class="ttdef"><b>Definition:</b> args.hxx:641</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_aa5477da47401025c5c05d1fac84da016"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#aa5477da47401025c5c05d1fac84da016">args::ArgumentParser::ParseCLI</a></div><div class="ttdeci">void ParseCLI(const int argc, const char *const *const argv)</div><div class="ttdoc">Convenience function to parse the CLI from argc and argv. </div><div class="ttdef"><b>Definition:</b> args.hxx:1235</div></div>
-<div class="ttc" id="classargs_1_1PositionalList_html"><div class="ttname"><a href="classargs_1_1PositionalList.html">args::PositionalList</a></div><div class="ttdoc">A positional argument class that pushes the found values into a list. </div><div class="ttdef"><b>Definition:</b> args.hxx:1598</div></div>
+<div class="ttc" id="classargs_1_1PositionalList_html"><div class="ttname"><a href="classargs_1_1PositionalList.html">args::PositionalList</a></div><div class="ttdoc">A positional argument class that pushes the found values into a list. </div><div class="ttdef"><b>Definition:</b> args.hxx:1599</div></div>
 <div class="ttc" id="structargs_1_1EitherFlag_html_ae08b6f663ad7f00b441443a2376411e9"><div class="ttname"><a href="structargs_1_1EitherFlag.html#ae08b6f663ad7f00b441443a2376411e9">args::EitherFlag::GetShort</a></div><div class="ttdeci">static std::unordered_set&lt; char &gt; GetShort(std::initializer_list&lt; EitherFlag &gt; flags)</div><div class="ttdoc">Get just the short flags from an initializer list of EitherFlags. </div><div class="ttdef"><b>Definition:</b> args.hxx:215</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a528b21b78c561266322c80aa9719bc65"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a528b21b78c561266322c80aa9719bc65">args::ArgumentParser::Epilog</a></div><div class="ttdeci">void Epilog(const std::string &amp;epilog)</div><div class="ttdoc">The description that appears below options. </div><div class="ttdef"><b>Definition:</b> args.hxx:878</div></div>
 <div class="ttc" id="classargs_1_1Help_html"><div class="ttname"><a href="classargs_1_1Help.html">args::Help</a></div><div class="ttdoc">An exception that indicates that the user has requested help. </div><div class="ttdef"><b>Definition:</b> args.hxx:180</div></div>
-<div class="ttc" id="classargs_1_1MapPositionalList_html_a4c6205ee24d49b256ff52e009532e858"><div class="ttname"><a href="classargs_1_1MapPositionalList.html#a4c6205ee24d49b256ff52e009532e858">args::MapPositionalList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1723</div></div>
-<div class="ttc" id="classargs_1_1MapPositionalList_html"><div class="ttname"><a href="classargs_1_1MapPositionalList.html">args::MapPositionalList</a></div><div class="ttdoc">A positional argument mapping list class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1689</div></div>
+<div class="ttc" id="classargs_1_1MapPositionalList_html_a4c6205ee24d49b256ff52e009532e858"><div class="ttname"><a href="classargs_1_1MapPositionalList.html#a4c6205ee24d49b256ff52e009532e858">args::MapPositionalList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1725</div></div>
+<div class="ttc" id="classargs_1_1MapPositionalList_html"><div class="ttname"><a href="classargs_1_1MapPositionalList.html">args::MapPositionalList</a></div><div class="ttdoc">A positional argument mapping list class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1691</div></div>
 <div class="ttc" id="classargs_1_1HelpFlag_html_a219bf25996280ac4ae4871a43bf0cfd7"><div class="ttname"><a href="classargs_1_1HelpFlag.html#a219bf25996280ac4ae4871a43bf0cfd7">args::HelpFlag::Get</a></div><div class="ttdeci">bool Get() const  noexcept</div><div class="ttdoc">Get whether this was matched. </div><div class="ttdef"><b>Definition:</b> args.hxx:1303</div></div>
-<div class="ttc" id="classargs_1_1MapPositional_html_a46e4f230ddbca26b7eb849fd3d87510d"><div class="ttname"><a href="classargs_1_1MapPositional.html#a46e4f230ddbca26b7eb849fd3d87510d">args::MapPositional::Get</a></div><div class="ttdeci">T &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1674</div></div>
+<div class="ttc" id="classargs_1_1MapPositional_html_a46e4f230ddbca26b7eb849fd3d87510d"><div class="ttname"><a href="classargs_1_1MapPositional.html#a46e4f230ddbca26b7eb849fd3d87510d">args::MapPositional::Get</a></div><div class="ttdeci">T &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1676</div></div>
 <div class="ttc" id="structargs_1_1ArgumentParser_1_1HelpParams_html_a1c7d59c585d5f54c83c7c1c0cdeeee51"><div class="ttname"><a href="structargs_1_1ArgumentParser_1_1HelpParams.html#a1c7d59c585d5f54c83c7c1c0cdeeee51">args::ArgumentParser::HelpParams::showProglineOptions</a></div><div class="ttdeci">bool showProglineOptions</div><div class="ttdoc">Show the {OPTIONS} on the prog line when this is true. </div><div class="ttdef"><b>Definition:</b> args.hxx:826</div></div>
 <div class="ttc" id="classargs_1_1MapError_html"><div class="ttname"><a href="classargs_1_1MapError.html">args::MapError</a></div><div class="ttdoc">Errors in map lookups. </div><div class="ttdef"><b>Definition:</b> args.hxx:171</div></div>
 <div class="ttc" id="classargs_1_1CounterFlag_html"><div class="ttname"><a href="classargs_1_1CounterFlag.html">args::CounterFlag</a></div><div class="ttdoc">A flag class that simply counts the number of times it&#39;s matched. </div><div class="ttdef"><b>Definition:</b> args.hxx:1311</div></div>
@@ -1593,22 +1595,22 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="classargs_1_1Group_html_a6572479f27701d4717bdf1a11d46f9c3"><div class="ttname"><a href="classargs_1_1Group.html#a6572479f27701d4717bdf1a11d46f9c3">args::Group::MatchedChildren</a></div><div class="ttdeci">std::vector&lt; Base * &gt;::size_type MatchedChildren() const </div><div class="ttdoc">Count the number of matched children this group has. </div><div class="ttdef"><b>Definition:</b> args.hxx:619</div></div>
 <div class="ttc" id="classargs_1_1Matcher_html"><div class="ttname"><a href="classargs_1_1Matcher.html">args::Matcher</a></div><div class="ttdoc">A class of "matchers", specifying short and flags that can possibly be matched. </div><div class="ttdef"><b>Definition:</b> args.hxx:237</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a817bfd65f387861769e8c69d3583d865"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a817bfd65f387861769e8c69d3583d865">args::ArgumentParser::ProglinePostfix</a></div><div class="ttdeci">const std::string &amp; ProglinePostfix() const </div><div class="ttdoc">The description that appears on the prog line after options. </div><div class="ttdef"><b>Definition:</b> args.hxx:856</div></div>
-<div class="ttc" id="classargs_1_1MapFlagList_html_a2524f5b58aa7978b65a572431a594c25"><div class="ttname"><a href="classargs_1_1MapFlagList.html#a2524f5b58aa7978b65a572431a594c25">args::MapFlagList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1544</div></div>
+<div class="ttc" id="classargs_1_1MapFlagList_html_a2524f5b58aa7978b65a572431a594c25"><div class="ttname"><a href="classargs_1_1MapFlagList.html#a2524f5b58aa7978b65a572431a594c25">args::MapFlagList::Get</a></div><div class="ttdeci">List &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1545</div></div>
 <div class="ttc" id="classargs_1_1Group_html_ac458709409f03b05fd6f87aa431f8bac"><div class="ttname"><a href="classargs_1_1Group.html#ac458709409f03b05fd6f87aa431f8bac">args::Group::Match</a></div><div class="ttdeci">FlagBase * Match(const std::string &amp;flag)</div><div class="ttdoc">Return the first FlagBase that matches flag, or nullptr. </div><div class="ttdef"><b>Definition:</b> args.hxx:511</div></div>
 <div class="ttc" id="classargs_1_1Group_html_ad5f70246abc2d2f266751077e804a27a"><div class="ttname"><a href="classargs_1_1Group.html#ad5f70246abc2d2f266751077e804a27a">args::Group::HasFlag</a></div><div class="ttdeci">bool HasFlag() const </div><div class="ttdoc">Get whether this has any FlagBase children. </div><div class="ttdef"><b>Definition:</b> args.hxx:584</div></div>
 <div class="ttc" id="classargs_1_1Group_html"><div class="ttname"><a href="classargs_1_1Group.html">args::Group</a></div><div class="ttdoc">Class for all kinds of validating groups, including ArgumentParser. </div><div class="ttdef"><b>Definition:</b> args.hxx:492</div></div>
 <div class="ttc" id="structargs_1_1ArgumentParser_1_1HelpParams_html_a0ddca053b8d64792061f94ff1dc18bb9"><div class="ttname"><a href="structargs_1_1ArgumentParser_1_1HelpParams.html#a0ddca053b8d64792061f94ff1dc18bb9">args::ArgumentParser::HelpParams::showTerminator</a></div><div class="ttdeci">bool showTerminator</div><div class="ttdoc">Show the terminator when both options and positional parameters are present. </div><div class="ttdef"><b>Definition:</b> args.hxx:822</div></div>
-<div class="ttc" id="classargs_1_1MapFlagList_html"><div class="ttname"><a href="classargs_1_1MapFlagList.html">args::MapFlagList</a></div><div class="ttdoc">A mapping value flag list class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1511</div></div>
+<div class="ttc" id="classargs_1_1MapFlagList_html"><div class="ttname"><a href="classargs_1_1MapFlagList.html">args::MapFlagList</a></div><div class="ttdoc">A mapping value flag list class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1512</div></div>
 <div class="ttc" id="structargs_1_1ArgumentParser_1_1HelpParams_html_a4119e6f4344360cf9cdee5576bf55515"><div class="ttname"><a href="structargs_1_1ArgumentParser_1_1HelpParams.html#a4119e6f4344360cf9cdee5576bf55515">args::ArgumentParser::HelpParams::helpindent</a></div><div class="ttdeci">unsigned int helpindent</div><div class="ttdoc">The indent of the flag descriptions. </div><div class="ttdef"><b>Definition:</b> args.hxx:811</div></div>
 <div class="ttc" id="classargs_1_1Matcher_html_a9d2920c7c82ac9306e70b5be8ffee933"><div class="ttname"><a href="classargs_1_1Matcher.html#a9d2920c7c82ac9306e70b5be8ffee933">args::Matcher::GetFlagStrings</a></div><div class="ttdeci">std::vector&lt; std::string &gt; GetFlagStrings(const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;name, const std::string &amp;shortSeparator, const std::string longSeparator) const </div><div class="ttdoc">(INTERNAL) Get all flag strings as a vector, with the prefixes and names embedded ...</div><div class="ttdef"><b>Definition:</b> args.hxx:316</div></div>
 <div class="ttc" id="classargs_1_1Group_html_a94fb9566620de414632a85c4b6e52404"><div class="ttname"><a href="classargs_1_1Group.html#a94fb9566620de414632a85c4b6e52404">args::Group::Match</a></div><div class="ttdeci">FlagBase * Match(const char flag)</div><div class="ttdoc">Return the first FlagBase that matches flag, or nullptr. </div><div class="ttdef"><b>Definition:</b> args.hxx:537</div></div>
 <div class="ttc" id="classargs_1_1NamedBase_html"><div class="ttname"><a href="classargs_1_1NamedBase.html">args::NamedBase</a></div><div class="ttdoc">Base class for all match types that have a name. </div><div class="ttdef"><b>Definition:</b> args.hxx:370</div></div>
-<div class="ttc" id="classargs_1_1MapFlag_html_ad4f1db59b839e44157c5eba9b482b75c"><div class="ttname"><a href="classargs_1_1MapFlag.html#ad4f1db59b839e44157c5eba9b482b75c">args::MapFlag::Get</a></div><div class="ttdeci">T &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1496</div></div>
+<div class="ttc" id="classargs_1_1MapFlag_html_ad4f1db59b839e44157c5eba9b482b75c"><div class="ttname"><a href="classargs_1_1MapFlag.html#ad4f1db59b839e44157c5eba9b482b75c">args::MapFlag::Get</a></div><div class="ttdeci">T &amp; Get() noexcept</div><div class="ttdoc">Get the value. </div><div class="ttdef"><b>Definition:</b> args.hxx:1497</div></div>
 <div class="ttc" id="classargs_1_1Matcher_html_a3253a6757de0ff2d313cecdb8a3df44d"><div class="ttname"><a href="classargs_1_1Matcher.html#a3253a6757de0ff2d313cecdb8a3df44d">args::Matcher::GetFlagStrings</a></div><div class="ttdeci">std::vector&lt; std::string &gt; GetFlagStrings(const std::string &amp;shortPrefix, const std::string &amp;longPrefix) const </div><div class="ttdoc">(INTERNAL) Get all flag strings as a vector, with the prefixes embedded </div><div class="ttdef"><b>Definition:</b> args.hxx:299</div></div>
 <div class="ttc" id="namespaceargs_html_a7c4e2dbb1616764df0030e03e3b964a8"><div class="ttname"><a href="namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8">args::Glyphs</a></div><div class="ttdeci">std::string::size_type Glyphs(const std::string &amp;string)</div><div class="ttdoc">(INTERNAL) Count UTF-8 glyphs </div><div class="ttdef"><b>Definition:</b> args.hxx:63</div></div>
 <div class="ttc" id="classargs_1_1Group_html_a6aac08d55100d19cf89c2c7d5b1319cc"><div class="ttname"><a href="classargs_1_1Group.html#a6aac08d55100d19cf89c2c7d5b1319cc">args::Group::GetChildDescriptions</a></div><div class="ttdeci">std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt; GetChildDescriptions(const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator, const unsigned int indent=0) const </div><div class="ttdoc">Get all the child descriptions for help generation. </div><div class="ttdef"><b>Definition:</b> args.hxx:648</div></div>
 <div class="ttc" id="classargs_1_1ArgumentParser_html_a0e28d98942b1b4cb2fff01a85b43a076"><div class="ttname"><a href="classargs_1_1ArgumentParser.html#a0e28d98942b1b4cb2fff01a85b43a076">args::ArgumentParser::Prog</a></div><div class="ttdeci">void Prog(const std::string &amp;prog)</div><div class="ttdoc">The program name for help generation. </div><div class="ttdef"><b>Definition:</b> args.hxx:851</div></div>
-<div class="ttc" id="classargs_1_1MapFlag_html"><div class="ttname"><a href="classargs_1_1MapFlag.html">args::MapFlag</a></div><div class="ttdoc">A mapping value flag class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1463</div></div>
+<div class="ttc" id="classargs_1_1MapFlag_html"><div class="ttname"><a href="classargs_1_1MapFlag.html">args::MapFlag</a></div><div class="ttdoc">A mapping value flag class. </div><div class="ttdef"><b>Definition:</b> args.hxx:1464</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
