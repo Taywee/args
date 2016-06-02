@@ -137,6 +137,16 @@ TEST_CASE("Argument flag lists work as expected", "[args]")
     REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
 }
 
+#include <unordered_set>
+
+TEST_CASE("Argument flag lists work with sets", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::ValueFlagList<std::string, std::unordered_set<std::string>> foo(parser, "FOO", "test flag", {'f', "foo"});
+    parser.ParseArgs(std::vector<std::string>{"--foo=7", "-fblah", "-f", "9", "--foo", "blah"});
+    REQUIRE((args::get(foo) == std::unordered_set<std::string>{"7", "9", "blah"}));
+}
+
 TEST_CASE("Positional arguments and positional argument lists work as expected", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
@@ -151,6 +161,15 @@ TEST_CASE("Positional arguments and positional argument lists work as expected",
     REQUIRE(baz);
     REQUIRE((args::get(baz) == std::vector<char>{'a', 'b', 'c', 'x', 'y', 'z'}));
 }
+
+TEST_CASE("Positional lists work with sets", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::PositionalList<std::string, std::unordered_set<std::string>> foo(parser, "FOO", "test positional");
+    parser.ParseArgs(std::vector<std::string>{"foo", "FoO", "bar", "baz", "foo", "9", "baz"});
+    REQUIRE((args::get(foo) == std::unordered_set<std::string>{"foo", "FoO", "bar", "baz", "9"}));
+}
+
 
 TEST_CASE("Positionals that are unspecified evaluate false", "[args]")
 {
