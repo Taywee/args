@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">4.1.3</span>
+   &#160;<span id="projectnumber">4.1.4</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -122,12 +122,12 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5b62116fde3cd1da740b036278f6a2c2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5b62116fde3cd1da740b036278f6a2c2"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Group</b> (const std::string &amp;help, const std::function&lt; bool(const <a class="el" href="classargs_1_1Group.html">Group</a> &amp;)&gt; &amp;validator=Validators::DontCare)</td></tr>
-<tr class="separator:a5b62116fde3cd1da740b036278f6a2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5120fe6afc7f6df3c6410d97e2b35c29"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5120fe6afc7f6df3c6410d97e2b35c29"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Group</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;help, const std::function&lt; bool(const <a class="el" href="classargs_1_1Group.html">Group</a> &amp;)&gt; &amp;validator=Validators::DontCare)</td></tr>
-<tr class="separator:a5120fe6afc7f6df3c6410d97e2b35c29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5655d39bfedab97218d786f7ac7e8245"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5655d39bfedab97218d786f7ac7e8245"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Group</b> (const std::string &amp;help=std::string(), const std::function&lt; bool(const <a class="el" href="classargs_1_1Group.html">Group</a> &amp;)&gt; &amp;validator=Validators::DontCare)</td></tr>
+<tr class="separator:a5655d39bfedab97218d786f7ac7e8245"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a710c2053274102984c4ac3e6e356a53d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a710c2053274102984c4ac3e6e356a53d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Group</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;help=std::string(), const std::function&lt; bool(const <a class="el" href="classargs_1_1Group.html">Group</a> &amp;)&gt; &amp;validator=Validators::DontCare)</td></tr>
+<tr class="separator:a710c2053274102984c4ac3e6e356a53d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac458709409f03b05fd6f87aa431f8bac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#ac458709409f03b05fd6f87aa431f8bac">Match</a> (const std::string &amp;flag)</td></tr>
 <tr class="memdesc:ac458709409f03b05fd6f87aa431f8bac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr.  <a href="#ac458709409f03b05fd6f87aa431f8bac">More...</a><br /></td></tr>
 <tr class="separator:ac458709409f03b05fd6f87aa431f8bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -160,10 +160,10 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a5796a6270afc0cc535a59b5fe2e51c67">Get</a> () const </td></tr>
 <tr class="memdesc:a5796a6270afc0cc535a59b5fe2e51c67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get validation. <br /></td></tr>
 <tr class="separator:a5796a6270afc0cc535a59b5fe2e51c67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ef395fc1d98bd88c02f0df7ed422bf7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ef395fc1d98bd88c02f0df7ed422bf7"></a>
-std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a7ef395fc1d98bd88c02f0df7ed422bf7">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator, unsigned int indent=0) const </td></tr>
-<tr class="memdesc:a7ef395fc1d98bd88c02f0df7ed422bf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
-<tr class="separator:a7ef395fc1d98bd88c02f0df7ed422bf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6aac08d55100d19cf89c2c7d5b1319cc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6aac08d55100d19cf89c2c7d5b1319cc"></a>
+std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a6aac08d55100d19cf89c2c7d5b1319cc">GetChildDescriptions</a> (const std::string &amp;shortPrefix, const std::string &amp;longPrefix, const std::string &amp;shortSeparator, const std::string &amp;longSeparator, const unsigned int indent=0) const </td></tr>
+<tr class="memdesc:a6aac08d55100d19cf89c2c7d5b1319cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all the child descriptions for help generation. <br /></td></tr>
+<tr class="separator:a6aac08d55100d19cf89c2c7d5b1319cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85382243f31e08ef0ce5df807d82d102"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85382243f31e08ef0ce5df807d82d102"></a>
 std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a85382243f31e08ef0ce5df807d82d102">GetPosNames</a> () const </td></tr>
 <tr class="memdesc:a85382243f31e08ef0ce5df807d82d102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of positional parameters. <br /></td></tr>
