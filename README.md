@@ -178,8 +178,8 @@ int main()
         {
             std::vector<std::string> arguments(carguments);
             args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-            args::ValueFlag<int> integer(parser, "integer", "The integer flag", args::Matcher{'i', "int"});
-            args::ValueFlagList<char> characters(parser, "characters", "The character flag", args::Matcher{'c', "char"});
+            args::ValueFlag<int> integer(parser, "integer", "The integer flag", {'i', "int"});
+            args::ValueFlagList<char> characters(parser, "characters", "The character flag", {'c', "char"});
             args::PositionalList<double> numbers(parser, "numbers", "The numbers position list");
             parser.ParseArgs(arguments);
             const int i = args::get(integer);
@@ -291,7 +291,7 @@ All the code examples here will be complete code examples, with some output.
 int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher{'h', "help"});
+    args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
     try
     {
         parser.ParseCLI(argc, argv);
@@ -335,9 +335,9 @@ int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::Group group(parser, "This group is all exclusive:", args::Group::Validators::Xor);
-    args::Flag foo(group, "foo", "The foo flag", args::Matcher{'f', "foo"});
-    args::Flag bar(group, "bar", "The bar flag", args::Matcher({'b'}));
-    args::Flag baz(group, "baz", "The baz flag", args::Matcher({"baz"}));
+    args::Flag foo(group, "foo", "The foo flag", {'f', "foo"});
+    args::Flag bar(group, "bar", "The bar flag", {'b'});
+    args::Flag baz(group, "baz", "The baz flag", {"baz"});
     try
     {
         parser.ParseCLI(argc, argv);
@@ -412,9 +412,9 @@ Group validation failed somewhere!
 int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::HelpFlag help(parser, "help", "Display this help menu", args::Matcher{'h', "help"});
-    args::ValueFlag<int> integer(parser, "integer", "The integer flag", args::Matcher({'i'}));
-    args::ValueFlagList<char> characters(parser, "characters", "The character flag", args::Matcher({'c'}));
+    args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
+    args::ValueFlag<int> integer(parser, "integer", "The integer flag", {'i'});
+    args::ValueFlagList<char> characters(parser, "characters", "The character flag", {'c'});
     args::Positional<std::string> foo(parser, "foo", "The foo position");
     args::PositionalList<double> numbers(parser, "numbers", "The numbers position list");
     try
@@ -594,10 +594,10 @@ there are unextracted characters left in the stream.
 int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program with a really long description that is probably going to have to be wrapped across multiple different lines.  This is a test to see how the line wrapping works", "This goes after the options.  This epilog is also long enough that it will have to be properly wrapped to display correctly on the screen");
-    args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher{'h', "help"});
-    args::ValueFlag<std::string> foo(parser, "FOO", "The foo flag.", args::Matcher{'a', 'b', 'c', "a", "b", "c", "the-foo-flag"});
-    args::ValueFlag<std::string> bar(parser, "BAR", "The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.", args::Matcher{'d', 'e', 'f', "d", "e", "f"});
-    args::ValueFlag<std::string> baz(parser, "FOO", "The baz flag.  This one has a lot of options, and will need wrapping in the description, even with its short flag list.", args::Matcher({"baz"}));
+    args::HelpFlag help(parser, "HELP", "Show this help menu.", {'h', "help"});
+    args::ValueFlag<std::string> foo(parser, "FOO", "The foo flag.", {'a', 'b', 'c', "a", "b", "c", "the-foo-flag"});
+    args::ValueFlag<std::string> bar(parser, "BAR", "The bar flag.  This one has a lot of options, and will need wrapping in the description, along with its long flag list.", {'d', 'e', 'f', "d", "e", "f"});
+    args::ValueFlag<std::string> baz(parser, "FOO", "The baz flag.  This one has a lot of options, and will need wrapping in the description, even with its short flag list.", {"baz"});
     args::Positional<std::string> pos1(parser, "POS1", "The pos1 argument.");
     args::PositionalList<std::string> poslist1(parser, "POSLIST1", "The poslist1 argument.");
     args::Positional<std::string> pos2(parser, "POS2", "The pos2 argument.");
@@ -702,11 +702,11 @@ int main(int argc, char **argv)
     args::ArgumentParser parser("This command likes to break your disks");
     parser.LongPrefix("");
     parser.LongSeparator("=");
-    args::HelpFlag help(parser, "HELP", "Show this help menu.", args::Matcher({"help"}));
-    args::ValueFlag<long> bs(parser, "BYTES", "Block size", args::Matcher({"bs"}), 512);
-    args::ValueFlag<long> skip(parser, "BYTES", "Bytes to skip", args::Matcher({"skip"}), 0);
-    args::ValueFlag<std::string> input(parser, "BLOCK SIZE", "Block size", args::Matcher({"if"}));
-    args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", args::Matcher({"of"}));
+    args::HelpFlag help(parser, "HELP", "Show this help menu.", {"help"});
+    args::ValueFlag<long> bs(parser, "BYTES", "Block size", {"bs"}, 512);
+    args::ValueFlag<long> skip(parser, "BYTES", "Bytes to skip", {"skip"}, 0);
+    args::ValueFlag<std::string> input(parser, "BLOCK SIZE", "Block size", {"if"});
+    args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", {"of"});
     try
     {
         parser.ParseCLI(argc, argv);
@@ -795,25 +795,25 @@ int main(int argc, char **argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::Group xorgroup(parser, "this group provides xor validation:", args::Group::Validators::Xor);
-    args::Flag a(xorgroup, "a", "test flag", args::Matcher({'a'}));
-    args::Flag b(xorgroup, "b", "test flag", args::Matcher({'b'}));
-    args::Flag c(xorgroup, "c", "test flag", args::Matcher({'c'}));
+    args::Flag a(xorgroup, "a", "test flag", {'a'});
+    args::Flag b(xorgroup, "b", "test flag", {'b'});
+    args::Flag c(xorgroup, "c", "test flag", {'c'});
     args::Group nxor(xorgroup, "this group provides all-or-none (nxor) validation:", args::Group::Validators::AllOrNone);
-    args::Flag d(nxor, "d", "test flag", args::Matcher({'d'}));
-    args::Flag e(nxor, "e", "test flag", args::Matcher({'e'}));
-    args::Flag f(nxor, "f", "test flag", args::Matcher({'f'}));
+    args::Flag d(nxor, "d", "test flag", {'d'});
+    args::Flag e(nxor, "e", "test flag", {'e'});
+    args::Flag f(nxor, "f", "test flag", {'f'});
     args::Group nxor2(nxor, "this group provides all-or-none (nxor2) validation:", args::Group::Validators::AllOrNone);
-    args::Flag i(nxor2, "i", "test flag", args::Matcher({'i'}));
-    args::Flag j(nxor2, "j", "test flag", args::Matcher({'j'}));
-    args::Flag k(nxor2, "k", "test flag", args::Matcher({'k'}));
+    args::Flag i(nxor2, "i", "test flag", {'i'});
+    args::Flag j(nxor2, "j", "test flag", {'j'});
+    args::Flag k(nxor2, "k", "test flag", {'k'});
     args::Group nxor3(nxor, "this group provides all-or-none (nxor3) validation:", args::Group::Validators::AllOrNone);
-    args::Flag l(nxor3, "l", "test flag", args::Matcher({'l'}));
-    args::Flag m(nxor3, "m", "test flag", args::Matcher({'m'}));
-    args::Flag n(nxor3, "n", "test flag", args::Matcher({'n'}));
+    args::Flag l(nxor3, "l", "test flag", {'l'});
+    args::Flag m(nxor3, "m", "test flag", {'m'});
+    args::Flag n(nxor3, "n", "test flag", {'n'});
     args::Group atleastone(xorgroup, "this group provides at-least-one validation:", args::Group::Validators::AtLeastOne);
-    args::Flag g(atleastone, "g", "test flag", args::Matcher({'g'}));
-    args::Flag o(atleastone, "o", "test flag", args::Matcher({'o'}));
-    args::HelpFlag help(parser, "help", "Show this help menu", args::Matcher{'h', "help"});
+    args::Flag g(atleastone, "g", "test flag", {'g'});
+    args::Flag o(atleastone, "o", "test flag", {'o'});
+    args::HelpFlag help(parser, "help", "Show this help menu", {'h', "help"});
     try
     {
         parser.ParseCLI(argc, argv);
@@ -893,10 +893,10 @@ TEST_CASE("Mapping types work as needed", "[args]")
         {"yellow", MappingEnum::yellow},
         {"green", MappingEnum::green}};
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::MapFlag<std::string, MappingEnum> dmf(parser, "DMF", "Maps string to an enum", args::Matcher{"dmf"}, map);
-    args::MapFlag<std::string, MappingEnum> mf(parser, "MF", "Maps string to an enum", args::Matcher{"mf"}, map);
-    args::MapFlag<std::string, MappingEnum, ToLowerReader> cimf(parser, "CIMF", "Maps string to an enum case-insensitively", args::Matcher{"cimf"}, map);
-    args::MapFlagList<std::string, MappingEnum> mfl(parser, "MFL", "Maps string to an enum list", args::Matcher{"mfl"}, map);
+    args::MapFlag<std::string, MappingEnum> dmf(parser, "DMF", "Maps string to an enum", {"dmf"}, map);
+    args::MapFlag<std::string, MappingEnum> mf(parser, "MF", "Maps string to an enum", {"mf"}, map);
+    args::MapFlag<std::string, MappingEnum, ToLowerReader> cimf(parser, "CIMF", "Maps string to an enum case-insensitively", {"cimf"}, map);
+    args::MapFlagList<std::string, MappingEnum> mfl(parser, "MFL", "Maps string to an enum list", {"mfl"}, map);
     args::MapPositional<std::string, MappingEnum> mp(parser, "MP", "Maps string to an enum", map);
     args::MapPositionalList<std::string, MappingEnum> mpl(parser, "MPL", "Maps string to an enum list", map);
     parser.ParseArgs(std::vector<std::string>{"--mf=red", "--cimf=YeLLoW", "--mfl=bar", "foo", "--mfl=green", "red", "--mfl", "bar", "default"});
