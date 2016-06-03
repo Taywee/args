@@ -1154,16 +1154,16 @@ namespace args
                             {
                                 if (ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base))
                                 {
-                                    const std::string arg(++argit, std::end(argchunk));
-                                    if (!arg.empty())
+                                    const std::string value(++argit, std::end(argchunk));
+                                    if (!value.empty())
                                     {
                                         if (allowJoinedShortValue)
                                         {
-                                            argbase->ParseValue(arg);
+                                            argbase->ParseValue(value);
                                         } else
                                         {
                                             std::ostringstream problem;
-                                            problem << "Flag '" << *argit << "' was passed a joined argument, but these are disallowed";
+                                            problem << "Flag '" << arg << "' was passed a joined argument, but these are disallowed";
                                             throw ParseError(problem.str());
                                         }
                                     } else
@@ -1172,7 +1172,7 @@ namespace args
                                         if (it == end)
                                         {
                                             std::ostringstream problem;
-                                            problem << "Flag '" << *argit << "' requires an argument but received none";
+                                            problem << "Flag '" << arg << "' requires an argument but received none";
                                             throw ParseError(problem.str());
                                         }
 
@@ -1182,7 +1182,7 @@ namespace args
                                         } else
                                         {
                                             std::ostringstream problem;
-                                            problem << "Flag '" << *argit << "' was passed a separate argument, but these are disallowed";
+                                            problem << "Flag '" << arg << "' was passed a separate argument, but these are disallowed";
                                             throw ParseError(problem.str());
                                         }
                                     }
