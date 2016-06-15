@@ -412,3 +412,33 @@ TEST_CASE("Mapping types work as needed", "[args]")
     REQUIRE((args::get(mpl) == std::vector<MappingEnum>{MappingEnum::red, MappingEnum::def}));
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--mf=YeLLoW"}), args::MapError);
 }
+
+TEST_CASE("An exception should be thrown when a single-argument flag is matched multiple times and the constructor option is specified", "[args]")
+{
+    std::unordered_map<std::string, MappingEnum> map{
+        {"default", MappingEnum::def},
+        {"foo", MappingEnum::foo},
+        {"bar", MappingEnum::bar},
+        {"red", MappingEnum::red},
+        {"yellow", MappingEnum::yellow},
+        {"green", MappingEnum::green}};
+
+    std::ostream null(nullptr);
+    args::ArgumentParser parser("Test command");
+    args::Flag foo(parser, "Foo", "Foo", {'f', "foo"}, true);
+    args::ValueFlag<std::string> bar(parser, "Bar", "Bar", {'b', "bar"}, "", true);
+    args::Flag bix(parser, "Bix", "Bix", {'x', "bix"});
+    args::MapFlag<std::string, MappingEnum> baz(parser, "Baz", "Baz", {'B', "baz"}, map, MappingEnum::def, true);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "-f", "-bblah"}), args::ExtraError);
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--foo", "-xxx", "--bix", "-bblah", "--bix"}));
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "-bblah", "-blah"}), args::ExtraError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "-bblah", "--bar", "blah"}), args::ExtraError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--baz=red", "-B", "yellow"}), args::ExtraError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--baz", "red", "-Byellow"}), args::ExtraError);
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"--foo", "-Bgreen"}));
+    REQUIRE(foo);
+    REQUIRE_FALSE(bar);
+    REQUIRE_FALSE(bix);
+    REQUIRE(baz);
+    REQUIRE(args::get(baz) == MappingEnum::green);
+}
