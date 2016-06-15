@@ -175,6 +175,15 @@ namespace args
             virtual ~MapError() {};
     };
 
+    /** Error that occurs when a singular flag is specified multiple times
+     */
+    class ExtraError : public ParseError
+    {
+        public:
+            ExtraError(const std::string &problem) : ParseError(problem) {}
+            virtual ~ExtraError() {};
+    };
+
     /** An exception that indicates that the user has requested help
      */
     class Help : public Error
@@ -393,11 +402,14 @@ namespace args
      */
     class FlagBase : public NamedBase
     {
+        private:
+            const bool extraError;
+
         protected:
             const Matcher matcher;
 
         public:
-            FlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : NamedBase(name, help), matcher(std::move(matcher)) {}
+            FlagBase(const std::string &name, const std::string &help, Matcher &&matcher, const bool extraError = false) : NamedBase(name, help), extraError(extraError), matcher(std::move(matcher)) {}
 
             virtual ~FlagBase() {}
 
@@ -405,6 +417,12 @@ namespace args
             {
                 if (matcher.Match(flag))
                 {
+                    if (extraError && matched)
+                    {
+                        std::ostringstream problem;
+                        problem << "Flag '" << flag << "' was passed multiple times, but should only be allowed to be passed once";
+                        throw ExtraError(problem.str());
+                    }
                     matched = true;
                     return this;
                 }
@@ -415,6 +433,12 @@ namespace args
             {
                 if (matcher.Match(flag))
                 {
+                    if (extraError && matched)
+                    {
+                        std::ostringstream problem;
+                        problem << "Flag '" << flag << "' was passed multiple times, but should only be allowed to be passed once";
+                        throw ExtraError(problem.str());
+                    }
                     matched = true;
                     return this;
                 }
@@ -445,7 +469,7 @@ namespace args
     class ValueFlagBase : public FlagBase
     {
         public:
-            ValueFlagBase(const std::string &name, const std::string &help, Matcher &&matcher) : FlagBase(name, help, std::move(matcher)) {}
+            ValueFlagBase(const std::string &name, const std::string &help, Matcher &&matcher, const bool extraError = false) : FlagBase(name, help, std::move(matcher), extraError) {}
             virtual ~ValueFlagBase() {}
             virtual void ParseValue(const std::string &value) = 0;
 
@@ -1254,7 +1278,7 @@ namespace args
     class Flag : public FlagBase
     {
         public:
-            Flag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): FlagBase(name, help, std::move(matcher))
+            Flag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const bool extraError = false): FlagBase(name, help, std::move(matcher), extraError)
             {
                 group.Add(*this);
             }
@@ -1389,7 +1413,7 @@ namespace args
 
         public:
 
-            ValueFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T()): ValueFlagBase(name, help, std::move(matcher)), value(defaultValue)
+            ValueFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T(), const bool extraError = false): ValueFlagBase(name, help, std::move(matcher), extraError), value(defaultValue)
             {
                 group.Add(*this);
             }
@@ -1469,7 +1493,7 @@ namespace args
 
         public:
 
-            MapFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map &map, const T &defaultValue = T()): ValueFlagBase(name, help, std::move(matcher)), map(map), value(defaultValue)
+            MapFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map &map, const T &defaultValue = T(), const bool extraError = false): ValueFlagBase(name, help, std::move(matcher), extraError), map(map), value(defaultValue)
             {
                 group.Add(*this);
             }
