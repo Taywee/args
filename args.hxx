@@ -420,7 +420,7 @@ namespace args
                     if (extraError && matched)
                     {
                         std::ostringstream problem;
-                        problem << "Flag '" << flag << "' was passed multiple times, but is only be allowed to be passed once";
+                        problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
                         throw ExtraError(problem.str());
                     }
                     matched = true;
@@ -436,7 +436,7 @@ namespace args
                     if (extraError && matched)
                     {
                         std::ostringstream problem;
-                        problem << "Flag '" << flag << "' was passed multiple times, but is only be allowed to be passed once";
+                        problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
                         throw ExtraError(problem.str());
                     }
                     matched = true;
