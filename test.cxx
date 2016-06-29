@@ -423,7 +423,6 @@ TEST_CASE("An exception should be thrown when a single-argument flag is matched 
         {"yellow", MappingEnum::yellow},
         {"green", MappingEnum::green}};
 
-    std::ostream null(nullptr);
     args::ArgumentParser parser("Test command");
     args::Flag foo(parser, "Foo", "Foo", {'f', "foo"}, true);
     args::ValueFlag<std::string> bar(parser, "Bar", "Bar", {'b', "bar"}, "", true);
@@ -441,4 +440,38 @@ TEST_CASE("An exception should be thrown when a single-argument flag is matched 
     REQUIRE_FALSE(bix);
     REQUIRE(baz);
     REQUIRE(args::get(baz) == MappingEnum::green);
+}
+
+TEST_CASE("Sub-parsers should work through kick-out", "[args]")
+{
+    std::unordered_map<std::string, MappingEnum> map{
+        {"default", MappingEnum::def},
+        {"foo", MappingEnum::foo},
+        {"bar", MappingEnum::bar},
+        {"red", MappingEnum::red},
+        {"yellow", MappingEnum::yellow},
+        {"green", MappingEnum::green}};
+
+    const std::vector<std::string> args{"--foo", "green", "--bar"};
+
+    args::ArgumentParser parser1("Test command");
+    args::Flag foo1(parser1, "Foo", "Foo", {'f', "foo"});
+    args::Flag bar1(parser1, "Bar", "Bar", {'b', "bar"});
+    args::MapPositional<std::string, MappingEnum> sub(parser1, "sub", "sub", map);
+    sub.KickOut(true);
+
+    auto next = parser1.ParseArgs(args);
+
+    args::ArgumentParser parser2("Test command");
+    args::Flag foo2(parser2, "Foo", "Foo", {'f', "foo"});
+    args::Flag bar2(parser2, "Bar", "Bar", {'b', "bar"});
+
+    parser1.ParseArgs(next, std::end(args));
+
+    REQUIRE(foo1);
+    REQUIRE_FALSE(bar1);
+    REQUIRE(sub);
+    REQUIRE(args::get(sub) == MappingEnum::green);
+    REQUIRE_FALSE(foo2);
+    REQUIRE(bar2);
 }
