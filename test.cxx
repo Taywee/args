@@ -475,3 +475,50 @@ TEST_CASE("Sub-parsers should work through kick-out", "[args]")
     REQUIRE_FALSE(foo2);
     REQUIRE(bar2);
 }
+
+TEST_CASE("Kick-out should work via all flags and value flags", "[args]")
+{
+    const std::vector<std::string> args{"-a", "-b", "--foo", "-ca", "--bar", "barvalue", "-db"};
+
+    args::ArgumentParser parser1("Test command");
+    args::Flag a1(parser1, "a", "a", {'a'});
+    args::Flag b1(parser1, "b", "b", {'b'});
+    args::Flag c1(parser1, "c", "c", {'c'});
+    args::Flag d1(parser1, "d", "d", {'d'});
+    args::Flag foo(parser1, "foo", "foo", {'f', "foo"});
+    foo.KickOut(true);
+
+    args::ArgumentParser parser2("Test command");
+    args::Flag a2(parser2, "a", "a", {'a'});
+    args::Flag b2(parser2, "b", "b", {'b'});
+    args::Flag c2(parser2, "c", "c", {'c'});
+    args::Flag d2(parser2, "d", "d", {'d'});
+    args::ValueFlag<std::string> bar(parser2, "bar", "bar", {'B', "bar"});
+    bar.KickOut(true);
+
+    args::ArgumentParser parser3("Test command");
+    args::Flag a3(parser3, "a", "a", {'a'});
+    args::Flag b3(parser3, "b", "b", {'b'});
+    args::Flag c3(parser3, "c", "c", {'c'});
+    args::Flag d3(parser3, "d", "d", {'d'});
+
+    auto next = parser1.ParseArgs(args);
+    next = parser2.ParseArgs(next, std::end(args));
+    next = parser3.ParseArgs(next, std::end(args));
+    REQUIRE(next == std::end(args));
+    REQUIRE(a1);
+    REQUIRE(b1);
+    REQUIRE_FALSE(c1);
+    REQUIRE_FALSE(d1);
+    REQUIRE(foo);
+    REQUIRE(a2);
+    REQUIRE_FALSE(b2);
+    REQUIRE(c2);
+    REQUIRE_FALSE(d2);
+    REQUIRE(bar);
+    REQUIRE(args::get(bar) == "barvalue");
+    REQUIRE_FALSE(a3);
+    REQUIRE(b3);
+    REQUIRE_FALSE(c3);
+    REQUIRE(d3);
+}
