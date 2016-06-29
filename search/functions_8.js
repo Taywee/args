@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['parseargs',['ParseArgs',['../classargs_1_1ArgumentParser.html#ac2852678eece00f5ac0689381f26a204',1,'args::ArgumentParser::ParseArgs(It begin, It end)'],['../classargs_1_1ArgumentParser.html#a5901df787a0cc82d3be71feab12115bc',1,'args::ArgumentParser::ParseArgs(const T &amp;args)']]],
-  ['parsecli',['ParseCLI',['../classargs_1_1ArgumentParser.html#aa5477da47401025c5c05d1fac84da016',1,'args::ArgumentParser']]],
-  ['prog',['Prog',['../classargs_1_1ArgumentParser.html#a422f77bb16552118d6fb7fdeff16feb4',1,'args::ArgumentParser::Prog() const '],['../classargs_1_1ArgumentParser.html#a0e28d98942b1b4cb2fff01a85b43a076',1,'args::ArgumentParser::Prog(const std::string &amp;prog)']]],
-  ['proglinepostfix',['ProglinePostfix',['../classargs_1_1ArgumentParser.html#a817bfd65f387861769e8c69d3583d865',1,'args::ArgumentParser::ProglinePostfix() const '],['../classargs_1_1ArgumentParser.html#a80abc2f1eac8eb52fc4c8be4ccb8afa7',1,'args::ArgumentParser::ProglinePostfix(const std::string &amp;proglinePostfix)']]]
+  ['match',['Match',['../classargs_1_1Matcher.html#a7768277ed9ab02ba5afaa74ad6db0c5a',1,'args::Matcher::Match(const char flag) const '],['../classargs_1_1Matcher.html#a1f82c4cd0ec6dc72ccdb84358baa7f56',1,'args::Matcher::Match(const std::string &amp;flag) const '],['../classargs_1_1Group.html#ac458709409f03b05fd6f87aa431f8bac',1,'args::Group::Match(const std::string &amp;flag)'],['../classargs_1_1Group.html#a94fb9566620de414632a85c4b6e52404',1,'args::Group::Match(const char flag)']]],
+  ['matched',['Matched',['../classargs_1_1Group.html#a27007b59c7ada6de8288cfdd59a271cf',1,'args::Group']]],
+  ['matchedchildren',['MatchedChildren',['../classargs_1_1Group.html#a6572479f27701d4717bdf1a11d46f9c3',1,'args::Group']]],
+  ['matcher',['Matcher',['../classargs_1_1Matcher.html#a87fc200d9a51b3be654e0ec551304ec5',1,'args::Matcher::Matcher(ShortIt shortFlagsStart, ShortIt shortFlagsEnd, LongIt longFlagsStart, LongIt longFlagsEnd)'],['../classargs_1_1Matcher.html#a62cfbb3db70f623153f8317abb5421dc',1,'args::Matcher::Matcher(Short &amp;&amp;shortIn, Long &amp;&amp;longIn)'],['../classargs_1_1Matcher.html#ad70f96e5475d9020773b429e9f79cb2d',1,'args::Matcher::Matcher(std::initializer_list&lt; EitherFlag &gt; in)']]]
 ];

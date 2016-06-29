@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['valuereader',['ValueReader',['../namespaceargs.html#a5688bc41dd8cfd8979dbfa9881248b28',1,'args']]],
-  ['valuereader_3c_20std_3a_3astring_20_3e',['ValueReader&lt; std::string &gt;',['../namespaceargs.html#ab13b0b06be1c46f2eb179c16b5a550d8',1,'args']]]
+  ['terminator',['Terminator',['../classargs_1_1ArgumentParser.html#a1fdfc5a74cb370d242516fcf1c720059',1,'args::ArgumentParser::Terminator() const '],['../classargs_1_1ArgumentParser.html#a27c66514e6dbcaa4853a5cefff4e0300',1,'args::ArgumentParser::Terminator(const std::string &amp;terminator)']]]
 ];

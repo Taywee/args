@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['terminator',['Terminator',['../classargs_1_1ArgumentParser.html#a1fdfc5a74cb370d242516fcf1c720059',1,'args::ArgumentParser::Terminator() const '],['../classargs_1_1ArgumentParser.html#a27c66514e6dbcaa4853a5cefff4e0300',1,'args::ArgumentParser::Terminator(const std::string &amp;terminator)']]]
+  ['setargumentseparations',['SetArgumentSeparations',['../classargs_1_1ArgumentParser.html#a669a1d89c313f2c3dacf81e31da22394',1,'args::ArgumentParser']]],
+  ['shortprefix',['ShortPrefix',['../classargs_1_1ArgumentParser.html#a3d7318620ce5b0f0bfc39b3430d79613',1,'args::ArgumentParser::ShortPrefix() const '],['../classargs_1_1ArgumentParser.html#a388f16882b8b08b7b1f26fa0bf57a081',1,'args::ArgumentParser::ShortPrefix(const std::string &amp;shortprefix)']]]
 ];
