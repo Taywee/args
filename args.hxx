@@ -398,11 +398,13 @@ namespace args
                 return name;
             }
 
+            /// Sets a kick-out value for building subparsers
             void KickOut(bool kickout) noexcept
             {
                 this->kickout = kickout;
             }
 
+            /// Gets the kick-out value for building subparsers
             bool KickOut() const noexcept
             {
                 return kickout;
