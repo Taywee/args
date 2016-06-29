@@ -380,9 +380,10 @@ namespace args
     {
         protected:
             const std::string name;
+            bool kickout;
 
         public:
-            NamedBase(const std::string &name, const std::string &help) : Base(help), name(name) {}
+            NamedBase(const std::string &name, const std::string &help) : Base(help), name(name), kickout(false) {}
             virtual ~NamedBase() {}
 
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &shortSeparator, const std::string &longSeparator) const override
@@ -395,6 +396,18 @@ namespace args
             virtual std::string Name() const
             {
                 return name;
+            }
+
+            /// Sets a kick-out value for building subparsers
+            void KickOut(bool kickout) noexcept
+            {
+                this->kickout = kickout;
+            }
+
+            /// Gets the kick-out value for building subparsers
+            bool KickOut() const noexcept
+            {
+                return kickout;
             }
     };
 
@@ -420,7 +433,7 @@ namespace args
                     if (extraError && matched)
                     {
                         std::ostringstream problem;
-                        problem << "Flag '" << flag << "' was passed multiple times, but should only be allowed to be passed once";
+                        problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
                         throw ExtraError(problem.str());
                     }
                     matched = true;
@@ -436,7 +449,7 @@ namespace args
                     if (extraError && matched)
                     {
                         std::ostringstream problem;
-                        problem << "Flag '" << flag << "' was passed multiple times, but should only be allowed to be passed once";
+                        problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
                         throw ExtraError(problem.str());
                     }
                     matched = true;
@@ -1093,9 +1106,10 @@ namespace args
              *
              * \param begin an iterator to the beginning of the argument list
              * \param end an iterator to the past-the-end element of the argument list
+             * \return the iterator after the last parsed value.  Only useful for kick-out
              */
             template <typename It>
-            void ParseArgs(It begin, It end)
+            It ParseArgs(It begin, It end)
             {
                 // Reset all Matched statuses to false, for validation.  Don't reset values.
                 ResetMatched();
@@ -1160,6 +1174,11 @@ namespace args
                                 problem << "Passed an argument into a non-argument flag: " << chunk;
                                 throw ParseError(problem.str());
                             }
+
+                            if (base->KickOut())
+                            {
+                                return ++it;
+                            }
                         } else
                         {
                             std::ostringstream problem;
@@ -1174,7 +1193,7 @@ namespace args
                         {
                             const char arg = *argit;
 
-                            if (Base *base = Match(arg))
+                            if (FlagBase *base = Match(arg))
                             {
                                 if (ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base))
                                 {
@@ -1213,6 +1232,11 @@ namespace args
                                     // Because this argchunk is done regardless
                                     break;
                                 }
+
+                                if (base->KickOut())
+                                {
+                                    return ++it;
+                                }
                             } else
                             {
                                 std::ostringstream problem;
@@ -1226,6 +1250,11 @@ namespace args
                         if (pos)
                         {
                             pos->ParseValue(chunk);
+
+                            if (pos->KickOut())
+                            {
+                                return ++it;
+                            }
                         } else
                         {
                             std::ostringstream problem;
@@ -1240,30 +1269,34 @@ namespace args
                     problem << "Group validation failed somewhere!";
                     throw ValidationError(problem.str());
                 }
+                return end;
             }
 
             /** Parse all arguments.
              *
              * \param args an iterable of the arguments
+             * \return the iterator after the last parsed value.  Only useful for kick-out
              */
             template <typename T>
-            void ParseArgs(const T &args)
+            auto ParseArgs(const T &args) -> decltype(std::begin(args))
             {
-                ParseArgs(std::begin(args), std::end(args));
+                return ParseArgs(std::begin(args), std::end(args));
             }
 
             /** Convenience function to parse the CLI from argc and argv
              *
              * Just assigns the program name and vectorizes arguments for passing into ParseArgs()
+             *
+             * \return whether or not all arguments were parsed.  This works for detecting kick-out, but is generally useless as it can't do anything with it.
              */
-            void ParseCLI(const int argc, const char * const * const argv)
+            bool ParseCLI(const int argc, const char * const * const argv)
             {
                 if (prog.empty())
                 {
                     prog.assign(argv[0]);
                 }
                 const std::vector<std::string> args(argv + 1, argv + argc);
-                ParseArgs(args);
+                return ParseArgs(args) == std::end(args);
             }
     };
 
