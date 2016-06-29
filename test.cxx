@@ -423,7 +423,6 @@ TEST_CASE("An exception should be thrown when a single-argument flag is matched 
         {"yellow", MappingEnum::yellow},
         {"green", MappingEnum::green}};
 
-    std::ostream null(nullptr);
     args::ArgumentParser parser("Test command");
     args::Flag foo(parser, "Foo", "Foo", {'f', "foo"}, true);
     args::ValueFlag<std::string> bar(parser, "Bar", "Bar", {'b', "bar"}, "", true);
@@ -441,4 +440,85 @@ TEST_CASE("An exception should be thrown when a single-argument flag is matched 
     REQUIRE_FALSE(bix);
     REQUIRE(baz);
     REQUIRE(args::get(baz) == MappingEnum::green);
+}
+
+TEST_CASE("Sub-parsers should work through kick-out", "[args]")
+{
+    std::unordered_map<std::string, MappingEnum> map{
+        {"default", MappingEnum::def},
+        {"foo", MappingEnum::foo},
+        {"bar", MappingEnum::bar},
+        {"red", MappingEnum::red},
+        {"yellow", MappingEnum::yellow},
+        {"green", MappingEnum::green}};
+
+    const std::vector<std::string> args{"--foo", "green", "--bar"};
+
+    args::ArgumentParser parser1("Test command");
+    args::Flag foo1(parser1, "Foo", "Foo", {'f', "foo"});
+    args::Flag bar1(parser1, "Bar", "Bar", {'b', "bar"});
+    args::MapPositional<std::string, MappingEnum> sub(parser1, "sub", "sub", map);
+    sub.KickOut(true);
+
+    auto next = parser1.ParseArgs(args);
+
+    args::ArgumentParser parser2("Test command");
+    args::Flag foo2(parser2, "Foo", "Foo", {'f', "foo"});
+    args::Flag bar2(parser2, "Bar", "Bar", {'b', "bar"});
+
+    parser2.ParseArgs(next, std::end(args));
+
+    REQUIRE(foo1);
+    REQUIRE_FALSE(bar1);
+    REQUIRE(sub);
+    REQUIRE(args::get(sub) == MappingEnum::green);
+    REQUIRE_FALSE(foo2);
+    REQUIRE(bar2);
+}
+
+TEST_CASE("Kick-out should work via all flags and value flags", "[args]")
+{
+    const std::vector<std::string> args{"-a", "-b", "--foo", "-ca", "--bar", "barvalue", "-db"};
+
+    args::ArgumentParser parser1("Test command");
+    args::Flag a1(parser1, "a", "a", {'a'});
+    args::Flag b1(parser1, "b", "b", {'b'});
+    args::Flag c1(parser1, "c", "c", {'c'});
+    args::Flag d1(parser1, "d", "d", {'d'});
+    args::Flag foo(parser1, "foo", "foo", {'f', "foo"});
+    foo.KickOut(true);
+
+    args::ArgumentParser parser2("Test command");
+    args::Flag a2(parser2, "a", "a", {'a'});
+    args::Flag b2(parser2, "b", "b", {'b'});
+    args::Flag c2(parser2, "c", "c", {'c'});
+    args::Flag d2(parser2, "d", "d", {'d'});
+    args::ValueFlag<std::string> bar(parser2, "bar", "bar", {'B', "bar"});
+    bar.KickOut(true);
+
+    args::ArgumentParser parser3("Test command");
+    args::Flag a3(parser3, "a", "a", {'a'});
+    args::Flag b3(parser3, "b", "b", {'b'});
+    args::Flag c3(parser3, "c", "c", {'c'});
+    args::Flag d3(parser3, "d", "d", {'d'});
+
+    auto next = parser1.ParseArgs(args);
+    next = parser2.ParseArgs(next, std::end(args));
+    next = parser3.ParseArgs(next, std::end(args));
+    REQUIRE(next == std::end(args));
+    REQUIRE(a1);
+    REQUIRE(b1);
+    REQUIRE_FALSE(c1);
+    REQUIRE_FALSE(d1);
+    REQUIRE(foo);
+    REQUIRE(a2);
+    REQUIRE_FALSE(b2);
+    REQUIRE(c2);
+    REQUIRE_FALSE(d2);
+    REQUIRE(bar);
+    REQUIRE(args::get(bar) == "barvalue");
+    REQUIRE_FALSE(a3);
+    REQUIRE(b3);
+    REQUIRE_FALSE(c3);
+    REQUIRE(d3);
 }
