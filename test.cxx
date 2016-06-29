@@ -466,7 +466,7 @@ TEST_CASE("Sub-parsers should work through kick-out", "[args]")
     args::Flag foo2(parser2, "Foo", "Foo", {'f', "foo"});
     args::Flag bar2(parser2, "Bar", "Bar", {'b', "bar"});
 
-    parser1.ParseArgs(next, std::end(args));
+    parser2.ParseArgs(next, std::end(args));
 
     REQUIRE(foo1);
     REQUIRE_FALSE(bar1);
