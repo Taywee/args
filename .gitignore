@@ -45,3 +45,4 @@ install_manifest.txt
 Makefile
 !/Makefile
 *-prefix
+gitlike

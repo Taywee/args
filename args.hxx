@@ -85,11 +85,11 @@ namespace args
     std::vector<std::string> Wrap(const std::string &in, const std::string::size_type width, std::string::size_type firstlinewidth = 0)
     {
         // Preserve existing line breaks
-        const std::string::size_type newlineloc = in.find('\n');
+        const auto newlineloc = in.find('\n');
         if (newlineloc != in.npos)
         {
-            std::vector<std::string> first(Wrap(std::string(in, 0, newlineloc), width));
-            std::vector<std::string> second(Wrap(std::string(in, newlineloc + 1), width));
+            auto first = Wrap(std::string(in, 0, newlineloc), width);
+            auto second = Wrap(std::string(in, newlineloc + 1), width);
             first.insert(
                 std::end(first),
                 std::make_move_iterator(std::begin(second)),
@@ -100,7 +100,7 @@ namespace args
         {
             firstlinewidth = width;
         }
-        std::string::size_type currentwidth = firstlinewidth;
+        auto currentwidth = firstlinewidth;
 
         std::istringstream stream(in);
         std::vector<std::string> output;
@@ -110,7 +110,7 @@ namespace args
         {
             std::string item;
             stream >> item;
-            std::string::size_type itemsize = Glyphs(item);
+            auto itemsize = Glyphs(item);
             if ((linesize + 1 + itemsize) > currentwidth)
             {
                 if (linesize > 0)
@@ -461,7 +461,7 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::vector<std::string> flagStrings(matcher.GetFlagStrings(shortPrefix, longPrefix));
+                const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
@@ -489,7 +489,7 @@ namespace args
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
             {
                 std::tuple<std::string, std::string> description;
-                const std::vector<std::string> flagStrings(matcher.GetFlagStrings(shortPrefix, longPrefix, Name(), shortSeparator, longSeparator));
+                const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix, Name(), shortSeparator, longSeparator);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
@@ -600,8 +600,8 @@ namespace args
             {
                 for (Base *child: children)
                 {
-                    PositionalBase *next = dynamic_cast<PositionalBase *>(child);
-                    Group *group = dynamic_cast<Group *>(child);
+                    auto next = dynamic_cast<PositionalBase *>(child);
+                    auto group = dynamic_cast<Group *>(child);
                     if (group)
                     {
                         next = group->GetNextPositional();
@@ -626,7 +626,7 @@ namespace args
                     {
                         return true;
                     }
-                    if (Group *group = dynamic_cast<Group *>(child))
+                    if (auto group = dynamic_cast<Group *>(child))
                     {
                         if (group->HasFlag())
                         {
@@ -687,7 +687,7 @@ namespace args
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
                 {
-                    if (const Group *group = dynamic_cast<Group *>(child))
+                    if (const auto group = dynamic_cast<Group *>(child))
                     {
                         // Push that group description on the back if not empty
                         unsigned char addindent = 0;
@@ -696,14 +696,14 @@ namespace args
                             descriptions.emplace_back(group->help, "", indent);
                             addindent = 1;
                         }
-                        std::vector<std::tuple<std::string, std::string, unsigned int>> groupDescriptions(group->GetChildDescriptions(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + addindent));
+                        auto groupDescriptions = group->GetChildDescriptions(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + addindent);
                         descriptions.insert(
                             std::end(descriptions),
                             std::make_move_iterator(std::begin(groupDescriptions)),
                             std::make_move_iterator(std::end(groupDescriptions)));
-                    } else if (const NamedBase *named = dynamic_cast<NamedBase *>(child))
+                    } else if (const auto named = dynamic_cast<NamedBase *>(child))
                     {
-                        const std::tuple<std::string, std::string> description(named->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator));
+                        const auto description = named->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator);
                         descriptions.emplace_back(std::get<0>(description), std::get<1>(description), indent);
                     }
                 }
@@ -719,7 +719,7 @@ namespace args
                 {
                     if (const Group *group = dynamic_cast<Group *>(child))
                     {
-                        std::vector<std::string> groupNames(group->GetPosNames());
+                        auto groupNames = group->GetPosNames();
                         names.insert(
                             std::end(names),
                             std::make_move_iterator(std::begin(groupNames)),
@@ -773,7 +773,7 @@ namespace args
                 {
                     for (const auto child: group.Children())
                     {
-                        if (const Group *group = dynamic_cast<Group *>(child))
+                        if (const auto group = dynamic_cast<Group *>(child))
                         {
                             if (!group->Matched())
                             {
@@ -999,8 +999,8 @@ namespace args
                 bool hasoptions = false;
                 bool hasarguments = false;
 
-                const std::vector<std::string> description(Wrap(this->description, helpParams.width - helpParams.descriptionindent));
-                const std::vector<std::string> epilog(Wrap(this->epilog, helpParams.width - helpParams.descriptionindent));
+                const auto description = Wrap(this->description, helpParams.width - helpParams.descriptionindent);
+                const auto epilog = Wrap(this->epilog, helpParams.width - helpParams.descriptionindent);
                 std::ostringstream prognameline;
                 prognameline << prog;
                 if (HasFlag())
@@ -1023,7 +1023,7 @@ namespace args
                 {
                     prognameline << ' ' << proglinePostfix;
                 }
-                const std::vector<std::string> proglines(Wrap(prognameline.str(), helpParams.width - (helpParams.progindent + 4), helpParams.width - helpParams.progindent));
+                const auto proglines = Wrap(prognameline.str(), helpParams.width - (helpParams.progindent + 4), helpParams.width - helpParams.progindent);
                 auto progit = std::begin(proglines);
                 if (progit != std::end(proglines))
                 {
@@ -1037,7 +1037,7 @@ namespace args
 
                 help << '\n';
 
-                for (const std::string &line: description)
+                for (const auto &line: description)
                 {
                     help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
@@ -1045,9 +1045,9 @@ namespace args
                 help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
                 for (const auto &description: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " "))
                 {
-                    const unsigned int groupindent = std::get<2>(description) * helpParams.eachgroupindent;
-                    const std::vector<std::string> flags(Wrap(std::get<0>(description), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter)));
-                    const std::vector<std::string> info(Wrap(std::get<1>(description), helpParams.width - (helpParams.helpindent + groupindent)));
+                    const auto groupindent = std::get<2>(description) * helpParams.eachgroupindent;
+                    const auto flags = Wrap(std::get<0>(description), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter));
+                    const auto info = Wrap(std::get<1>(description), helpParams.width - (helpParams.helpindent + groupindent));
 
                     std::string::size_type flagssize = 0;
                     for (auto flagsit = std::begin(flags); flagsit != std::end(flags); ++flagsit)
@@ -1078,14 +1078,14 @@ namespace args
                 }
                 if (hasoptions && hasarguments && helpParams.showTerminator)
                 {
-                    for (const std::string &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
+                    for (const auto &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
                     {
                         help << std::string(helpParams.flagindent, ' ') << item << '\n';
                     }
                 }
 
                 help << "\n";
-                for (const std::string &line: epilog)
+                for (const auto &line: epilog)
                 {
                     help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
@@ -1118,7 +1118,7 @@ namespace args
                 // Check all arg chunks
                 for (auto it = begin; it != end; ++it)
                 {
-                    const std::string &chunk = *it;
+                    const auto &chunk = *it;
 
                     if (!terminated and chunk == terminator)
                     {
@@ -1126,16 +1126,17 @@ namespace args
                     // If a long arg was found
                     } else if (!terminated && chunk.find(longprefix) == 0 && chunk.size() > longprefix.size())
                     {
-                        const std::string argchunk(chunk.substr(longprefix.size()));
+                        const auto argchunk = chunk.substr(longprefix.size());
                         // Try to separate it, in case of a separator:
                         const auto separator = longseparator.empty() ? argchunk.npos : argchunk.find(longseparator);
-                        const std::string arg = (separator != argchunk.npos ?
+                        // If the separator is in the argument, separate it.
+                        const auto arg = (separator != argchunk.npos ?
                             std::string(argchunk, 0, separator)
                             : argchunk);
 
-                        if (FlagBase *base = Match(arg))
+                        if (auto base = Match(arg))
                         {
-                            if (ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base))
+                            if (auto argbase = dynamic_cast<ValueFlagBase *>(base))
                             {
                                 if (separator != argchunk.npos)
                                 {
@@ -1188,14 +1189,14 @@ namespace args
                         // Check short args
                     } else if (!terminated && chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
                     {
-                        const std::string argchunk(chunk.substr(shortprefix.size()));
+                        const auto argchunk = chunk.substr(shortprefix.size());
                         for (auto argit = std::begin(argchunk); argit != std::end(argchunk); ++argit)
                         {
-                            const char arg = *argit;
+                            const auto arg = *argit;
 
-                            if (FlagBase *base = Match(arg))
+                            if (auto base = Match(arg))
                             {
-                                if (ValueFlagBase *argbase = dynamic_cast<ValueFlagBase *>(base))
+                                if (auto argbase = dynamic_cast<ValueFlagBase *>(base))
                                 {
                                     const std::string value(++argit, std::end(argchunk));
                                     if (!value.empty())
@@ -1246,7 +1247,7 @@ namespace args
                         }
                     } else
                     {
-                        PositionalBase *pos = GetNextPositional();
+                        auto pos = GetNextPositional();
                         if (pos)
                         {
                             pos->ParseValue(chunk);
@@ -1289,7 +1290,7 @@ namespace args
              *
              * \return whether or not all arguments were parsed.  This works for detecting kick-out, but is generally useless as it can't do anything with it.
              */
-            bool ParseCLI(const int argc, const char * const * const argv)
+            bool ParseCLI(const int argc, const char * const * argv)
             {
                 if (prog.empty())
                 {
@@ -1377,7 +1378,7 @@ namespace args
 
             virtual FlagBase *Match(const std::string &arg) override
             {
-                FlagBase *me = FlagBase::Match(arg);
+                auto me = FlagBase::Match(arg);
                 if (me)
                 {
                     ++count;
@@ -1387,7 +1388,7 @@ namespace args
 
             virtual FlagBase *Match(const char arg) override
             {
-                FlagBase *me = FlagBase::Match(arg);
+                auto me = FlagBase::Match(arg);
                 if (me)
                 {
                     ++count;
