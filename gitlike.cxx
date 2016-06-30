@@ -22,6 +22,7 @@ int main(int argc, char **argv)
     args::ArgumentParser parser("This is a git-like program", "Valid commands are init and add");
     args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
     parser.Prog(argv[0]);
+    parser.ProglinePostfix("{command options}");
     args::Flag version(parser, "version", "Show the version of this program", {"version"});
     args::ValueFlag<std::string> htmlpath(parser, "html-path", "Specify the html path", {"html-path"});
     args::MapPositional<std::string, commandtype> command(parser, "command", "Command to execute", map);
