@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">5.0.0</span>
+   &#160;<span id="projectnumber">5.1.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -111,6 +111,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Error.html">args::Error</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classargs_1_1Base.html" title="Base class for all match types. ">Base</a> error class.  <a href="classargs_1_1Error.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1UsageError.html">args::UsageError</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Errors that occur during usage.  <a href="classargs_1_1UsageError.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ParseError.html">args::ParseError</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Errors that occur during regular parsing.  <a href="classargs_1_1ParseError.html#details">More...</a><br /></td></tr>
@@ -215,14 +218,14 @@ Functions</h2></td></tr>
 <tr class="memitem:aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>args::operator&lt;&lt;</b> (std::ostream &amp;os, const ArgumentParser &amp;parser)</td></tr>
 <tr class="separator:aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5688bc41dd8cfd8979dbfa9881248b28"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a5688bc41dd8cfd8979dbfa9881248b28"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#a5688bc41dd8cfd8979dbfa9881248b28">args::ValueReader</a> (const std::string &amp;name, const std::string &amp;value, T &amp;destination)</td></tr>
-<tr class="memdesc:a5688bc41dd8cfd8979dbfa9881248b28"><td class="mdescLeft">&#160;</td><td class="mdescRight">A default Reader function for argument classes.  <a href="namespaceargs.html#a5688bc41dd8cfd8979dbfa9881248b28">More...</a><br /></td></tr>
-<tr class="separator:a5688bc41dd8cfd8979dbfa9881248b28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab13b0b06be1c46f2eb179c16b5a550d8"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
-<tr class="memitem:ab13b0b06be1c46f2eb179c16b5a550d8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#ab13b0b06be1c46f2eb179c16b5a550d8">args::ValueReader&lt; std::string &gt;</a> (const std::string &amp;name, const std::string &amp;value, std::string &amp;destination)</td></tr>
-<tr class="memdesc:ab13b0b06be1c46f2eb179c16b5a550d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">std::string specialization for ValueReader  <a href="namespaceargs.html#ab13b0b06be1c46f2eb179c16b5a550d8">More...</a><br /></td></tr>
-<tr class="separator:ab13b0b06be1c46f2eb179c16b5a550d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba39c2017da65453ff9efb09dbdc3e6d"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aba39c2017da65453ff9efb09dbdc3e6d"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#aba39c2017da65453ff9efb09dbdc3e6d">args::ValueReader</a> (const std::string &amp;name, const std::string &amp;value, T &amp;destination)</td></tr>
+<tr class="memdesc:aba39c2017da65453ff9efb09dbdc3e6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A default Reader function for argument classes.  <a href="namespaceargs.html#aba39c2017da65453ff9efb09dbdc3e6d">More...</a><br /></td></tr>
+<tr class="separator:aba39c2017da65453ff9efb09dbdc3e6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a246ecbe3924203fdcf5cf2340e70e79f"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:a246ecbe3924203fdcf5cf2340e70e79f"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#a246ecbe3924203fdcf5cf2340e70e79f">args::ValueReader&lt; std::string &gt;</a> (const std::string &amp;name, const std::string &amp;value, std::string &amp;destination)</td></tr>
+<tr class="memdesc:a246ecbe3924203fdcf5cf2340e70e79f"><td class="mdescLeft">&#160;</td><td class="mdescRight">std::string specialization for ValueReader  <a href="namespaceargs.html#a246ecbe3924203fdcf5cf2340e70e79f">More...</a><br /></td></tr>
+<tr class="separator:a246ecbe3924203fdcf5cf2340e70e79f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>this single-header lets you use all of the args functionality </p>

@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">5.0.0</span>
+   &#160;<span id="projectnumber">5.1.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -221,12 +221,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a710c2053274102984c4ac3e6e356a53d inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a710c2053274102984c4ac3e6e356a53d"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Group</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;help=std::string(), const std::function&lt; bool(const <a class="el" href="classargs_1_1Group.html">Group</a> &amp;)&gt; &amp;validator=Validators::DontCare)</td></tr>
 <tr class="separator:a710c2053274102984c4ac3e6e356a53d inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac458709409f03b05fd6f87aa431f8bac inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#ac458709409f03b05fd6f87aa431f8bac">Match</a> (const std::string &amp;flag)</td></tr>
-<tr class="memdesc:ac458709409f03b05fd6f87aa431f8bac inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr.  <a href="#ac458709409f03b05fd6f87aa431f8bac">More...</a><br /></td></tr>
-<tr class="separator:ac458709409f03b05fd6f87aa431f8bac inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94fb9566620de414632a85c4b6e52404 inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a94fb9566620de414632a85c4b6e52404">Match</a> (const char flag)</td></tr>
-<tr class="memdesc:a94fb9566620de414632a85c4b6e52404 inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr.  <a href="#a94fb9566620de414632a85c4b6e52404">More...</a><br /></td></tr>
-<tr class="separator:a94fb9566620de414632a85c4b6e52404 inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab131dbcce67ec225c47b9087d333eff1 inherit pub_methods_classargs_1_1Group"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ab131dbcce67ec225c47b9087d333eff1 inherit pub_methods_classargs_1_1Group"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1FlagBase.html">FlagBase</a> *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#ab131dbcce67ec225c47b9087d333eff1">Match</a> (const T &amp;flag)</td></tr>
+<tr class="memdesc:ab131dbcce67ec225c47b9087d333eff1 inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the first <a class="el" href="classargs_1_1FlagBase.html" title="Base class for all flag options. ">FlagBase</a> that matches flag, or nullptr.  <a href="#ab131dbcce67ec225c47b9087d333eff1">More...</a><br /></td></tr>
+<tr class="separator:ab131dbcce67ec225c47b9087d333eff1 inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ac0360507e7e5d4bb57bc8081839b68 inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classargs_1_1PositionalBase.html">PositionalBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a9ac0360507e7e5d4bb57bc8081839b68">GetNextPositional</a> ()</td></tr>
 <tr class="memdesc:a9ac0360507e7e5d4bb57bc8081839b68 inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the next ready positional, or nullptr if there is none.  <a href="#a9ac0360507e7e5d4bb57bc8081839b68">More...</a><br /></td></tr>
 <tr class="separator:a9ac0360507e7e5d4bb57bc8081839b68 inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -261,9 +259,9 @@ std::vector&lt; std::tuple&lt; std::string, std::string, unsigned int &gt; &gt;&
 std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1Group.html#a85382243f31e08ef0ce5df807d82d102">GetPosNames</a> () const </td></tr>
 <tr class="memdesc:a85382243f31e08ef0ce5df807d82d102 inherit pub_methods_classargs_1_1Group"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of positional parameters. <br /></td></tr>
 <tr class="separator:a85382243f31e08ef0ce5df807d82d102 inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca7582d3fbb5c17f69db2c7dfdf467bd inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aca7582d3fbb5c17f69db2c7dfdf467bd"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ResetMatched</b> () override</td></tr>
-<tr class="separator:aca7582d3fbb5c17f69db2c7dfdf467bd inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ccee0f0ea0902b82029b2ab30f3f84b inherit pub_methods_classargs_1_1Group"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ccee0f0ea0902b82029b2ab30f3f84b"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>Reset</b> () noexcept override</td></tr>
+<tr class="separator:a7ccee0f0ea0902b82029b2ab30f3f84b inherit pub_methods_classargs_1_1Group"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classargs_1_1Base"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classargs_1_1Base')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classargs_1_1Base.html">args::Base</a></td></tr>
 <tr class="memitem:a746f35038981c797a85f4cc56cfc2125 inherit pub_methods_classargs_1_1Base"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a746f35038981c797a85f4cc56cfc2125"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Base</b> (const std::string &amp;help)</td></tr>
