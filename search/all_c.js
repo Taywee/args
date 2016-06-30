@@ -1,7 +1,7 @@
 var searchData=
 [
   ['parseargs',['ParseArgs',['../classargs_1_1ArgumentParser.html#a4bc1f3f3d000f11715fa66ade894bd9b',1,'args::ArgumentParser::ParseArgs(It begin, It end)'],['../classargs_1_1ArgumentParser.html#abc88273e1c57f994a17ba8ddb646d6d3',1,'args::ArgumentParser::ParseArgs(const T &amp;args) -&gt; decltype(std::begin(args))                                        ']]],
-  ['parsecli',['ParseCLI',['../classargs_1_1ArgumentParser.html#a287041ab9ed8ea7b604716c557bcc84f',1,'args::ArgumentParser']]],
+  ['parsecli',['ParseCLI',['../classargs_1_1ArgumentParser.html#a8e79c5bd015bad9648b9c98eecc63fc9',1,'args::ArgumentParser']]],
   ['parseerror',['ParseError',['../classargs_1_1ParseError.html',1,'args']]],
   ['positional',['Positional',['../classargs_1_1Positional.html',1,'args']]],
   ['positionalbase',['PositionalBase',['../classargs_1_1PositionalBase.html',1,'args']]],
