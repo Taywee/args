@@ -146,6 +146,7 @@ namespace args
     }
 
 #ifdef ARGS_NOEXCEPT
+    /// Error class, for when ARGS_NOEXCEPT is defined
     enum class Error
     {
         None,
@@ -375,6 +376,7 @@ namespace args
             bool matched;
             const std::string help;
 #ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
             Error error;
 #endif
 
@@ -408,6 +410,7 @@ namespace args
             }
 
 #ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
             virtual Error GetError() const
             {
                 return error;
@@ -760,6 +763,7 @@ namespace args
             }
 
 #ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
             virtual Error GetError() const override
             {
                 if (error != Error::None)
