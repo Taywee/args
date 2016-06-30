@@ -251,11 +251,12 @@ TEST_CASE("Argument groups should nest", "[args]")
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a", "-dg"}), args::ValidationError);
 }
 
-void DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
+bool DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
 {
     size_t commapos = 0;
     std::get<0>(destination) = std::stod(value, &commapos);
     std::get<1>(destination) = std::stod(std::string(value, commapos + 1));
+    return true;
 }
 
 TEST_CASE("Custom types work", "[args]")
@@ -375,10 +376,11 @@ enum class MappingEnum
 #include <algorithm>
 #include <string>
 
-void ToLowerReader(const std::string &name, const std::string &value, std::string &destination)
+bool ToLowerReader(const std::string &name, const std::string &value, std::string &destination)
 {
     destination = value;
     std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);
+    return true;
 }
 
 TEST_CASE("Mapping types work as needed", "[args]")
@@ -521,4 +523,67 @@ TEST_CASE("Kick-out should work via all flags and value flags", "[args]")
     REQUIRE(b3);
     REQUIRE_FALSE(c3);
     REQUIRE(d3);
+}
+
+#define ARGS_TESTNAMESPACE
+#define ARGS_NOEXCEPT
+#include <args.hxx>
+
+TEST_CASE("Noexcept mode works as expected", "[args]")
+{
+    std::unordered_map<std::string, MappingEnum> map{
+        {"default", MappingEnum::def},
+        {"foo", MappingEnum::foo},
+        {"bar", MappingEnum::bar},
+        {"red", MappingEnum::red},
+        {"yellow", MappingEnum::yellow},
+        {"green", MappingEnum::green}};
+
+    argstest::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    argstest::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
+    argstest::Flag bar(parser, "BAR", "test flag", {'b', "bar"}, true);
+    argstest::ValueFlag<int> foo(parser, "FOO", "test flag", {'f', "foo"});
+    argstest::Group nandgroup(parser, "this group provides nand validation", argstest::Group::Validators::AtMostOne);
+    argstest::Flag x(nandgroup, "x", "test flag", {'x'});
+    argstest::Flag y(nandgroup, "y", "test flag", {'y'});
+    argstest::Flag z(nandgroup, "z", "test flag", {'z'});
+    argstest::MapFlag<std::string, MappingEnum> mf(parser, "MF", "Maps string to an enum", {"mf"}, map);
+    parser.ParseArgs(std::vector<std::string>{"-h"});
+    REQUIRE(parser.GetError() == argstest::Error::Help);
+    parser.ParseArgs(std::vector<std::string>{"--Help"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+    parser.ParseArgs(std::vector<std::string>{"--bar=test"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+    parser.ParseArgs(std::vector<std::string>{"--bar"});
+    REQUIRE(parser.GetError() == argstest::Error::None);
+    parser.ParseArgs(std::vector<std::string>{"--bar", "-b"});
+    REQUIRE(parser.GetError() == argstest::Error::Extra);
+
+    parser.ParseArgs(std::vector<std::string>{"--foo=7.5"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+    parser.ParseArgs(std::vector<std::string>{"--foo", "7a"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+    parser.ParseArgs(std::vector<std::string>{"--foo", "7e4"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+    parser.ParseArgs(std::vector<std::string>{"--foo"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+
+    parser.ParseArgs(std::vector<std::string>{"--foo=85"});
+    REQUIRE(parser.GetError() == argstest::Error::None);
+
+    parser.ParseArgs(std::vector<std::string>{"this is a test flag again", "1", "this has no positional available"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+
+    parser.ParseArgs(std::vector<std::string>{"-x"});
+    REQUIRE(parser.GetError() == argstest::Error::None);
+    parser.ParseArgs(std::vector<std::string>{"-xz"});
+    REQUIRE(parser.GetError() == argstest::Error::Validation);
+    parser.ParseArgs(std::vector<std::string>{"-y"});
+    REQUIRE(parser.GetError() == argstest::Error::None);
+    parser.ParseArgs(std::vector<std::string>{"-y", "-xz"});
+    REQUIRE(parser.GetError() == argstest::Error::Validation);
+    parser.ParseArgs(std::vector<std::string>{"--mf", "YeLLoW"});
+    REQUIRE(parser.GetError() == argstest::Error::Map);
+    parser.ParseArgs(std::vector<std::string>{"--mf", "yellow"});
+    REQUIRE(parser.GetError() == argstest::Error::None);
 }

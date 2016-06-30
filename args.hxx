@@ -36,11 +36,17 @@
 #include <unordered_set>
 #include <type_traits>
 
+#ifdef ARGS_TESTNAMESPACE
+namespace argstest
+{
+#else
+
 /** \namespace args
  * \brief contains all the functionality of the args library
  */
 namespace args
 {
+#endif
     /** Getter to grab the value from the argument type.
      *
      * If the Get() function of the type returns a reference, so does this, and
@@ -139,6 +145,19 @@ namespace args
         return output;
     }
 
+#ifdef ARGS_NOEXCEPT
+    /// Error class, for when ARGS_NOEXCEPT is defined
+    enum class Error
+    {
+        None,
+        Usage,
+        Parse,
+        Validation,
+        Map,
+        Extra,
+        Help
+    };
+#else
     /** Base error class
      */
     class Error : public std::runtime_error
@@ -146,6 +165,15 @@ namespace args
         public:
             Error(const std::string &problem) : std::runtime_error(problem) {}
             virtual ~Error() {};
+    };
+
+    /** Errors that occur during usage
+     */
+    class UsageError : public Error
+    {
+        public:
+            UsageError(const std::string &problem) : Error(problem) {}
+            virtual ~UsageError() {};
     };
 
     /** Errors that occur during regular parsing
@@ -192,6 +220,7 @@ namespace args
             Help(const std::string &flag) : Error(flag) {}
             virtual ~Help() {};
     };
+#endif
 
     /** A simple unified option type for unified initializer lists for the Matcher class.
      */
@@ -346,6 +375,10 @@ namespace args
         protected:
             bool matched;
             const std::string help;
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            Error error;
+#endif
 
         public:
             Base(const std::string &help) : matched(false), help(help) {}
@@ -368,10 +401,21 @@ namespace args
                 return description;
             }
 
-            virtual void ResetMatched()
+            virtual void Reset() noexcept
             {
                 matched = false;
+#ifdef ARGS_NOEXCEPT
+                error = Error::None;
+#endif
             }
+
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            virtual Error GetError() const
+            {
+                return error;
+            }
+#endif
     };
 
     /** Base class for all match types that have a name
@@ -432,9 +476,13 @@ namespace args
                 {
                     if (extraError && matched)
                     {
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Extra;
+#else
                         std::ostringstream problem;
                         problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
                         throw ExtraError(problem.str());
+#endif
                     }
                     matched = true;
                     return this;
@@ -448,9 +496,13 @@ namespace args
                 {
                     if (extraError && matched)
                     {
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Extra;
+#else
                         std::ostringstream problem;
                         problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
                         throw ExtraError(problem.str());
+#endif
                     }
                     matched = true;
                     return this;
@@ -545,33 +597,8 @@ namespace args
              * \param flag The flag with prefixes stripped
              * \return the first matching FlagBase pointer, or nullptr if there is no match
              */
-            FlagBase *Match(const std::string &flag)
-            {
-                for (Base *child: children)
-                {
-                    if (FlagBase *flagBase = dynamic_cast<FlagBase *>(child))
-                    {
-                        if (FlagBase *match = flagBase->Match(flag))
-                        {
-                            return match;
-                        }
-                    } else if (Group *group = dynamic_cast<Group *>(child))
-                    {
-                        if (FlagBase *match = group->Match(flag))
-                        {
-                            return match;
-                        }
-                    }
-                }
-                return nullptr;
-            }
-
-            /** Return the first FlagBase that matches flag, or nullptr
-             *
-             * \param flag The flag with prefixes stripped
-             * \return the first matching FlagBase pointer, or nullptr if there is no match
-             */
-            FlagBase *Match(const char flag)
+            template <typename T>
+            FlagBase *Match(const T &flag)
             {
                 for (Base *child: children)
                 {
@@ -655,15 +682,7 @@ namespace args
              */
             std::vector<Base *>::size_type MatchedChildren() const
             {
-                std::vector<Base *>::size_type sum = 0;
-                for (const Base * child: children)
-                {
-                    if (child->Matched())
-                    {
-                        ++sum;
-                    }
-                }
-                return sum;
+                return std::count_if(std::begin(children), std::end(children), [](const Base *child){return child->Matched();});
             }
 
             /** Whether or not this group matches validation
@@ -732,13 +751,36 @@ namespace args
                 return names;
             }
 
-            virtual void ResetMatched() override
+            virtual void Reset() noexcept override
             {
                 for (auto &child: children)
                 {
-                    child->ResetMatched();
+                    child->Reset();
+                }
+#ifdef ARGS_NOEXCEPT
+                error = Error::None;
+#endif
+            }
+
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            virtual Error GetError() const override
+            {
+                if (error != Error::None)
+                {
+                    return error;
+                }
+
+                auto it = std::find_if(std::begin(children), std::end(children), [](const Base *child){return child->GetError() != Error::None;});
+                if (it == std::end(children))
+                {
+                    return Error::None;
+                } else
+                {
+                    return (*it)->GetError();
                 }
             }
+#endif
 
             /** Default validators
              */
@@ -943,9 +985,15 @@ namespace args
             {
                 if (longseparator.empty())
                 {
-                    throw std::runtime_error("longseparator can not be set to empty");
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Usage;
+#else
+                    throw UsageError("longseparator can not be set to empty");
+#endif
+                } else
+                {
+                    this->longseparator = longseparator;
                 }
-                this->longseparator = longseparator;
             }
 
             /** The terminator that forcibly separates flags from positionals
@@ -1111,8 +1159,8 @@ namespace args
             template <typename It>
             It ParseArgs(It begin, It end)
             {
-                // Reset all Matched statuses to false, for validation.  Don't reset values.
-                ResetMatched();
+                // Reset all Matched statuses and errors
+                Reset();
                 bool terminated = false;
 
                 // Check all arg chunks
@@ -1145,18 +1193,28 @@ namespace args
                                         argbase->ParseValue(argchunk.substr(separator + longseparator.size()));
                                     } else
                                     {
+#ifdef ARGS_NOEXCEPT
+                                        error = Error::Parse;
+                                        return it;
+#else
                                         std::ostringstream problem;
                                         problem << "Flag '" << arg << "' was passed a joined argument, but these are disallowed";
                                         throw ParseError(problem.str());
+#endif
                                     }
                                 } else
                                 {
                                     ++it;
                                     if (it == end)
                                     {
+#ifdef ARGS_NOEXCEPT
+                                        error = Error::Parse;
+                                        return it;
+#else
                                         std::ostringstream problem;
                                         problem << "Flag '" << arg << "' requires an argument but received none";
                                         throw ParseError(problem.str());
+#endif
                                     }
 
                                     if (allowSeparateLongValue)
@@ -1164,16 +1222,26 @@ namespace args
                                         argbase->ParseValue(*it);
                                     } else
                                     {
+#ifdef ARGS_NOEXCEPT
+                                        error = Error::Parse;
+                                        return it;
+#else
                                         std::ostringstream problem;
                                         problem << "Flag '" << arg << "' was passed a separate argument, but these are disallowed";
                                         throw ParseError(problem.str());
+#endif
                                     }
                                 }
                             } else if (separator != argchunk.npos)
                             {
+#ifdef ARGS_NOEXCEPT
+                                error = Error::Parse;
+                                return it;
+#else
                                 std::ostringstream problem;
                                 problem << "Passed an argument into a non-argument flag: " << chunk;
                                 throw ParseError(problem.str());
+#endif
                             }
 
                             if (base->KickOut())
@@ -1182,9 +1250,14 @@ namespace args
                             }
                         } else
                         {
+#ifdef ARGS_NOEXCEPT
+                            error = Error::Parse;
+                            return it;
+#else
                             std::ostringstream problem;
                             problem << "Flag could not be matched: " << arg;
                             throw ParseError(problem.str());
+#endif
                         }
                         // Check short args
                     } else if (!terminated && chunk.find(shortprefix) == 0 && chunk.size() > shortprefix.size())
@@ -1206,18 +1279,28 @@ namespace args
                                             argbase->ParseValue(value);
                                         } else
                                         {
+#ifdef ARGS_NOEXCEPT
+                                            error = Error::Parse;
+                                            return it;
+#else
                                             std::ostringstream problem;
                                             problem << "Flag '" << arg << "' was passed a joined argument, but these are disallowed";
                                             throw ParseError(problem.str());
+#endif
                                         }
                                     } else
                                     {
                                         ++it;
                                         if (it == end)
                                         {
+#ifdef ARGS_NOEXCEPT
+                                            error = Error::Parse;
+                                            return it;
+#else
                                             std::ostringstream problem;
                                             problem << "Flag '" << arg << "' requires an argument but received none";
                                             throw ParseError(problem.str());
+#endif
                                         }
 
                                         if (allowSeparateShortValue)
@@ -1225,9 +1308,14 @@ namespace args
                                             argbase->ParseValue(*it);
                                         } else
                                         {
+#ifdef ARGS_NOEXCEPT
+                                            error = Error::Parse;
+                                            return it;
+#else
                                             std::ostringstream problem;
                                             problem << "Flag '" << arg << "' was passed a separate argument, but these are disallowed";
                                             throw ParseError(problem.str());
+#endif
                                         }
                                     }
                                     // Because this argchunk is done regardless
@@ -1240,9 +1328,14 @@ namespace args
                                 }
                             } else
                             {
+#ifdef ARGS_NOEXCEPT
+                                error = Error::Parse;
+                                return it;
+#else
                                 std::ostringstream problem;
                                 problem << "Flag could not be matched: '" << arg << "'";
                                 throw ParseError(problem.str());
+#endif
                             }
                         }
                     } else
@@ -1258,17 +1351,26 @@ namespace args
                             }
                         } else
                         {
+#ifdef ARGS_NOEXCEPT
+                            error = Error::Parse;
+                            return it;
+#else
                             std::ostringstream problem;
                             problem << "Passed in argument, but no positional arguments were ready to receive it: " << chunk;
                             throw ParseError(problem.str());
+#endif
                         }
                     }
                 }
                 if (!Matched())
                 {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Validation;
+#else
                     std::ostringstream problem;
                     problem << "Group validation failed somewhere!";
                     throw ValidationError(problem.str());
+#endif
                 }
                 return end;
             }
@@ -1342,7 +1444,12 @@ namespace args
             {
                 if (FlagBase::Match(arg))
                 {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Help;
+#else
                     throw Help(arg);
+#endif
+                    return this;
                 }
                 return nullptr;
             }
@@ -1351,7 +1458,12 @@ namespace args
             {
                 if (FlagBase::Match(arg))
                 {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Help;
+#else
                     throw Help(std::string(1, arg));
+#endif
+                    return this;
                 }
                 return nullptr;
             }
@@ -1410,17 +1522,22 @@ namespace args
      * raises a ParseError if there are any characters left.
      */
     template <typename T>
-    void ValueReader(const std::string &name, const std::string &value, T &destination)
+    bool ValueReader(const std::string &name, const std::string &value, T &destination)
     {
         std::istringstream ss(value);
         ss >> destination;
 
         if (ss.rdbuf()->in_avail() > 0)
         {
+#ifdef ARGS_NOEXCEPT
+            return false;
+#else
             std::ostringstream problem;
             problem << "Argument '" << name << "' received invalid value type '" << value << "'";
             throw ParseError(problem.str());
+#endif
         }
+        return true;
     }
 
     /** std::string specialization for ValueReader
@@ -1429,9 +1546,10 @@ namespace args
      * it is more efficient to ust copy a string into the destination.
      */
     template <>
-    void ValueReader<std::string>(const std::string &name, const std::string &value, std::string &destination)
+    bool ValueReader<std::string>(const std::string &name, const std::string &value, std::string &destination)
     {
         destination.assign(value);
+        return true;
     }
 
     /** An argument-accepting flag class
@@ -1439,7 +1557,7 @@ namespace args
      * \tparam T the type to extract the argument as
      * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
      */
-    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    template <typename T, bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
     class ValueFlag : public ValueFlagBase
     {
         private:
@@ -1456,7 +1574,12 @@ namespace args
 
             virtual void ParseValue(const std::string &value) override
             {
-                Reader(name, value, this->value);
+                if (!Reader(name, value, this->value))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
             }
 
             /** Get the value
@@ -1476,7 +1599,7 @@ namespace args
     template <
         typename T,
         typename List = std::vector<T>,
-        void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+        bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
     class ValueFlagList : public ValueFlagBase
     {
         private:
@@ -1494,7 +1617,12 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 T v;
-                Reader(name, value, v);
+                if (!Reader(name, value, v))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
                 values.insert(std::end(values), v);
             }
 
@@ -1518,7 +1646,7 @@ namespace args
      * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <typename K, typename T, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
     class MapFlag : public ValueFlagBase
     {
         private:
@@ -1537,13 +1665,22 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                Reader(name, value, key);
+                if (!Reader(name, value, key))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
                     throw MapError(problem.str());
+#endif
                 } else
                 {
                     this->value = it->second;
@@ -1566,7 +1703,7 @@ namespace args
      * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, typename List = std::vector<T>, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <typename K, typename T, typename List = std::vector<T>, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
     class MapFlagList : public ValueFlagBase
     {
         private:
@@ -1585,13 +1722,22 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                Reader(name, value, key);
+                if (!Reader(name, value, key))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
                     throw MapError(problem.str());
+#endif
                 } else
                 {
                     this->values.emplace_back(it->second);
@@ -1616,7 +1762,7 @@ namespace args
      * \tparam T the type to extract the argument as
      * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
      */
-    template <typename T, void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    template <typename T, bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
     class Positional : public PositionalBase
     {
         private:
@@ -1631,7 +1777,12 @@ namespace args
 
             virtual void ParseValue(const std::string &value) override
             {
-                Reader(name, value, this->value);
+                if (!Reader(name, value, this->value))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
                 ready = false;
                 matched = true;
             }
@@ -1653,7 +1804,7 @@ namespace args
     template <
         typename T,
         typename List = std::vector<T>,
-        void (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+        bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
     class PositionalList : public PositionalBase
     {
         private:
@@ -1670,7 +1821,12 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 T v;
-                Reader(name, value, v);
+                if (!Reader(name, value, v))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
                 values.insert(std::end(values), v);
                 matched = true;
             }
@@ -1695,7 +1851,7 @@ namespace args
      * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <typename K, typename T, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
     class MapPositional : public PositionalBase
     {
         private:
@@ -1714,13 +1870,22 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                Reader(name, value, key);
+                if (!Reader(name, value, key))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
                     throw MapError(problem.str());
+#endif
                 } else
                 {
                     this->value = it->second;
@@ -1745,7 +1910,7 @@ namespace args
      * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, typename List = std::vector<T>, void (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <typename K, typename T, typename List = std::vector<T>, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
     class MapPositionalList : public PositionalBase
     {
         private:
@@ -1764,13 +1929,22 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                Reader(name, value, key);
+                if (!Reader(name, value, key))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+#endif
+                }
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
                     throw MapError(problem.str());
+#endif
                 } else
                 {
                     this->values.emplace_back(it->second);
