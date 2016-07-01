@@ -381,11 +381,12 @@ std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
 
 #include <args.hxx>
 
-void DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
+bool DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
 {
     size_t commapos = 0;
     std::get<0>(destination) = std::stod(value, &commapos);
     std::get<1>(destination) = std::stod(std::string(value, commapos + 1));
+    return true;
 }
 
 int main(int argc, char **argv)
@@ -751,10 +752,11 @@ int main(int argc, char **argv)
 I haven't written out a long example for this, but here's the test case you should be able to discern the meaning from:
 
 ```cpp
-void ToLowerReader(const std::string &name, const std::string &value, std::string &destination)
+bool ToLowerReader(const std::string &name, const std::string &value, std::string &destination)
 {
     destination = value;
     std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);
+    return true;
 }
 
 TEST_CASE("Mapping types work as needed", "[args]")
