@@ -346,11 +346,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> DoublesReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::tuple&lt;double, double&gt; &amp;destination)</div>
+<div class="line"><span class="keywordtype">bool</span> DoublesReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::tuple&lt;double, double&gt; &amp;destination)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordtype">size_t</span> commapos = 0;</div>
 <div class="line">    std::get&lt;0&gt;(destination) = std::stod(value, &amp;commapos);</div>
 <div class="line">    std::get&lt;1&gt;(destination) = std::stod(std::string(value, commapos + 1));</div>
+<div class="line">    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
@@ -674,10 +675,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;%                                                                                </div>
 </div><!-- fragment --><h1>Mapping arguments</h1>
 <p>I haven't written out a long example for this, but here's the test case you should be able to discern the meaning from:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> ToLowerReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::string &amp;destination)</div>
+<div class="fragment"><div class="line"><span class="keywordtype">bool</span> ToLowerReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::string &amp;destination)</div>
 <div class="line">{</div>
 <div class="line">    destination = value;</div>
 <div class="line">    std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);</div>
+<div class="line">    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line">TEST_CASE(<span class="stringliteral">&quot;Mapping types work as needed&quot;</span>, <span class="stringliteral">&quot;[args]&quot;</span>)</div>
