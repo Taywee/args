@@ -85,7 +85,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="textblock"><p><a href="https://gitgud.io/Taywee/args/commits/master">![build status](https://gitgud.io/Taywee/args/badges/master/build.svg)</a></p>
 <p>A simple, small, flexible, single-header C++11 argument parsing library, in fewer than 2K lines of code.</p>
 <p>This is designed to appear somewhat similar to Python's argparse, but in C++, with static type checking, and hopefully a lot faster (also allowing fully nestable group logic, where Python's argparse does not).</p>
-<p>UTF-8 support is limited at best. No normalization is performed, so non-ascii characters are very best kept out of flags, and combined glyphs are probably going to mess up help output if you use it. Most UTF-8 necessary for internationalization should work for most cases, though heavily combinatory UTF alphabets may wreak havoc.</p>
+<p>UTF-8 support is limited at best. No normalization is performed, so non-ascii characters are very best kept out of flags, and combined glyphs are probably going to mess up help output if you use them. Most UTF-8 necessary for internationalization should work for most cases, though heavily combinatory UTF alphabets may wreak havoc.</p>
 <p>This program is MIT-licensed, so you can use the header as-is with no restrictions. I'd appreciate attribution in a README, Man page, or something if you are feeling generous, but all that's required is that you don't remove the license and my name from the header of the <a class="el" href="args_8hxx.html" title="this single-header lets you use all of the args functionality ">args.hxx</a> file in source redistributions (ie. don't pretend that you wrote it). I do welcome additions and updates wherever you feel like contributing code.</p>
 <p>The API documentation can be found at <a href="https://taywee.github.io/args">https://taywee.github.io/args</a></p>
 <p>The code can be downloaded at <a href="https://github.com/Taywee/args">https://github.com/Taywee/args</a></p>
@@ -101,22 +101,22 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>Generates pretty help for you, with some good tweakable parameters.</li>
 <li>Lets you customize all prefixes and most separators, allowing you to create an infinite number of different argument syntaxes</li>
 <li>Lets you parse, by default, any type that has a stream extractor operator for it. If this doesn't work for your uses, you can supply a function and parse the string yourself if you like.</li>
-<li>Lets you decide not to allow separate-argument argument flags or joined ones (like disallowing <code>--foo bar</code>, requiring <code>--foo=bar</code>, or the inverse, or the same for short options).</li>
-<li>Allows you to create subparsers somewhat like argparse, through the use of kick-out flags (check the gitlike.cxx example program for a simple sample of this)</li>
+<li>Lets you decide not to allow separate-argument value flags or joined ones (like disallowing <code>--foo bar</code>, requiring <code>--foo=bar</code>, or the inverse, or the same for short options).</li>
+<li>Allows you to create subparsers somewhat like argparse, through the use of kick-out arguments (check the gitlike.cxx example program for a simple sample of this)</li>
 </ul>
 <h1>What does it not do?</h1>
 <p>There are tons of things this library does not do!</p>
 <h2>It will not ever:</h2>
 <ul>
-<li>Allow one argument flag to take a specific number of arguments (like <code>--foo first second</code>). You can instead split that with a flag list (<code>--foo first --foo second</code>) or a custom type extraction (<code>--foo first,second</code>)</li>
+<li>Allow one value flag to take a specific number of values (like <code>--foo first second</code>, where &ndash;foo slurps both arguments). You can instead split that with a flag list (<code>--foo first --foo second</code>) or a custom type extraction ( <code>--foo first,second</code>)</li>
 <li>Allow you to intermix multiple different prefix types (eg. <code>++foo</code> and <code>--foo</code> in the same parser), though shortopt and longopt prefixes can be different.</li>
-<li>Allow you to have argument flags only optionally accept arguments</li>
-<li>Allow you to make flag arguments sensitive to order (like gnu find), or make them sensitive to relative ordering with positional flags. The only orderings that are order-sensitive are:<ul>
-<li>Positional options relative to one-another</li>
-<li>List positional options or flag arguments to each of their own respective items</li>
+<li>Allow you to have value flags only optionally accept values</li>
+<li>Allow you to make flags sensitive to order (like gnu find), or make them sensitive to relative ordering with positionals. The only orderings that are order-sensitive are:<ul>
+<li>Positionals relative to one-another</li>
+<li>List positionals or flag values to each of their own respective items</li>
 </ul>
 </li>
-<li>Allow you to use a positional argument list before any other positional arguments (the last argument list will slurp all subsequent positional arguments). The logic for allowing this would be a lot more code than I'd like, and would make static checking much more difficult, requiring us to sort std::string arguments and pair them to positional arguments before assigning them, rather than what we currently do, which is assiging them as we go for better simplicity and speed.</li>
+<li>Allow you to use a positional list before any other positionals (the last argument list will slurp all subsequent positional arguments). The logic for allowing this would be a lot more code than I'd like, and would make static checking much more difficult, requiring us to sort std::string arguments and pair them to positional arguments before assigning them, rather than what we currently do, which is assiging them as we go for better simplicity and speed. The library doesn't stop you from trying, but the first positional list will slurp in all following positionals</li>
 </ul>
 <h1>How do I install it?</h1>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make install</div>
@@ -124,12 +124,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make install DESTDIR=/opt/mydir</div>
 </div><!-- fragment --><p>You can also copy the file into your source tree, if you want to be absolutely sure you keep a stable API between projects.</p>
 <h2>I also want man pages.</h2>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sudo make installman</div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;make doc/man</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;sudo make installman</div>
 </div><!-- fragment --><p>This requires Doxygen</p>
+<h2>I want the doxygen documentation locally</h2>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;doxygen Doxyfile</div>
+</div><!-- fragment --><p>Your docs are now in doc/html</p>
 <h1>How do I use it?</h1>
 <p>Create an ArgumentParser, modify its attributes to fit your needs, add arguments through regular argument objects (or create your own), and match them with an <a class="el" href="classargs_1_1Matcher.html" title="A class of &quot;matchers&quot;, specifying short and flags that can possibly be matched. ">args::Matcher</a> object (check its construction details in the doxygen documentation.</p>
 <p>Then you can either call it with <a class="el" href="classargs_1_1ArgumentParser.html#a8e79c5bd015bad9648b9c98eecc63fc9" title="Convenience function to parse the CLI from argc and argv. ">args::ArgumentParser::ParseCLI</a> for the full command line with program name, or <a class="el" href="classargs_1_1ArgumentParser.html#a4bc1f3f3d000f11715fa66ade894bd9b" title="Parse all arguments. ">args::ArgumentParser::ParseArgs</a> with just the arguments to be parsed. The argument and group variables can then be interpreted as a boolean to see if they've been matched.</p>
-<p>All variables can be pulled (including the boolean match status) with <a class="el" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc" title="Getter to grab the value from the argument type. ">args::get</a>.</p>
+<p>All variables can be pulled (including the boolean match status for regular <a class="el" href="classargs_1_1Flag.html" title="Boolean argument matcher. ">args::Flag</a> variables) with <a class="el" href="namespaceargs.html#a36455abed9f3630b1ec6267111887acc" title="Getter to grab the value from the argument type. ">args::get</a>.</p>
 <h1>Group validation is weird. How do I get more helpful output for failed validation?</h1>
 <p>This is unfortunately not possible, given the power of the groups available. For instance, if you have a group validation that works like <code>(A &amp;&amp; B) || (C &amp;&amp; (D XOR E))</code>, how is this library going to be able to determine what exactly when wrong when it fails? It only knows that the entire expression evaluated false, not specifically what the user did wrong (and this is doubled over by the fact that validation operations are ordinary functions without any special meaning to the library). As you are the only one who understands the logic of your program, if you want useful group messages, you have to catch the ValidationError as a special case and check your own groups and spit out messages accordingly.</p>
 <h1>Is it developed with regression tests?</h1>
