@@ -11,7 +11,7 @@ nestable group logic, where Python's argparse does not).
 
 UTF-8 support is limited at best.  No normalization is performed, so non-ascii
 characters are very best kept out of flags, and combined glyphs are probably
-going to mess up help output if you use it.  Most UTF-8 necessary for
+going to mess up help output if you use them.  Most UTF-8 necessary for
 internationalization should work for most cases, though heavily combinatory UTF
 alphabets may wreak havoc.
 
@@ -49,12 +49,12 @@ It:
 * Lets you parse, by default, any type that has a stream extractor operator for
   it.  If this doesn't work for your uses, you can supply a function and parse
   the string yourself if you like.
-* Lets you decide not to allow separate-argument argument flags or joined ones
+* Lets you decide not to allow separate-argument value flags or joined ones
   (like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
   same for short options).
 * Allows you to create subparsers somewhat like argparse, through the use of
-  kick-out flags (check the gitlike.cxx example program for a simple sample of
-  this)
+  kick-out arguments (check the gitlike.cxx example program for a simple sample
+  of this)
 
 # What does it not do?
 
@@ -62,26 +62,27 @@ There are tons of things this library does not do!
 
 ## It will not ever:
 
-* Allow one argument flag to take a specific number of arguments (like `--foo
-  first second`).  You can instead split that with a flag list (`--foo first
-  --foo second`) or a custom type extraction (`--foo first,second`)
+* Allow one value flag to take a specific number of values (like `--foo first
+  second`, where --foo slurps both arguments).  You can instead split that with
+  a flag list (`--foo first --foo second`) or a custom type extraction (
+  `--foo first,second`)
 * Allow you to intermix multiple different prefix types (eg. `++foo` and
   `--foo` in the same parser), though shortopt and longopt prefixes can be
   different.
-* Allow you to have argument flags only optionally accept arguments
-* Allow you to make flag arguments sensitive to order (like gnu find), or make
-  them sensitive to relative ordering with positional flags.  The only
-  orderings that are order-sensitive are:
-    * Positional options relative to one-another
-    * List positional options or flag arguments to each of their own respective
-      items
-* Allow you to use a positional argument list before any other positional
-  arguments (the last argument list will slurp all subsequent positional
-  arguments).  The logic for allowing this would be a lot more code than I'd
-  like, and would make static checking much more difficult, requiring us to
-  sort std::string arguments and pair them to positional arguments before
-  assigning them, rather than what we currently do, which is assiging them as
-  we go for better simplicity and speed.
+* Allow you to have value flags only optionally accept values
+* Allow you to make flags sensitive to order (like gnu find), or make them
+  sensitive to relative ordering with positionals.  The only orderings that are
+  order-sensitive are:
+    * Positionals relative to one-another
+    * List positionals or flag values to each of their own respective items
+* Allow you to use a positional list before any other positionals (the last
+  argument list will slurp all subsequent positional arguments).  The logic for
+  allowing this would be a lot more code than I'd like, and would make static
+  checking much more difficult, requiring us to sort std::string arguments and
+  pair them to positional arguments before assigning them, rather than what we
+  currently do, which is assiging them as we go for better simplicity and
+  speed.  The library doesn't stop you from trying, but the first positional
+  list will slurp in all following positionals
 
 # How do I install it?
 
@@ -101,10 +102,19 @@ sure you keep a stable API between projects.
 ## I also want man pages.
 
 ```shell
+make doc/man
 sudo make installman
 ```
 
 This requires Doxygen
+
+## I want the doxygen documentation locally
+
+```shell
+doxygen Doxyfile
+```
+
+Your docs are now in doc/html
 
 # How do I use it?
 
@@ -118,8 +128,8 @@ command line with program name, or args::ArgumentParser::ParseArgs with
 just the arguments to be parsed.  The argument and group variables can then be
 interpreted as a boolean to see if they've been matched.
 
-All variables can be pulled (including the boolean match status) with
-args::get.
+All variables can be pulled (including the boolean match status for regular
+args::Flag variables) with args::get.
 
 # Group validation is weird.  How do I get more helpful output for failed validation?
 
