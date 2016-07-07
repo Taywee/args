@@ -8,5 +8,6 @@ var searchData=
   ['getnextpositional',['GetNextPositional',['../classargs_1_1Group.html#a9ac0360507e7e5d4bb57bc8081839b68',1,'args::Group']]],
   ['getposnames',['GetPosNames',['../classargs_1_1Group.html#a85382243f31e08ef0ce5df807d82d102',1,'args::Group']]],
   ['getshort',['GetShort',['../structargs_1_1EitherFlag.html#ae08b6f663ad7f00b441443a2376411e9',1,'args::EitherFlag']]],
-  ['glyphs',['Glyphs',['../namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8',1,'args']]]
+  ['glyphs',['Glyphs',['../namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8',1,'args']]],
+  ['group',['Group',['../classargs_1_1Group.html#a5655d39bfedab97218d786f7ac7e8245',1,'args::Group::Group(const std::string &amp;help=std::string(), const std::function&lt; bool(const Group &amp;)&gt; &amp;validator=Validators::DontCare)'],['../classargs_1_1Group.html#a710c2053274102984c4ac3e6e356a53d',1,'args::Group::Group(Group &amp;group, const std::string &amp;help=std::string(), const std::function&lt; bool(const Group &amp;)&gt; &amp;validator=Validators::DontCare)']]]
 ];

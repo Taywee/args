@@ -10,5 +10,6 @@ var searchData=
   ['getshort',['GetShort',['../structargs_1_1EitherFlag.html#ae08b6f663ad7f00b441443a2376411e9',1,'args::EitherFlag']]],
   ['glyphs',['Glyphs',['../namespaceargs.html#a7c4e2dbb1616764df0030e03e3b964a8',1,'args']]],
   ['group',['Group',['../classargs_1_1Group.html',1,'args']]],
+  ['group',['Group',['../classargs_1_1Group.html#a5655d39bfedab97218d786f7ac7e8245',1,'args::Group::Group(const std::string &amp;help=std::string(), const std::function&lt; bool(const Group &amp;)&gt; &amp;validator=Validators::DontCare)'],['../classargs_1_1Group.html#a710c2053274102984c4ac3e6e356a53d',1,'args::Group::Group(Group &amp;group, const std::string &amp;help=std::string(), const std::function&lt; bool(const Group &amp;)&gt; &amp;validator=Validators::DontCare)']]],
   ['gutter',['gutter',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a3fb710d04f5aa5f16a819a8a445511be',1,'args::ArgumentParser::HelpParams']]]
 ];
