@@ -46,8 +46,9 @@ clean:
 	rm -rv $(EXECUTABLE) $(OBJECTS) $(DEPENDENCIES) doc
 
 pages:
+	-rm -r pages/*
 	doxygen Doxyfile
-	cp -rv doc/html/* .
+	cp -rv doc/html/* pages/
 
 doc/man: 
 	doxygen Doxyfile

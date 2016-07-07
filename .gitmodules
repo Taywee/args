@@ -1,0 +1,4 @@
+[submodule "pages"]
+	path = pages
+	url = github.com:Taywee/args.git
+	branch = gh-pages

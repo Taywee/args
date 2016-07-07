@@ -585,7 +585,9 @@ namespace args
             std::function<bool(const Group &)> validator;
 
         public:
+            /// If help is empty, this group will not be printed in help output
             Group(const std::string &help = std::string(), const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
+            /// If help is empty, this group will not be printed in help output
             Group(Group &group, const std::string &help = std::string(), const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator)
             {
                 group.Add(*this);
@@ -673,7 +675,7 @@ namespace args
 
             /** Get all this group's children
              */
-            const std::vector<Base *> Children() const
+            const std::vector<Base *> &Children() const
             {
                 return children;
             }
@@ -813,17 +815,9 @@ namespace args
 
                 static bool AllChildGroups(const Group &group)
                 {
-                    for (const auto child: group.Children())
-                    {
-                        if (const auto group = dynamic_cast<Group *>(child))
-                        {
-                            if (!group->Matched())
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                    return true;
+                    return std::find_if(std::begin(group.Children()), std::end(group.Children()), [](const Base* child) -> bool {
+                            return dynamic_cast<const Group *>(child) && !child->Matched();
+                            }) == std::end(group.Children());
                 }
 
                 static bool DontCare(const Group &group)
