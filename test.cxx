@@ -142,7 +142,7 @@ TEST_CASE("Argument flag lists work as expected", "[args]")
 TEST_CASE("Argument flag lists work with sets", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ValueFlagList<std::string, std::unordered_set<std::string>> foo(parser, "FOO", "test flag", {'f', "foo"});
+    args::ValueFlagList<std::string, std::unordered_set> foo(parser, "FOO", "test flag", {'f', "foo"});
     parser.ParseArgs(std::vector<std::string>{"--foo=7", "-fblah", "-f", "9", "--foo", "blah"});
     REQUIRE((args::get(foo) == std::unordered_set<std::string>{"7", "9", "blah"}));
 }
@@ -165,7 +165,7 @@ TEST_CASE("Positional arguments and positional argument lists work as expected",
 TEST_CASE("Positional lists work with sets", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::PositionalList<std::string, std::unordered_set<std::string>> foo(parser, "FOO", "test positional");
+    args::PositionalList<std::string, std::unordered_set> foo(parser, "FOO", "test positional");
     parser.ParseArgs(std::vector<std::string>{"foo", "FoO", "bar", "baz", "foo", "9", "baz"});
     REQUIRE((args::get(foo) == std::unordered_set<std::string>{"foo", "FoO", "bar", "baz", "9"}));
 }
@@ -251,13 +251,15 @@ TEST_CASE("Argument groups should nest", "[args]")
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a", "-dg"}), args::ValidationError);
 }
 
-bool DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
+struct DoublesReader
 {
-    size_t commapos = 0;
-    std::get<0>(destination) = std::stod(value, &commapos);
-    std::get<1>(destination) = std::stod(std::string(value, commapos + 1));
-    return true;
-}
+    void operator()(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
+    {
+        size_t commapos = 0;
+        std::get<0>(destination) = std::stod(value, &commapos);
+        std::get<1>(destination) = std::stod(std::string(value, commapos + 1));
+    }
+};
 
 TEST_CASE("Custom types work", "[args]")
 {
@@ -376,12 +378,14 @@ enum class MappingEnum
 #include <algorithm>
 #include <string>
 
-bool ToLowerReader(const std::string &name, const std::string &value, std::string &destination)
+struct ToLowerReader
 {
-    destination = value;
-    std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);
-    return true;
-}
+    void operator()(const std::string &name, const std::string &value, std::string &destination)
+    {
+        destination = value;
+        std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);
+    }
+};
 
 TEST_CASE("Mapping types work as needed", "[args]")
 {

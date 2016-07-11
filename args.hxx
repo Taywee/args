@@ -1510,29 +1510,32 @@ namespace args
             }
     };
 
-    /** A default Reader function for argument classes
+    /** A default Reader class for argument classes
      *
      * Simply uses a std::istringstream to read into the destination type, and
      * raises a ParseError if there are any characters left.
      */
     template <typename T>
-    bool ValueReader(const std::string &name, const std::string &value, T &destination)
+    struct ValueReader
     {
-        std::istringstream ss(value);
-        ss >> destination;
-
-        if (ss.rdbuf()->in_avail() > 0)
+        bool operator ()(const std::string &name, const std::string &value, T &destination)
         {
+            std::istringstream ss(value);
+            ss >> destination;
+
+            if (ss.rdbuf()->in_avail() > 0)
+            {
 #ifdef ARGS_NOEXCEPT
-            return false;
+                return false;
 #else
-            std::ostringstream problem;
-            problem << "Argument '" << name << "' received invalid value type '" << value << "'";
-            throw ParseError(problem.str());
+                std::ostringstream problem;
+                problem << "Argument '" << name << "' received invalid value type '" << value << "'";
+                throw ParseError(problem.str());
 #endif
+            }
+            return true;
         }
-        return true;
-    }
+    };
 
     /** std::string specialization for ValueReader
      *
@@ -1540,22 +1543,28 @@ namespace args
      * it is more efficient to ust copy a string into the destination.
      */
     template <>
-    bool ValueReader<std::string>(const std::string &name, const std::string &value, std::string &destination)
+    struct ValueReader<std::string>
     {
-        destination.assign(value);
-        return true;
-    }
+        bool operator()(const std::string &name, const std::string &value, std::string &destination)
+        {
+            destination.assign(value);
+            return true;
+        }
+    };
 
     /** An argument-accepting flag class
      * 
      * \tparam T the type to extract the argument as
-     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      */
-    template <typename T, bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    template <
+        typename T,
+        typename Reader = ValueReader<T>>
     class ValueFlag : public ValueFlagBase
     {
         private:
             T value;
+            Reader reader;
 
         public:
 
@@ -1568,12 +1577,14 @@ namespace args
 
             virtual void ParseValue(const std::string &value) override
             {
-                if (!Reader(name, value, this->value))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, this->value))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, this->value);
+#endif
             }
 
             /** Get the value
@@ -1588,20 +1599,21 @@ namespace args
      * 
      * \tparam T the type to extract the argument as
      * \tparam List the list type that houses the values
-     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      */
     template <
         typename T,
-        typename List = std::vector<T>,
-        bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+        template <typename...> class List = std::vector,
+        typename Reader = ValueReader<T>>
     class ValueFlagList : public ValueFlagBase
     {
         private:
-            List values;
+            List<T> values;
+            Reader reader;
 
         public:
 
-            ValueFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List &defaultValues = List()): ValueFlagBase(name, help, std::move(matcher)), values(defaultValues)
+            ValueFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List<T> &defaultValues = List<T>()): ValueFlagBase(name, help, std::move(matcher)), values(defaultValues)
             {
                 group.Add(*this);
             }
@@ -1611,18 +1623,20 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 T v;
-                if (!Reader(name, value, v))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, v))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, v);
+#endif
                 values.insert(std::end(values), v);
             }
 
             /** Get the values
              */
-            List &Get() noexcept
+            List<T> &Get() noexcept
             {
                 return values;
             }
@@ -1637,19 +1651,24 @@ namespace args
      * 
      * \tparam K the type to extract the argument as
      * \tparam T the type to store the result as
-     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <
+        typename K,
+        typename T,
+        typename Reader = ValueReader<K>,
+        template <typename...> class Map = std::unordered_map>
     class MapFlag : public ValueFlagBase
     {
         private:
-            const Map map;
+            const Map<K, T> map;
             T value;
+            Reader reader;
 
         public:
 
-            MapFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map &map, const T &defaultValue = T(), const bool extraError = false): ValueFlagBase(name, help, std::move(matcher), extraError), map(map), value(defaultValue)
+            MapFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map<K, T> &map, const T &defaultValue = T(), const bool extraError = false): ValueFlagBase(name, help, std::move(matcher), extraError), map(map), value(defaultValue)
             {
                 group.Add(*this);
             }
@@ -1659,12 +1678,14 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                if (!Reader(name, value, key))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, key))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, key);
+#endif
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
@@ -1694,19 +1715,25 @@ namespace args
      * \tparam K the type to extract the argument as
      * \tparam T the type to store the result as
      * \tparam List the list type that houses the values
-     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, typename List = std::vector<T>, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <
+        typename K,
+        typename T,
+        template <typename...> class List = std::vector,
+        typename Reader = ValueReader<K>,
+        template <typename...> class Map = std::unordered_map>
     class MapFlagList : public ValueFlagBase
     {
         private:
-            const Map map;
-            List values;
+            const Map<K, T> map;
+            List<T> values;
+            Reader reader;
 
         public:
 
-            MapFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map &map, const List &defaultValues = List()): ValueFlagBase(name, help, std::move(matcher)), map(map), values(defaultValues)
+            MapFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map<K, T> &map, const List<T> &defaultValues = List<T>()): ValueFlagBase(name, help, std::move(matcher)), map(map), values(defaultValues)
             {
                 group.Add(*this);
             }
@@ -1716,12 +1743,14 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                if (!Reader(name, value, key))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, key))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, key);
+#endif
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
@@ -1740,7 +1769,7 @@ namespace args
 
             /** Get the value
              */
-            List &Get() noexcept
+            List<T> &Get() noexcept
             {
                 return values;
             }
@@ -1754,13 +1783,16 @@ namespace args
     /** A positional argument class
      *
      * \tparam T the type to extract the argument as
-     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      */
-    template <typename T, bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+    template <
+        typename T,
+        typename Reader = ValueReader<T>>
     class Positional : public PositionalBase
     {
         private:
             T value;
+            Reader reader;
         public:
             Positional(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PositionalBase(name, help), value(defaultValue)
             {
@@ -1771,12 +1803,14 @@ namespace args
 
             virtual void ParseValue(const std::string &value) override
             {
-                if (!Reader(name, value, this->value))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, this->value))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, this->value);
+#endif
                 ready = false;
                 matched = true;
             }
@@ -1793,19 +1827,20 @@ namespace args
      * 
      * \tparam T the type to extract the argument as
      * \tparam List the list type that houses the values
-     * \tparam Reader The function used to read the argument, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      */
     template <
         typename T,
-        typename List = std::vector<T>,
-        bool (*Reader)(const std::string &, const std::string &, T&) = ValueReader<T>>
+        template <typename...> class List = std::vector,
+        typename Reader = ValueReader<T>>
     class PositionalList : public PositionalBase
     {
         private:
-            List values;
+            List<T> values;
+            Reader reader;
 
         public:
-            PositionalList(Group &group, const std::string &name, const std::string &help, const List &defaultValues = List()): PositionalBase(name, help), values(defaultValues)
+            PositionalList(Group &group, const std::string &name, const std::string &help, const List<T> &defaultValues = List<T>()): PositionalBase(name, help), values(defaultValues)
             {
                 group.Add(*this);
             }
@@ -1815,12 +1850,14 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 T v;
-                if (!Reader(name, value, v))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, v))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, v);
+#endif
                 values.insert(std::end(values), v);
                 matched = true;
             }
@@ -1832,7 +1869,7 @@ namespace args
 
             /** Get the values
              */
-            List &Get() noexcept
+            List<T> &Get() noexcept
             {
                 return values;
             }
@@ -1842,19 +1879,24 @@ namespace args
      * 
      * \tparam K the type to extract the argument as
      * \tparam T the type to store the result as
-     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <
+        typename K,
+        typename T,
+        typename Reader = ValueReader<K>,
+        template <typename...> class Map = std::unordered_map>
     class MapPositional : public PositionalBase
     {
         private:
-            const Map map;
+            const Map<K, T> map;
             T value;
+            Reader reader;
 
         public:
 
-            MapPositional(Group &group, const std::string &name, const std::string &help, const Map &map, const T &defaultValue = T()): PositionalBase(name, help), map(map), value(defaultValue)
+            MapPositional(Group &group, const std::string &name, const std::string &help, const Map<K, T> &map, const T &defaultValue = T()): PositionalBase(name, help), map(map), value(defaultValue)
             {
                 group.Add(*this);
             }
@@ -1864,12 +1906,14 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                if (!Reader(name, value, key))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, key))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, key);
+#endif
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
@@ -1901,19 +1945,25 @@ namespace args
      * \tparam K the type to extract the argument as
      * \tparam T the type to store the result as
      * \tparam List the list type that houses the values
-     * \tparam Reader The function used to read the argument into the key type, taking the name, value, and destination reference
+     * \tparam Reader The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined)
      * \tparam Map The Map type.  Should operate like std::map or std::unordered_map
      */
-    template <typename K, typename T, typename List = std::vector<T>, bool (*Reader)(const std::string &, const std::string &, K&) = ValueReader<K>, typename Map = std::unordered_map<K, T>>
+    template <
+        typename K,
+        typename T,
+        template <typename...> class List = std::vector,
+        typename Reader = ValueReader<K>,
+        template <typename...> class Map = std::unordered_map>
     class MapPositionalList : public PositionalBase
     {
         private:
-            const Map map;
-            List values;
+            const Map<K, T> map;
+            List<T> values;
+            Reader reader;
 
         public:
 
-            MapPositionalList(Group &group, const std::string &name, const std::string &help, const Map &map, const List &defaultValues = List()): PositionalBase(name, help), map(map), values(defaultValues)
+            MapPositionalList(Group &group, const std::string &name, const std::string &help, const Map<K, T> &map, const List<T> &defaultValues = List<T>()): PositionalBase(name, help), map(map), values(defaultValues)
             {
                 group.Add(*this);
             }
@@ -1923,12 +1973,14 @@ namespace args
             virtual void ParseValue(const std::string &value) override
             {
                 K key;
-                if (!Reader(name, value, key))
-                {
 #ifdef ARGS_NOEXCEPT
+                if (!reader(name, value, key))
+                {
                     error = Error::Parse;
-#endif
                 }
+#else
+                reader(name, value, key);
+#endif
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
@@ -1948,7 +2000,7 @@ namespace args
 
             /** Get the value
              */
-            List &Get() noexcept
+            List<T> &Get() noexcept
             {
                 return values;
             }

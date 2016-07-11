@@ -391,13 +391,15 @@ std::istream& operator>>(std::istream& is, std::tuple<int, int>& ints)
 
 #include <args.hxx>
 
-bool DoublesReader(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
+struct DoublesReader
 {
-    size_t commapos = 0;
-    std::get<0>(destination) = std::stod(value, &commapos);
-    std::get<1>(destination) = std::stod(std::string(value, commapos + 1));
-    return true;
-}
+    void operator()(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
+    {
+        size_t commapos = 0;
+        std::get<0>(destination) = std::stod(value, &commapos);
+        std::get<1>(destination) = std::stod(std::string(value, commapos + 1));
+    }
+};
 
 int main(int argc, char **argv)
 {
