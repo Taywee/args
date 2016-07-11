@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">5.1.0</span>
+   &#160;<span id="projectnumber">6.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -178,6 +178,12 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ValueFlagList.html">ValueFlagList</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An argument-accepting flag class that pushes the found values into a list.  <a href="classargs_1_1ValueFlagList.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structargs_1_1ValueReader.html">ValueReader</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A default Reader class for argument classes.  <a href="structargs_1_1ValueReader.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structargs_1_1ValueReader_3_01std_1_1string_01_4.html">ValueReader&lt; std::string &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">std::string specialization for <a class="el" href="structargs_1_1ValueReader.html" title="A default Reader class for argument classes. ">ValueReader</a>  <a href="structargs_1_1ValueReader_3_01std_1_1string_01_4.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -194,14 +200,6 @@ Functions</h2></td></tr>
 <tr class="memitem:aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;os, const <a class="el" href="classargs_1_1ArgumentParser.html">ArgumentParser</a> &amp;parser)</td></tr>
 <tr class="separator:aa8ea7a3e7cbf85dc70ad2bfc2ff15fb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba39c2017da65453ff9efb09dbdc3e6d"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:aba39c2017da65453ff9efb09dbdc3e6d"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#aba39c2017da65453ff9efb09dbdc3e6d">ValueReader</a> (const std::string &amp;name, const std::string &amp;value, T &amp;destination)</td></tr>
-<tr class="memdesc:aba39c2017da65453ff9efb09dbdc3e6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A default Reader function for argument classes.  <a href="#aba39c2017da65453ff9efb09dbdc3e6d">More...</a><br /></td></tr>
-<tr class="separator:aba39c2017da65453ff9efb09dbdc3e6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a246ecbe3924203fdcf5cf2340e70e79f"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
-<tr class="memitem:a246ecbe3924203fdcf5cf2340e70e79f"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceargs.html#a246ecbe3924203fdcf5cf2340e70e79f">ValueReader&lt; std::string &gt;</a> (const std::string &amp;name, const std::string &amp;value, std::string &amp;destination)</td></tr>
-<tr class="memdesc:a246ecbe3924203fdcf5cf2340e70e79f"><td class="mdescLeft">&#160;</td><td class="mdescRight">std::string specialization for ValueReader  <a href="#a246ecbe3924203fdcf5cf2340e70e79f">More...</a><br /></td></tr>
-<tr class="separator:a246ecbe3924203fdcf5cf2340e70e79f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>contains all the functionality of the args library </p>
@@ -251,80 +249,6 @@ template&lt;typename Option &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The UTF-8 glyphs in the string </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="aba39c2017da65453ff9efb09dbdc3e6d"></a>
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">bool args::ValueReader </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>value</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">T &amp;&#160;</td>
-          <td class="paramname"><em>destination</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>A default Reader function for argument classes. </p>
-<p>Simply uses a std::istringstream to read into the destination type, and raises a <a class="el" href="classargs_1_1ParseError.html" title="Errors that occur during regular parsing. ">ParseError</a> if there are any characters left. </p>
-
-</div>
-</div>
-<a class="anchor" id="a246ecbe3924203fdcf5cf2340e70e79f"></a>
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="namespaceargs.html#aba39c2017da65453ff9efb09dbdc3e6d">args::ValueReader</a>&lt; std::string &gt; </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>value</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::string &amp;&#160;</td>
-          <td class="paramname"><em>destination</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>std::string specialization for ValueReader </p>
-<p>By default, stream extraction into a string splits on white spaces, and it is more efficient to ust copy a string into the destination. </p>
 
 </div>
 </div>

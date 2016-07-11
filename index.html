@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">5.1.0</span>
+   &#160;<span id="projectnumber">6.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -350,19 +350,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="args_8hxx.html">args.hxx</a>&gt;</span></div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">bool</span> DoublesReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::tuple&lt;double, double&gt; &amp;destination)</div>
+<div class="line"><span class="keyword">struct </span><a class="code" href="structDoublesReader.html">DoublesReader</a></div>
 <div class="line">{</div>
-<div class="line">    <span class="keywordtype">size_t</span> commapos = 0;</div>
-<div class="line">    std::get&lt;0&gt;(destination) = std::stod(value, &amp;commapos);</div>
-<div class="line">    std::get&lt;1&gt;(destination) = std::stod(std::string(value, commapos + 1));</div>
-<div class="line">    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line">}</div>
+<div class="line">    <span class="keywordtype">void</span> operator()(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::tuple&lt;double, double&gt; &amp;destination)</div>
+<div class="line">    {</div>
+<div class="line">        <span class="keywordtype">size_t</span> commapos = 0;</div>
+<div class="line">        std::get&lt;0&gt;(destination) = std::stod(value, &amp;commapos);</div>
+<div class="line">        std::get&lt;1&gt;(destination) = std::stod(std::string(value, commapos + 1));</div>
+<div class="line">    }</div>
+<div class="line">};</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)</div>
 <div class="line">{</div>
 <div class="line">    <a class="code" href="classargs_1_1ArgumentParser.html">args::ArgumentParser</a> parser(<span class="stringliteral">&quot;This is a test program.&quot;</span>);</div>
 <div class="line">    <a class="code" href="classargs_1_1Positional.html">args::Positional&lt;std::tuple&lt;int, int&gt;</a>&gt; ints(parser, <span class="stringliteral">&quot;INTS&quot;</span>, <span class="stringliteral">&quot;This takes a pair of integers.&quot;</span>);</div>
-<div class="line">    <a class="code" href="classargs_1_1Positional.html">args::Positional&lt;std::tuple&lt;double, double&gt;</a>, DoublesReader&gt; doubles(parser, <span class="stringliteral">&quot;DOUBLES&quot;</span>, <span class="stringliteral">&quot;This takes a pair of doubles.&quot;</span>);</div>
+<div class="line">    <a class="code" href="classargs_1_1Positional.html">args::Positional&lt;std::tuple&lt;double, double&gt;</a>, <a class="code" href="structDoublesReader.html">DoublesReader</a>&gt; doubles(parser, <span class="stringliteral">&quot;DOUBLES&quot;</span>, <span class="stringliteral">&quot;This takes a pair of doubles.&quot;</span>);</div>
 <div class="line">    <span class="keywordflow">try</span></div>
 <div class="line">    {</div>
 <div class="line">        parser.ParseCLI(argc, argv);</div>
@@ -679,7 +681,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;%                                                                                </div>
 </div><!-- fragment --><h1>Mapping arguments</h1>
 <p>I haven't written out a long example for this, but here's the test case you should be able to discern the meaning from:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">bool</span> ToLowerReader(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::string &amp;destination)</div>
+<div class="fragment"><div class="line"><span class="keywordtype">bool</span> <a class="code" href="structToLowerReader.html">ToLowerReader</a>(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> std::string &amp;value, std::string &amp;destination)</div>
 <div class="line">{</div>
 <div class="line">    destination = value;</div>
 <div class="line">    std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);</div>

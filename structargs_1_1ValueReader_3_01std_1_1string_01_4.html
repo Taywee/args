@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>args: Namespace List</title>
+<title>args: args::ValueReader&lt; std::string &gt; Struct Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -41,8 +41,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="namespaces.html"><span>Namespaces</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -64,11 +64,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li class="current"><a href="namespaces.html"><span>Namespace&#160;List</span></a></li>
-      <li><a href="namespacemembers.html"><span>Namespace&#160;Members</span></a></li>
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -83,16 +84,40 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="namespaceargs.html">args</a></li><li class="navelem"><a class="el" href="structargs_1_1ValueReader_3_01std_1_1string_01_4.html">ValueReader&lt; std::string &gt;</a></li>  </ul>
+</div>
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="structargs_1_1ValueReader_3_01std_1_1string_01_4-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Namespace List</div>  </div>
+<div class="title">args::ValueReader&lt; std::string &gt; Struct Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock">Here is a list of all documented namespaces with brief descriptions:</div><div class="directory">
-<table class="directory">
-<tr id="row_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">N</span></span><a class="el" href="namespaceargs.html" target="_self">args</a></td><td class="desc">All the functionality of the args library </td></tr>
+
+<p>std::string specialization for <a class="el" href="structargs_1_1ValueReader.html" title="A default Reader class for argument classes. ">ValueReader</a>  
+ <a href="structargs_1_1ValueReader_3_01std_1_1string_01_4.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="args_8hxx_source.html">args.hxx</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ab354f49e3517f8b02590cfbae4a815ba"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab354f49e3517f8b02590cfbae4a815ba"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> (const std::string &amp;name, const std::string &amp;value, std::string &amp;destination)</td></tr>
+<tr class="separator:ab354f49e3517f8b02590cfbae4a815ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- directory -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><h3>template&lt;&gt;<br />
+struct args::ValueReader&lt; std::string &gt;</h3>
+
+<p>std::string specialization for <a class="el" href="structargs_1_1ValueReader.html" title="A default Reader class for argument classes. ">ValueReader</a> </p>
+<p>By default, stream extraction into a string splits on white spaces, and it is more efficient to ust copy a string into the destination. </p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
+<li><a class="el" href="args_8hxx_source.html">args.hxx</a></li>
+</ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

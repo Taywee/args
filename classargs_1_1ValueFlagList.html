@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">5.1.0</span>
+   &#160;<span id="projectnumber">6.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -117,16 +117,16 @@ Inheritance diagram for args::ValueFlagList&lt; T, List, Reader &gt;:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a098db4e722d763ec021ef22804170b4c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a098db4e722d763ec021ef22804170b4c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ValueFlagList</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;name, const std::string &amp;help, <a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, const List &amp;defaultValues=List())</td></tr>
-<tr class="separator:a098db4e722d763ec021ef22804170b4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea168a0010f3c9cc0e566c7d3c1c971f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aea168a0010f3c9cc0e566c7d3c1c971f"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ValueFlagList</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;name, const std::string &amp;help, <a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, const List&lt; T &gt; &amp;defaultValues=List&lt; T &gt;())</td></tr>
+<tr class="separator:aea168a0010f3c9cc0e566c7d3c1c971f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ba0c32b487482ea86973b09d5c442f4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ba0c32b487482ea86973b09d5c442f4"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseValue</b> (const std::string &amp;value) override</td></tr>
 <tr class="separator:a7ba0c32b487482ea86973b09d5c442f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65c73bb70c999ca150fa9334bd216ef7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a65c73bb70c999ca150fa9334bd216ef7"></a>
-List &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ValueFlagList.html#a65c73bb70c999ca150fa9334bd216ef7">Get</a> () noexcept</td></tr>
-<tr class="memdesc:a65c73bb70c999ca150fa9334bd216ef7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the values. <br /></td></tr>
-<tr class="separator:a65c73bb70c999ca150fa9334bd216ef7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3a3766e483ee75cc24de64214102d4e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa3a3766e483ee75cc24de64214102d4e"></a>
+List&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1ValueFlagList.html#aa3a3766e483ee75cc24de64214102d4e">Get</a> () noexcept</td></tr>
+<tr class="memdesc:aa3a3766e483ee75cc24de64214102d4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the values. <br /></td></tr>
+<tr class="separator:aa3a3766e483ee75cc24de64214102d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d1f3e9f4f9b3bca157bca90a974a10f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6d1f3e9f4f9b3bca157bca90a974a10f"></a>
 virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>Name</b> () const  override</td></tr>
 <tr class="separator:a6d1f3e9f4f9b3bca157bca90a974a10f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -195,7 +195,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 <tr class="separator:a9cdbbcdfa8e764c25f94dfe2c99c3b24 inherit pro_attribs_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename T, typename List = std::vector&lt;T&gt;, bool(*)(const std::string &amp;, const std::string &amp;, T &amp;) Reader = ValueReader&lt;T&gt;&gt;<br />
+<div class="textblock"><h3>template&lt;typename T, template&lt; typename... &gt; class List = std::vector, typename Reader = ValueReader&lt;T&gt;&gt;<br />
 class args::ValueFlagList&lt; T, List, Reader &gt;</h3>
 
 <p>An argument-accepting flag class that pushes the found values into a list. </p>
@@ -203,7 +203,7 @@ class args::ValueFlagList&lt; T, List, Reader &gt;</h3>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>the type to extract the argument as </td></tr>
     <tr><td class="paramname">List</td><td>the list type that houses the values </td></tr>
-    <tr><td class="paramname">Reader</td><td>The function used to read the argument, taking the name, value, and destination reference </td></tr>
+    <tr><td class="paramname">Reader</td><td>The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined) </td></tr>
   </table>
   </dd>
 </dl>

@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">5.1.0</span>
+   &#160;<span id="projectnumber">6.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -117,9 +117,9 @@ Inheritance diagram for args::MapFlag&lt; K, T, Reader, Map &gt;:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1f05de05a676be282aac244388da4b6c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1f05de05a676be282aac244388da4b6c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>MapFlag</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;name, const std::string &amp;help, <a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, const Map &amp;map, const T &amp;defaultValue=T(), const bool extraError=false)</td></tr>
-<tr class="separator:a1f05de05a676be282aac244388da4b6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ee353405a80b2bf9255091146189c06"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8ee353405a80b2bf9255091146189c06"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>MapFlag</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;name, const std::string &amp;help, <a class="el" href="classargs_1_1Matcher.html">Matcher</a> &amp;&amp;matcher, const Map&lt; K, T &gt; &amp;map, const T &amp;defaultValue=T(), const bool extraError=false)</td></tr>
+<tr class="separator:a8ee353405a80b2bf9255091146189c06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad041982d79b4ec77d1a2fe77a5ceddc5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad041982d79b4ec77d1a2fe77a5ceddc5"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseValue</b> (const std::string &amp;value) override</td></tr>
 <tr class="separator:ad041982d79b4ec77d1a2fe77a5ceddc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -195,7 +195,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 <tr class="separator:a9cdbbcdfa8e764c25f94dfe2c99c3b24 inherit pro_attribs_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename K, typename T, bool(*)(const std::string &amp;, const std::string &amp;, K &amp;) Reader = ValueReader&lt;K&gt;, typename Map = std::unordered_map&lt;K, T&gt;&gt;<br />
+<div class="textblock"><h3>template&lt;typename K, typename T, typename Reader = ValueReader&lt;K&gt;, template&lt; typename... &gt; class Map = std::unordered_map&gt;<br />
 class args::MapFlag&lt; K, T, Reader, Map &gt;</h3>
 
 <p>A mapping value flag class. </p>
@@ -203,7 +203,7 @@ class args::MapFlag&lt; K, T, Reader, Map &gt;</h3>
   <table class="tparams">
     <tr><td class="paramname">K</td><td>the type to extract the argument as </td></tr>
     <tr><td class="paramname">T</td><td>the type to store the result as </td></tr>
-    <tr><td class="paramname">Reader</td><td>The function used to read the argument into the key type, taking the name, value, and destination reference </td></tr>
+    <tr><td class="paramname">Reader</td><td>The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined) </td></tr>
     <tr><td class="paramname">Map</td><td>The Map type. Should operate like std::map or std::unordered_map </td></tr>
   </table>
   </dd>

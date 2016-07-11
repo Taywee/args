@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">args
-   &#160;<span id="projectnumber">5.1.0</span>
+   &#160;<span id="projectnumber">6.0.0</span>
    </div>
    <div id="projectbrief">A simple single-header C++11 STL-only argument parser library</div>
   </td>
@@ -116,16 +116,16 @@ Inheritance diagram for args::MapPositionalList&lt; K, T, List, Reader, Map &gt;
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab726a660da799d2bdd5aacddb4d1c59d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab726a660da799d2bdd5aacddb4d1c59d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>MapPositionalList</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;name, const std::string &amp;help, const Map &amp;map, const List &amp;defaultValues=List())</td></tr>
-<tr class="separator:ab726a660da799d2bdd5aacddb4d1c59d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a483b5d94372c0da167bc184f74b90fcd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a483b5d94372c0da167bc184f74b90fcd"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>MapPositionalList</b> (<a class="el" href="classargs_1_1Group.html">Group</a> &amp;group, const std::string &amp;name, const std::string &amp;help, const Map&lt; K, T &gt; &amp;map, const List&lt; T &gt; &amp;defaultValues=List&lt; T &gt;())</td></tr>
+<tr class="separator:a483b5d94372c0da167bc184f74b90fcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca6991bc8543c12252413cc402d04db8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aca6991bc8543c12252413cc402d04db8"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ParseValue</b> (const std::string &amp;value) override</td></tr>
 <tr class="separator:aca6991bc8543c12252413cc402d04db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c6205ee24d49b256ff52e009532e858"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4c6205ee24d49b256ff52e009532e858"></a>
-List &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1MapPositionalList.html#a4c6205ee24d49b256ff52e009532e858">Get</a> () noexcept</td></tr>
-<tr class="memdesc:a4c6205ee24d49b256ff52e009532e858"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the value. <br /></td></tr>
-<tr class="separator:a4c6205ee24d49b256ff52e009532e858"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a385d11d6c25148109a28998348ea6e83"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a385d11d6c25148109a28998348ea6e83"></a>
+List&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classargs_1_1MapPositionalList.html#a385d11d6c25148109a28998348ea6e83">Get</a> () noexcept</td></tr>
+<tr class="memdesc:a385d11d6c25148109a28998348ea6e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the value. <br /></td></tr>
+<tr class="separator:a385d11d6c25148109a28998348ea6e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03a6c25d6d352bad32139fba3ba5746f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a03a6c25d6d352bad32139fba3ba5746f"></a>
 virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>Name</b> () const  override</td></tr>
 <tr class="separator:a03a6c25d6d352bad32139fba3ba5746f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -187,7 +187,7 @@ const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>help</b>
 <tr class="separator:a9cdbbcdfa8e764c25f94dfe2c99c3b24 inherit pro_attribs_classargs_1_1Base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename K, typename T, typename List = std::vector&lt;T&gt;, bool(*)(const std::string &amp;, const std::string &amp;, K &amp;) Reader = ValueReader&lt;K&gt;, typename Map = std::unordered_map&lt;K, T&gt;&gt;<br />
+<div class="textblock"><h3>template&lt;typename K, typename T, template&lt; typename... &gt; class List = std::vector, typename Reader = ValueReader&lt;K&gt;, template&lt; typename... &gt; class Map = std::unordered_map&gt;<br />
 class args::MapPositionalList&lt; K, T, List, Reader, Map &gt;</h3>
 
 <p>A positional argument mapping list class. </p>
@@ -196,7 +196,7 @@ class args::MapPositionalList&lt; K, T, List, Reader, Map &gt;</h3>
     <tr><td class="paramname">K</td><td>the type to extract the argument as </td></tr>
     <tr><td class="paramname">T</td><td>the type to store the result as </td></tr>
     <tr><td class="paramname">List</td><td>the list type that houses the values </td></tr>
-    <tr><td class="paramname">Reader</td><td>The function used to read the argument into the key type, taking the name, value, and destination reference </td></tr>
+    <tr><td class="paramname">Reader</td><td>The functor type used to read the argument, taking the name, value, and destination reference with operator(), and returning a bool (if ARGS_NOEXCEPT is defined) </td></tr>
     <tr><td class="paramname">Map</td><td>The Map type. Should operate like std::map or std::unordered_map </td></tr>
   </table>
   </dd>

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['flag',['Flag',['../classargs_1_1Flag.html',1,'args']]],
-  ['flagbase',['FlagBase',['../classargs_1_1FlagBase.html',1,'args']]]
+  ['eitherflag',['EitherFlag',['../structargs_1_1EitherFlag.html',1,'args']]],
+  ['error',['Error',['../classargs_1_1Error.html',1,'args']]],
+  ['extraerror',['ExtraError',['../classargs_1_1ExtraError.html',1,'args']]]
 ];
