@@ -11,7 +11,7 @@ FLAGS		+=	-O2
 endif
 
 LIBS 		= 	
-CFLAGS		+=	-I. $(FLAGS) -c -MMD -Wall -Wextra
+CFLAGS		+=	-I. $(FLAGS) -c -MMD -Wall -Wextra -Wno-unused-parameter
 LDFLAGS		+=	$(FLAGS)
 
 SOURCES		= 	test.cxx
