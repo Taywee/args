@@ -574,6 +574,15 @@ namespace args
             }
 
             virtual void ParseValue(const std::string &value) = 0;
+
+            virtual void Reset() noexcept override
+            {
+                matched = false;
+                ready = true;
+#ifdef ARGS_NOEXCEPT
+                error = Error::None;
+#endif
+            }
     };
 
     /** Class for all kinds of validating groups, including ArgumentParser
@@ -686,7 +695,7 @@ namespace args
                     {
                         next = group->GetNextPositional();
                     }
-                    if (next and next->Ready())
+                    if (next && next->Ready())
                     {
                         return next;
                     }
@@ -1162,7 +1171,7 @@ namespace args
                 {
                     const auto &chunk = *it;
 
-                    if (!terminated and chunk == terminator)
+                    if (!terminated && chunk == terminator)
                     {
                         terminated = true;
                     // If a long arg was found
@@ -1475,10 +1484,11 @@ namespace args
     class CounterFlag : public Flag
     {
         private:
+            const int startcount;
             int count;
 
         public:
-            CounterFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const int startcount = 0): Flag(group, name, help, std::move(matcher)), count(startcount) {}
+            CounterFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const int startcount = 0): Flag(group, name, help, std::move(matcher)), startcount(startcount), count(startcount) {}
 
             virtual ~CounterFlag() {}
 
@@ -1507,6 +1517,12 @@ namespace args
             int &Get() noexcept
             {
                 return count;
+            }
+
+            virtual void Reset() noexcept override
+            {
+                FlagBase::Reset();
+                count = startcount;
             }
     };
 
@@ -1645,6 +1661,12 @@ namespace args
             {
                 return name + std::string("...");
             }
+
+            virtual void Reset() noexcept override
+            {
+                ValueFlagBase::Reset();
+                values.clear();
+            }
     };
 
     /** A mapping value flag class
@@ -1778,6 +1800,12 @@ namespace args
             {
                 return name + std::string("...");
             }
+
+            virtual void Reset() noexcept override
+            {
+                ValueFlagBase::Reset();
+                values.clear();
+            }
     };
 
     /** A positional argument class
@@ -1872,6 +1900,12 @@ namespace args
             List<T> &Get() noexcept
             {
                 return values;
+            }
+
+            virtual void Reset() noexcept override
+            {
+                PositionalBase::Reset();
+                values.clear();
             }
     };
 
@@ -2008,6 +2042,12 @@ namespace args
             virtual std::string Name() const override
             {
                 return name + std::string("...");
+            }
+
+            virtual void Reset() noexcept override
+            {
+                PositionalBase::Reset();
+                values.clear();
             }
     };
 }

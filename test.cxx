@@ -162,6 +162,47 @@ TEST_CASE("Positional arguments and positional argument lists work as expected",
     REQUIRE((args::get(baz) == std::vector<char>{'a', 'b', 'c', 'x', 'y', 'z'}));
 }
 
+TEST_CASE("The option terminator works as expected", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Positional<std::string> foo(parser, "FOO", "test flag");
+    args::Positional<bool> bar(parser, "BAR", "test flag");
+    args::PositionalList<std::string> baz(parser, "BAZ", "test flag");
+    args::Flag ofoo(parser, "FOO", "test flag", {'f', "foo"});
+    args::Flag obar(parser, "BAR", "test flag", {"bar", 'b'});
+    args::ValueFlag<double> obaz(parser, "BAZ", "test flag", {'a', "baz"});
+    parser.ParseArgs(std::vector<std::string>{"--foo", "this is a test flag", "0", "a", "b", "--baz", "7.0", "c", "x", "y", "z"});
+    REQUIRE(foo);
+    REQUIRE((args::get(foo) == "this is a test flag"));
+    REQUIRE(bar);
+    REQUIRE(!args::get(bar));
+    REQUIRE(baz);
+    REQUIRE((args::get(baz) == std::vector<std::string>{"a", "b", "c", "x", "y", "z"}));
+    REQUIRE(ofoo);
+    REQUIRE(!obar);
+    REQUIRE(obaz);
+    parser.ParseArgs(std::vector<std::string>{"--foo", "this is a test flag", "0", "a", "--", "b", "--baz", "7.0", "c", "x", "y", "z"});
+    REQUIRE(foo);
+    REQUIRE((args::get(foo) == "this is a test flag"));
+    REQUIRE(bar);
+    REQUIRE(!args::get(bar));
+    REQUIRE(baz);
+    REQUIRE((args::get(baz) == std::vector<std::string>{"a", "b", "--baz", "7.0", "c", "x", "y", "z"}));
+    REQUIRE(ofoo);
+    REQUIRE(!obar);
+    REQUIRE(!obaz);
+    parser.ParseArgs(std::vector<std::string>{"--foo", "--", "this is a test flag", "0", "a", "b", "--baz", "7.0", "c", "x", "y", "z"});
+    REQUIRE(foo);
+    REQUIRE((args::get(foo) == "this is a test flag"));
+    REQUIRE(bar);
+    REQUIRE(!args::get(bar));
+    REQUIRE(baz);
+    REQUIRE((args::get(baz) == std::vector<std::string>{"a", "b", "--baz", "7.0", "c", "x", "y", "z"}));
+    REQUIRE(ofoo);
+    REQUIRE(!obar);
+    REQUIRE(!obaz);
+}
+
 TEST_CASE("Positional lists work with sets", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
