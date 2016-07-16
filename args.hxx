@@ -585,6 +585,57 @@ namespace args
             std::function<bool(const Group &)> validator;
 
         public:
+            /** Default validators
+             */
+            struct Validators
+            {
+                static bool Xor(const Group &group)
+                {
+                    return group.MatchedChildren() == 1;
+                }
+
+                static bool AtLeastOne(const Group &group)
+                {
+                    return group.MatchedChildren() >= 1;
+                }
+
+                static bool AtMostOne(const Group &group)
+                {
+                    return group.MatchedChildren() <= 1;
+                }
+
+                static bool All(const Group &group)
+                {
+                    return group.Children().size() == group.MatchedChildren();
+                }
+
+                static bool AllOrNone(const Group &group)
+                {
+                    return (All(group) || None(group));
+                }
+
+                static bool AllChildGroups(const Group &group)
+                {
+                    return std::find_if(std::begin(group.Children()), std::end(group.Children()), [](const Base* child) -> bool {
+                            return dynamic_cast<const Group *>(child) && !child->Matched();
+                            }) == std::end(group.Children());
+                }
+
+                static bool DontCare(const Group &group)
+                {
+                    return true;
+                }
+
+                static bool CareTooMuch(const Group &group)
+                {
+                    return false;
+                }
+
+                static bool None(const Group &group)
+                {
+                    return group.MatchedChildren() == 0;
+                }
+            };
             /// If help is empty, this group will not be printed in help output
             Group(const std::string &help = std::string(), const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
             /// If help is empty, this group will not be printed in help output
@@ -784,57 +835,6 @@ namespace args
             }
 #endif
 
-            /** Default validators
-             */
-            struct Validators
-            {
-                static bool Xor(const Group &group)
-                {
-                    return group.MatchedChildren() == 1;
-                }
-
-                static bool AtLeastOne(const Group &group)
-                {
-                    return group.MatchedChildren() >= 1;
-                }
-
-                static bool AtMostOne(const Group &group)
-                {
-                    return group.MatchedChildren() <= 1;
-                }
-
-                static bool All(const Group &group)
-                {
-                    return group.Children().size() == group.MatchedChildren();
-                }
-
-                static bool AllOrNone(const Group &group)
-                {
-                    return (All(group) || None(group));
-                }
-
-                static bool AllChildGroups(const Group &group)
-                {
-                    return std::find_if(std::begin(group.Children()), std::end(group.Children()), [](const Base* child) -> bool {
-                            return dynamic_cast<const Group *>(child) && !child->Matched();
-                            }) == std::end(group.Children());
-                }
-
-                static bool DontCare(const Group &group)
-                {
-                    return true;
-                }
-
-                static bool CareTooMuch(const Group &group)
-                {
-                    return false;
-                }
-
-                static bool None(const Group &group)
-                {
-                    return group.MatchedChildren() == 0;
-                }
-            };
     };
 
     /** The main user facing command line argument parser class
