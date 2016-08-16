@@ -570,6 +570,7 @@ TEST_CASE("Kick-out should work via all flags and value flags", "[args]")
     REQUIRE(d3);
 }
 
+#undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
 #include <args.hxx>
