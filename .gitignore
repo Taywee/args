@@ -46,3 +46,4 @@ Makefile
 !/Makefile
 *-prefix
 gitlike
+/pages/
