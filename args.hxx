@@ -56,9 +56,9 @@ namespace args
      * the value will be modifiable.
      */
     template <typename Option>
-    auto get(Option &option) -> decltype(option.Get())
+    auto get(Option &option_) -> decltype(option_.Get())
     {
-        return option.Get();
+        return option_.Get();
     }
 
     /** (INTERNAL) Count UTF-8 glyphs
@@ -69,10 +69,10 @@ namespace args
      * \param string The string to count glyphs from
      * \return The UTF-8 glyphs in the string
      */
-    std::string::size_type Glyphs(const std::string &string)
+    std::string::size_type Glyphs(const std::string &string_)
     {
         std::string::size_type length = 0;
-        for (const char c: string)
+        for (const char c: string_)
         {
             if ((c & 0xc0) != 0x80)
             {
@@ -384,7 +384,7 @@ namespace args
 #endif
 
         public:
-            Base(const std::string &help) : matched(false), help(help) {}
+            Base(const std::string &help_) : matched(false), help(help_) {}
             virtual ~Base() {}
 
             virtual bool Matched() const noexcept
@@ -430,7 +430,7 @@ namespace args
             bool kickout;
 
         public:
-            NamedBase(const std::string &name, const std::string &help) : Base(help), name(name), kickout(false) {}
+            NamedBase(const std::string &name_, const std::string &help_) : Base(help_), name(name_), kickout(false) {}
             virtual ~NamedBase() {}
 
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &shortSeparator, const std::string &longSeparator) const override
@@ -446,9 +446,9 @@ namespace args
             }
 
             /// Sets a kick-out value for building subparsers
-            void KickOut(bool kickout) noexcept
+            void KickOut(bool kickout_) noexcept
             {
-                this->kickout = kickout;
+                this->kickout = kickout_;
             }
 
             /// Gets the kick-out value for building subparsers
@@ -469,7 +469,7 @@ namespace args
             const Matcher matcher;
 
         public:
-            FlagBase(const std::string &name, const std::string &help, Matcher &&matcher, const bool extraError = false) : NamedBase(name, help), extraError(extraError), matcher(std::move(matcher)) {}
+            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : NamedBase(name_, help_), extraError(extraError_), matcher(std::move(matcher_)) {}
 
             virtual ~FlagBase() {}
 
@@ -537,7 +537,7 @@ namespace args
     class ValueFlagBase : public FlagBase
     {
         public:
-            ValueFlagBase(const std::string &name, const std::string &help, Matcher &&matcher, const bool extraError = false) : FlagBase(name, help, std::move(matcher), extraError) {}
+            ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : FlagBase(name_, help_, std::move(matcher_), extraError_) {}
             virtual ~ValueFlagBase() {}
             virtual void ParseValue(const std::string &value) = 0;
 
@@ -568,7 +568,7 @@ namespace args
             bool ready;
 
         public:
-            PositionalBase(const std::string &name, const std::string &help) : NamedBase(name, help), ready(true) {}
+            PositionalBase(const std::string &name_, const std::string &help_) : NamedBase(name_, help_), ready(true) {}
             virtual ~PositionalBase() {}
 
             bool Ready()
@@ -576,7 +576,7 @@ namespace args
                 return ready;
             }
 
-            virtual void ParseValue(const std::string &value) = 0;
+            virtual void ParseValue(const std::string &value_) = 0;
 
             virtual void Reset() noexcept override
             {
@@ -649,11 +649,11 @@ namespace args
                 }
             };
             /// If help is empty, this group will not be printed in help output
-            Group(const std::string &help = std::string(), const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator) {}
+            Group(const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare) : Base(help_), validator(validator_) {}
             /// If help is empty, this group will not be printed in help output
-            Group(Group &group, const std::string &help = std::string(), const std::function<bool(const Group &)> &validator = Validators::DontCare) : Base(help), validator(validator)
+            Group(Group &group_, const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare) : Base(help_), validator(validator_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
             virtual ~Group() {}
 
@@ -914,10 +914,10 @@ namespace args
                  */
                 bool showProglinePositionals = true;
             } helpParams;
-            ArgumentParser(const std::string &description, const std::string &epilog = std::string()) :
+            ArgumentParser(const std::string &description_, const std::string &epilog_ = std::string()) :
                 Group("", Group::Validators::AllChildGroups),
-                description(description),
-                epilog(epilog),
+                description(description_),
+                epilog(epilog_),
                 longprefix("--"),
                 shortprefix("-"),
                 longseparator("="),
@@ -933,8 +933,8 @@ namespace args
             { return prog; }
             /** The program name for help generation
              */
-            void Prog(const std::string &prog)
-            { this->prog = prog; }
+            void Prog(const std::string &prog_)
+            { this->prog = prog_; }
 
             /** The description that appears on the prog line after options
              */
@@ -942,8 +942,8 @@ namespace args
             { return proglinePostfix; }
             /** The description that appears on the prog line after options
              */
-            void ProglinePostfix(const std::string &proglinePostfix)
-            { this->proglinePostfix = proglinePostfix; }
+            void ProglinePostfix(const std::string &proglinePostfix_)
+            { this->proglinePostfix = proglinePostfix_; }
 
             /** The description that appears above options
              */
@@ -951,8 +951,8 @@ namespace args
             { return description; }
             /** The description that appears above options
              */
-            void Description(const std::string &description)
-            { this->description = description; }
+            void Description(const std::string &description_)
+            { this->description = description_; }
             
             /** The description that appears below options
              */
@@ -960,8 +960,8 @@ namespace args
             { return epilog; }
             /** The description that appears below options
              */
-            void Epilog(const std::string &epilog)
-            { this->epilog = epilog; }
+            void Epilog(const std::string &epilog_)
+            { this->epilog = epilog_; }
 
             /** The prefix for long flags
              */
@@ -969,8 +969,8 @@ namespace args
             { return longprefix; }
             /** The prefix for long flags
              */
-            void LongPrefix(const std::string &longprefix)
-            { this->longprefix = longprefix; }
+            void LongPrefix(const std::string &longprefix_)
+            { this->longprefix = longprefix_; }
 
             /** The prefix for short flags
              */
@@ -978,8 +978,8 @@ namespace args
             { return shortprefix; }
             /** The prefix for short flags
              */
-            void ShortPrefix(const std::string &shortprefix)
-            { this->shortprefix = shortprefix; }
+            void ShortPrefix(const std::string &shortprefix_)
+            { this->shortprefix = shortprefix_; }
 
             /** The separator for long flags
              */
@@ -987,9 +987,9 @@ namespace args
             { return longseparator; }
             /** The separator for long flags
              */
-            void LongSeparator(const std::string &longseparator)
+            void LongSeparator(const std::string &longseparator_)
             {
-                if (longseparator.empty())
+                if (longseparator_.empty())
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Usage;
@@ -998,7 +998,7 @@ namespace args
 #endif
                 } else
                 {
-                    this->longseparator = longseparator;
+                    this->longseparator = longseparator_;
                 }
             }
 
@@ -1008,23 +1008,23 @@ namespace args
             { return terminator; }
             /** The terminator that forcibly separates flags from positionals
              */
-            void Terminator(const std::string &terminator)
-            { this->terminator = terminator; }
+            void Terminator(const std::string &terminator_)
+            { this->terminator = terminator_; }
 
             /** Get the current argument separation parameters.
              *
              * See SetArgumentSeparations for details on what each one means.
              */
             void GetArgumentSeparations(
-                bool &allowJoinedShortValue,
-                bool &allowJoinedLongValue,
-                bool &allowSeparateShortValue,
-                bool &allowSeparateLongValue) const
+                bool &allowJoinedShortValue_,
+                bool &allowJoinedLongValue_,
+                bool &allowSeparateShortValue_,
+                bool &allowSeparateLongValue_) const
             {
-                allowJoinedShortValue = this->allowJoinedShortValue;
-                allowJoinedLongValue = this->allowJoinedLongValue;
-                allowSeparateShortValue = this->allowSeparateShortValue;
-                allowSeparateLongValue = this->allowSeparateLongValue;
+                allowJoinedShortValue_ = this->allowJoinedShortValue;
+                allowJoinedLongValue_ = this->allowJoinedLongValue;
+                allowSeparateShortValue_ = this->allowSeparateShortValue;
+                allowSeparateLongValue_ = this->allowSeparateLongValue;
             }
 
             /** Change allowed option separation.
@@ -1035,15 +1035,15 @@ namespace args
              * \param allowSeparateLongValue Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
              */
             void SetArgumentSeparations(
-                const bool allowJoinedShortValue,
-                const bool allowJoinedLongValue,
-                const bool allowSeparateShortValue,
-                const bool allowSeparateLongValue)
+                const bool allowJoinedShortValue_,
+                const bool allowJoinedLongValue_,
+                const bool allowSeparateShortValue_,
+                const bool allowSeparateLongValue_)
             {
-                this->allowJoinedShortValue = allowJoinedShortValue;
-                this->allowJoinedLongValue = allowJoinedLongValue;
-                this->allowSeparateShortValue = allowSeparateShortValue;
-                this->allowSeparateLongValue = allowSeparateLongValue;
+                this->allowJoinedShortValue = allowJoinedShortValue_;
+                this->allowJoinedLongValue = allowJoinedLongValue_;
+                this->allowSeparateShortValue = allowSeparateShortValue_;
+                this->allowSeparateLongValue = allowSeparateLongValue_;
             }
 
             /** Pass the help menu into an ostream
@@ -1053,8 +1053,8 @@ namespace args
                 bool hasoptions = false;
                 bool hasarguments = false;
 
-                const auto description = Wrap(this->description, helpParams.width - helpParams.descriptionindent);
-                const auto epilog = Wrap(this->epilog, helpParams.width - helpParams.descriptionindent);
+                const auto description_text = Wrap(this->description, helpParams.width - helpParams.descriptionindent);
+                const auto epilog_text = Wrap(this->epilog, helpParams.width - helpParams.descriptionindent);
                 std::ostringstream prognameline;
                 prognameline << prog;
                 if (HasFlag())
@@ -1091,17 +1091,17 @@ namespace args
 
                 help << '\n';
 
-                for (const auto &line: description)
+                for (const auto &line: description_text)
                 {
                     help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
                 help << "\n";
                 help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
-                for (const auto &description: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " "))
+                for (const auto &desc: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " "))
                 {
-                    const auto groupindent = std::get<2>(description) * helpParams.eachgroupindent;
-                    const auto flags = Wrap(std::get<0>(description), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter));
-                    const auto info = Wrap(std::get<1>(description), helpParams.width - (helpParams.helpindent + groupindent));
+                    const auto groupindent = std::get<2>(desc) * helpParams.eachgroupindent;
+                    const auto flags = Wrap(std::get<0>(desc), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter));
+                    const auto info = Wrap(std::get<1>(desc), helpParams.width - (helpParams.helpindent + groupindent));
 
                     std::string::size_type flagssize = 0;
                     for (auto flagsit = std::begin(flags); flagsit != std::end(flags); ++flagsit)
@@ -1139,7 +1139,7 @@ namespace args
                 }
 
                 help << "\n";
-                for (const auto &line: epilog)
+                for (const auto &line: epilog_text)
                 {
                     help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
@@ -1420,9 +1420,9 @@ namespace args
     class Flag : public FlagBase
     {
         public:
-            Flag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const bool extraError = false): FlagBase(name, help, std::move(matcher), extraError)
+            Flag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false): FlagBase(name_, help_, std::move(matcher_), extraError_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~Flag() {}
@@ -1442,7 +1442,7 @@ namespace args
     class HelpFlag : public Flag
     {
         public:
-            HelpFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher): Flag(group, name, help, std::move(matcher)) {}
+            HelpFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_): Flag(group_, name_, help_, std::move(matcher_)) {}
 
             virtual ~HelpFlag() {}
 
@@ -1491,7 +1491,7 @@ namespace args
             int count;
 
         public:
-            CounterFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const int startcount = 0): Flag(group, name, help, std::move(matcher)), startcount(startcount), count(startcount) {}
+            CounterFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const int startcount_ = 0): Flag(group_, name_, help_, std::move(matcher_)), startcount(startcount_), count(startcount_) {}
 
             virtual ~CounterFlag() {}
 
@@ -1587,22 +1587,22 @@ namespace args
 
         public:
 
-            ValueFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const T &defaultValue = T(), const bool extraError = false): ValueFlagBase(name, help, std::move(matcher), extraError), value(defaultValue)
+            ValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &defaultValue_ = T(), const bool extraError_ = false): ValueFlagBase(name_, help_, std::move(matcher_), extraError_), value(defaultValue_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~ValueFlag() {}
 
-            virtual void ParseValue(const std::string &value) override
+            virtual void ParseValue(const std::string &value_) override
             {
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, this->value))
+                if (!reader(name, value_, this->value))
                 {
                     error = Error::Parse;
                 }
 #else
-                reader(name, value, this->value);
+                reader(name, value_, this->value);
 #endif
             }
 
@@ -1632,23 +1632,23 @@ namespace args
 
         public:
 
-            ValueFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const List<T> &defaultValues = List<T>()): ValueFlagBase(name, help, std::move(matcher)), values(defaultValues)
+            ValueFlagList(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const List<T> &defaultValues_ = List<T>()): ValueFlagBase(name_, help_, std::move(matcher_)), values(defaultValues_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~ValueFlagList() {}
 
-            virtual void ParseValue(const std::string &value) override
+            virtual void ParseValue(const std::string &value_) override
             {
                 T v;
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, v))
+                if (!reader(name, value_, v))
                 {
                     error = Error::Parse;
                 }
 #else
-                reader(name, value, v);
+                reader(name, value_, v);
 #endif
                 values.insert(std::end(values), v);
             }
@@ -1693,23 +1693,23 @@ namespace args
 
         public:
 
-            MapFlag(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map<K, T> &map, const T &defaultValue = T(), const bool extraError = false): ValueFlagBase(name, help, std::move(matcher), extraError), map(map), value(defaultValue)
+            MapFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, const T &defaultValue_ = T(), const bool extraError_ = false): ValueFlagBase(name_, help_, std::move(matcher_), extraError_), map(map_), value(defaultValue_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~MapFlag() {}
 
-            virtual void ParseValue(const std::string &value) override
+            virtual void ParseValue(const std::string &value_) override
             {
                 K key;
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, key))
+                if (!reader(name, value_, key))
                 {
                     error = Error::Parse;
                 }
 #else
-                reader(name, value, key);
+                reader(name, value_, key);
 #endif
                 auto it = map.find(key);
                 if (it == std::end(map))
@@ -1758,9 +1758,9 @@ namespace args
 
         public:
 
-            MapFlagList(Group &group, const std::string &name, const std::string &help, Matcher &&matcher, const Map<K, T> &map, const List<T> &defaultValues = List<T>()): ValueFlagBase(name, help, std::move(matcher)), map(map), values(defaultValues)
+            MapFlagList(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, const List<T> &defaultValues_ = List<T>()): ValueFlagBase(name_, help_, std::move(matcher_)), map(map_), values(defaultValues_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~MapFlagList() {}
@@ -1825,22 +1825,22 @@ namespace args
             T value;
             Reader reader;
         public:
-            Positional(Group &group, const std::string &name, const std::string &help, const T &defaultValue = T()): PositionalBase(name, help), value(defaultValue)
+            Positional(Group &group_, const std::string &name_, const std::string &help_, const T &defaultValue_ = T()): PositionalBase(name_, help_), value(defaultValue_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~Positional() {}
 
-            virtual void ParseValue(const std::string &value) override
+            virtual void ParseValue(const std::string &value_) override
             {
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, this->value))
+                if (!reader(name, value_, this->value))
                 {
                     error = Error::Parse;
                 }
 #else
-                reader(name, value, this->value);
+                reader(name, value_, this->value);
 #endif
                 ready = false;
                 matched = true;
@@ -1871,23 +1871,23 @@ namespace args
             Reader reader;
 
         public:
-            PositionalList(Group &group, const std::string &name, const std::string &help, const List<T> &defaultValues = List<T>()): PositionalBase(name, help), values(defaultValues)
+            PositionalList(Group &group_, const std::string &name_, const std::string &help_, const List<T> &defaultValues_ = List<T>()): PositionalBase(name_, help_), values(defaultValues_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~PositionalList() {}
 
-            virtual void ParseValue(const std::string &value) override
+            virtual void ParseValue(const std::string &value_) override
             {
                 T v;
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, v))
+                if (!reader(name, value_, v))
                 {
                     error = Error::Parse;
                 }
 #else
-                reader(name, value, v);
+                reader(name, value_, v);
 #endif
                 values.insert(std::end(values), v);
                 matched = true;
@@ -1933,23 +1933,23 @@ namespace args
 
         public:
 
-            MapPositional(Group &group, const std::string &name, const std::string &help, const Map<K, T> &map, const T &defaultValue = T()): PositionalBase(name, help), map(map), value(defaultValue)
+            MapPositional(Group &group_, const std::string &name_, const std::string &help_, const Map<K, T> &map_, const T &defaultValue_ = T()): PositionalBase(name_, help_), map(map_), value(defaultValue_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~MapPositional() {}
 
-            virtual void ParseValue(const std::string &value) override
+            virtual void ParseValue(const std::string &value_) override
             {
                 K key;
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, key))
+                if (!reader(name, value_, key))
                 {
                     error = Error::Parse;
                 }
 #else
-                reader(name, value, key);
+                reader(name, value_, key);
 #endif
                 auto it = map.find(key);
                 if (it == std::end(map))
@@ -2000,23 +2000,23 @@ namespace args
 
         public:
 
-            MapPositionalList(Group &group, const std::string &name, const std::string &help, const Map<K, T> &map, const List<T> &defaultValues = List<T>()): PositionalBase(name, help), map(map), values(defaultValues)
+            MapPositionalList(Group &group_, const std::string &name_, const std::string &help_, const Map<K, T> &map_, const List<T> &defaultValues_ = List<T>()): PositionalBase(name_, help_), map(map_), values(defaultValues_)
             {
-                group.Add(*this);
+                group_.Add(*this);
             }
 
             virtual ~MapPositionalList() {}
 
-            virtual void ParseValue(const std::string &value) override
+            virtual void ParseValue(const std::string &value_) override
             {
                 K key;
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, key))
+                if (!reader(name, value_, key))
                 {
                     error = Error::Parse;
                 }
 #else
-                reader(name, value, key);
+                reader(name, value_, key);
 #endif
                 auto it = map.find(key);
                 if (it == std::end(map))
