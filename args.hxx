@@ -1452,10 +1452,10 @@ namespace args
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Help;
+                    return this;
 #else
                     throw Help(arg);
 #endif
-                    return this;
                 }
                 return nullptr;
             }
@@ -1466,10 +1466,10 @@ namespace args
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Help;
+                    return this;
 #else
                     throw Help(std::string(1, arg));
 #endif
-                    return this;
                 }
                 return nullptr;
             }
