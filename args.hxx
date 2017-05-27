@@ -397,7 +397,7 @@ namespace args
                 return Matched();
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &) const
             {
                 std::tuple<std::string, std::string> description;
                 std::get<1>(description) = help;
@@ -433,7 +433,7 @@ namespace args
             NamedBase(const std::string &name_, const std::string &help_) : Base(help_), name(name_), kickout(false) {}
             virtual ~NamedBase() {}
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &shortSeparator, const std::string &longSeparator) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &) const override
             {
                 std::tuple<std::string, std::string> description;
                 std::get<0>(description) = Name();
@@ -513,7 +513,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &, const std::string &) const override
             {
                 std::tuple<std::string, std::string> description;
                 const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix);
@@ -633,12 +633,12 @@ namespace args
                             }) == std::end(group.Children());
                 }
 
-                static bool DontCare(const Group &group)
+                static bool DontCare(const Group &)
                 {
                     return true;
                 }
 
-                static bool CareTooMuch(const Group &group)
+                static bool CareTooMuch(const Group &)
                 {
                     return false;
                 }
@@ -1564,7 +1564,7 @@ namespace args
     template <>
     struct ValueReader<std::string>
     {
-        bool operator()(const std::string &name, const std::string &value, std::string &destination)
+        bool operator()(const std::string &, const std::string &value, std::string &destination)
         {
             destination.assign(value);
             return true;
