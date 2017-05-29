@@ -397,7 +397,7 @@ namespace args
                 return Matched();
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &) const
             {
                 std::tuple<std::string, std::string> description;
                 std::get<1>(description) = help;
@@ -433,7 +433,7 @@ namespace args
             NamedBase(const std::string &name_, const std::string &help_) : Base(help_), name(name_), kickout(false) {}
             virtual ~NamedBase() {}
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefi, const std::string &shortSeparator, const std::string &longSeparator) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &) const override
             {
                 std::tuple<std::string, std::string> description;
                 std::get<0>(description) = Name();
@@ -513,7 +513,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
+            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &, const std::string &) const override
             {
                 std::tuple<std::string, std::string> description;
                 const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix);
@@ -633,12 +633,12 @@ namespace args
                             }) == std::end(group.Children());
                 }
 
-                static bool DontCare(const Group &group)
+                static bool DontCare(const Group &)
                 {
                     return true;
                 }
 
-                static bool CareTooMuch(const Group &group)
+                static bool CareTooMuch(const Group &)
                 {
                     return false;
                 }
@@ -1048,7 +1048,7 @@ namespace args
 
             /** Pass the help menu into an ostream
              */
-            void Help(std::ostream &help) const
+            void Help(std::ostream &help_) const
             {
                 bool hasoptions = false;
                 bool hasarguments = false;
@@ -1081,22 +1081,22 @@ namespace args
                 auto progit = std::begin(proglines);
                 if (progit != std::end(proglines))
                 {
-                    help << std::string(helpParams.progindent, ' ') << *progit << '\n';
+                    help_ << std::string(helpParams.progindent, ' ') << *progit << '\n';
                     ++progit;
                 }
                 for (; progit != std::end(proglines); ++progit)
                 {
-                    help << std::string(helpParams.progtailindent, ' ') << *progit << '\n';
+                    help_ << std::string(helpParams.progtailindent, ' ') << *progit << '\n';
                 }
 
-                help << '\n';
+                help_ << '\n';
 
                 for (const auto &line: description_text)
                 {
-                    help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
+                    help_ << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
-                help << "\n";
-                help << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
+                help_ << "\n";
+                help_ << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
                 for (const auto &desc: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " "))
                 {
                     const auto groupindent = std::get<2>(desc) * helpParams.eachgroupindent;
@@ -1108,9 +1108,9 @@ namespace args
                     {
                         if (flagsit != std::begin(flags))
                         {
-                            help << '\n';
+                            help_ << '\n';
                         }
-                        help << std::string(groupindent + helpParams.flagindent, ' ') << *flagsit;
+                        help_ << std::string(groupindent + helpParams.flagindent, ' ') << *flagsit;
                         flagssize = Glyphs(*flagsit);
                     }
 
@@ -1118,30 +1118,30 @@ namespace args
                     // groupindent is on both sides of this inequality, and therefore can be removed
                     if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent || infoit == std::end(info))
                     {
-                        help << '\n';
+                        help_ << '\n';
                     } else
                     {
                         // groupindent is on both sides of the minus sign, and therefore doesn't actually need to be in here
-                        help << std::string(helpParams.helpindent - (helpParams.flagindent + flagssize), ' ') << *infoit << '\n';
+                        help_ << std::string(helpParams.helpindent - (helpParams.flagindent + flagssize), ' ') << *infoit << '\n';
                         ++infoit;
                     }
                     for (; infoit != std::end(info); ++infoit)
                     {
-                        help << std::string(groupindent + helpParams.helpindent, ' ') << *infoit << '\n';
+                        help_ << std::string(groupindent + helpParams.helpindent, ' ') << *infoit << '\n';
                     }
                 }
                 if (hasoptions && hasarguments && helpParams.showTerminator)
                 {
                     for (const auto &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
                     {
-                        help << std::string(helpParams.flagindent, ' ') << item << '\n';
+                        help_ << std::string(helpParams.flagindent, ' ') << item << '\n';
                     }
                 }
 
-                help << "\n";
+                help_ << "\n";
                 for (const auto &line: epilog_text)
                 {
-                    help << std::string(helpParams.descriptionindent, ' ') << line << "\n";
+                    help_ << std::string(helpParams.descriptionindent, ' ') << line << "\n";
                 }
             }
 
@@ -1151,9 +1151,9 @@ namespace args
              */
             std::string Help() const
             {
-                std::ostringstream help;
-                Help(help);
-                return help.str();
+                std::ostringstream help_;
+                Help(help_);
+                return help_.str();
             }
 
             /** Parse all arguments.
@@ -1452,10 +1452,10 @@ namespace args
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Help;
+                    return this;
 #else
                     throw Help(arg);
 #endif
-                    return this;
                 }
                 return nullptr;
             }
@@ -1466,10 +1466,10 @@ namespace args
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Help;
+                    return this;
 #else
                     throw Help(std::string(1, arg));
 #endif
-                    return this;
                 }
                 return nullptr;
             }
@@ -1564,7 +1564,7 @@ namespace args
     template <>
     struct ValueReader<std::string>
     {
-        bool operator()(const std::string &name, const std::string &value, std::string &destination)
+        bool operator()(const std::string &, const std::string &value, std::string &destination)
         {
             destination.assign(value);
             return true;
