@@ -1627,10 +1627,24 @@ namespace args
     class ValueFlagList : public ValueFlagBase
     {
         private:
-            List<T> values;
+			using Container = List<T>;
+			Container values;
             Reader reader;
-
+			
         public:
+
+			typedef T value_type;
+			typedef typename Container::allocator_type allocator_type;
+			typedef typename Container::pointer pointer;
+			typedef typename Container::const_pointer const_pointer;
+			typedef T& reference;
+			typedef const T& const_reference;
+			typedef typename Container::size_type size_type;
+			typedef typename Container::difference_type difference_type;
+			typedef typename Container::iterator iterator;
+			typedef typename Container::const_iterator const_iterator;
+			typedef std::reverse_iterator<iterator> reverse_iterator;
+			typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
             ValueFlagList(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const List<T> &defaultValues_ = List<T>()): ValueFlagBase(name_, help_, std::move(matcher_)), values(defaultValues_)
             {
@@ -1670,6 +1684,36 @@ namespace args
                 ValueFlagBase::Reset();
                 values.clear();
             }
+
+			iterator begin() noexcept
+			{
+				return values.begin();
+			}
+
+			const_iterator begin() const noexcept
+			{
+				return values.begin();
+			}
+
+			const_iterator cbegin() const noexcept
+			{
+				return values.cbegin();
+			}
+
+			iterator end() noexcept
+			{
+				return values.end();
+			}
+
+			const_iterator end() const noexcept 
+			{
+				return values.end();
+			}
+
+			const_iterator cend() const noexcept
+			{
+				return values.cend();
+			}
     };
 
     /** A mapping value flag class
