@@ -69,7 +69,7 @@ namespace args
      * \param string The string to count glyphs from
      * \return The UTF-8 glyphs in the string
      */
-    std::string::size_type Glyphs(const std::string &string_)
+    inline std::string::size_type Glyphs(const std::string &string_)
     {
         std::string::size_type length = 0;
         for (const char c: string_)
@@ -91,7 +91,7 @@ namespace args
      * \param the widtho f the first line, defaults to the width of the body
      * \return the vector of lines
      */
-    std::vector<std::string> Wrap(const std::string &in, const std::string::size_type width, std::string::size_type firstlinewidth = 0)
+    inline std::vector<std::string> Wrap(const std::string &in, const std::string::size_type width, std::string::size_type firstlinewidth = 0)
     {
         // Preserve existing line breaks
         const auto newlineloc = in.find('\n');
@@ -1409,7 +1409,7 @@ namespace args
             }
     };
 
-    std::ostream &operator<<(std::ostream &os, const ArgumentParser &parser)
+    inline std::ostream &operator<<(std::ostream &os, const ArgumentParser &parser)
     {
         parser.Help(os);
         return os;
