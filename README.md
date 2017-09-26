@@ -1,5 +1,7 @@
 # args
 
+#### Note that this library is essentially in maintenance mode.  I haven't had the time to work on it or give it the love that it deserves.  I'm not adding new features, but I will fix bugs.  I will also very gladly accept pull requests.
+
 [![build status](https://gitgud.io/Taywee/args/badges/master/build.svg)](https://gitgud.io/Taywee/args/commits/master)
 
 A simple, small, flexible, single-header C++11 argument parsing library, in
