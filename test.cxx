@@ -570,6 +570,26 @@ TEST_CASE("Kick-out should work via all flags and value flags", "[args]")
     REQUIRE(d3);
 }
 
+TEST_CASE("Required flags work as expected", "[args]")
+{
+    args::ArgumentParser parser1("Test command");
+    args::ValueFlag<int> foo(parser1, "foo", "foo", {'f', "foo"}, args::Options::Required);
+    args::ValueFlag<int> bar(parser1, "bar", "bar", {'b', "bar"});
+
+    parser1.ParseArgs(std::vector<std::string>{"-f", "42"});
+    REQUIRE(foo.Get() == 42);
+
+    REQUIRE_THROWS_AS(parser1.ParseArgs(std::vector<std::string>{"-b4"}), args::RequiredError);
+
+    args::ArgumentParser parser2("Test command");
+    args::Positional<int> pos1(parser2, "a", "a");
+    REQUIRE_NOTHROW(parser2.ParseArgs(std::vector<std::string>{}));
+
+    args::ArgumentParser parser3("Test command");
+    args::Positional<int> pos2(parser3, "a", "a", args::Options::Required);
+    REQUIRE_THROWS_AS(parser3.ParseArgs(std::vector<std::string>{}), args::RequiredError);
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT

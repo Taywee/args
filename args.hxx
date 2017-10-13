@@ -156,6 +156,7 @@ namespace args
         Usage,
         Parse,
         Validation,
+        Required,
         Map,
         Extra,
         Help
@@ -195,6 +196,15 @@ namespace args
         public:
             ValidationError(const std::string &problem) : Error(problem) {}
             virtual ~ValidationError() {};
+    };
+
+    /** Errors that when a required flag is omitted
+     */
+    class RequiredError : public ValidationError
+    {
+        public:
+            RequiredError(const std::string &problem) : ValidationError(problem) {}
+            virtual ~RequiredError() {};
     };
 
     /** Errors in map lookups
@@ -392,6 +402,10 @@ namespace args
                 return matched;
             }
 
+            virtual void Validate(const std::string &, const std::string &)
+            {
+            }
+
             operator bool() const noexcept
             {
                 return Matched();
@@ -458,26 +472,59 @@ namespace args
             }
     };
 
+
+    enum class Options
+    {
+        /** Default options.
+         */
+        None = 0x0,
+
+        /** Flag can't be passed multiple times.
+         */
+        Single = 0x01,
+
+        /** Flag can't be omitted.
+         */
+        Required = 0x02,
+    };
+
+    inline Options operator | (Options lhs, Options rhs)
+    {
+        return static_cast<Options>(static_cast<int>(lhs) | static_cast<int>(rhs));
+    }
+
+    inline Options operator & (Options lhs, Options rhs)
+    {
+        return static_cast<Options>(static_cast<int>(lhs) & static_cast<int>(rhs));
+    }
+
     /** Base class for all flag options
      */
     class FlagBase : public NamedBase
     {
         private:
-            const bool extraError;
+            const Options options;
 
         protected:
             const Matcher matcher;
 
         public:
-            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : NamedBase(name_, help_), extraError(extraError_), matcher(std::move(matcher_)) {}
+            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : NamedBase(name_, help_), options(extraError_ ? Options::Single : Options()), matcher(std::move(matcher_)) {}
+
+            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : NamedBase(name_, help_), options(options_), matcher(std::move(matcher_)) {}
 
             virtual ~FlagBase() {}
+
+            Options GetOptions() const
+            {
+                return options;
+            }
 
             virtual FlagBase *Match(const std::string &flag)
             {
                 if (matcher.Match(flag))
                 {
-                    if (extraError && matched)
+                    if ((options & Options::Single) != Options::None && matched)
                     {
 #ifdef ARGS_NOEXCEPT
                         error = Error::Extra;
@@ -493,11 +540,25 @@ namespace args
                 return nullptr;
             }
 
+            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
+            {
+                if (!Matched() && (options & Options::Required) != Options::None)
+                {
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Required;
+#else
+                        std::ostringstream problem;
+                        problem << "Flag '" << matcher.GetFlagStrings(shortPrefix, longPrefix).at(0) << "' is required";
+                        throw RequiredError(problem.str());
+#endif
+                }
+            }
+
             virtual FlagBase *Match(const char flag)
             {
                 if (matcher.Match(flag))
                 {
-                    if (extraError && matched)
+                    if ((options & Options::Single) != Options::None && matched)
                     {
 #ifdef ARGS_NOEXCEPT
                         error = Error::Extra;
@@ -538,6 +599,7 @@ namespace args
     {
         public:
             ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : FlagBase(name_, help_, std::move(matcher_), extraError_) {}
+            ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : FlagBase(name_, help_, std::move(matcher_), options_) {}
             virtual ~ValueFlagBase() {}
             virtual void ParseValue(const std::string &value) = 0;
 
@@ -564,16 +626,24 @@ namespace args
      */
     class PositionalBase : public NamedBase
     {
+        private:
+            const Options options;
+
         protected:
             bool ready;
 
         public:
-            PositionalBase(const std::string &name_, const std::string &help_) : NamedBase(name_, help_), ready(true) {}
+            PositionalBase(const std::string &name_, const std::string &help_, Options options_ = Options::None) : NamedBase(name_, help_), options(options_), ready(true) {}
             virtual ~PositionalBase() {}
 
             bool Ready()
             {
                 return ready;
+            }
+
+            Options GetOptions() const
+            {
+                return options;
             }
 
             virtual void ParseValue(const std::string &value_) = 0;
@@ -585,6 +655,20 @@ namespace args
 #ifdef ARGS_NOEXCEPT
                 error = Error::None;
 #endif
+            }
+
+            virtual void Validate(const std::string &, const std::string &) override
+            {
+                if ((options & Options::Required) != Options::None && !Matched())
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Required;
+#else
+                    std::ostringstream problem;
+                    problem << "Option '" << Name() << "' is required";
+                    throw RequiredError(problem.str());
+#endif
+                }
             }
     };
 
@@ -682,6 +766,14 @@ namespace args
                     }
                 }
                 return nullptr;
+            }
+
+            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
+            {
+                for (Base *child: children)
+                {
+                    child->Validate(shortPrefix, longPrefix);
+                }
             }
 
             /** Get the next ready positional, or nullptr if there is none
@@ -1368,6 +1460,12 @@ namespace args
                         }
                     }
                 }
+
+                for (Base *child: Children())
+                {
+                    child->Validate(shortprefix, longprefix);
+                }
+
                 if (!Matched())
                 {
 #ifdef ARGS_NOEXCEPT
@@ -1420,9 +1518,13 @@ namespace args
     class Flag : public FlagBase
     {
         public:
-            Flag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false): FlagBase(name_, help_, std::move(matcher_), extraError_)
+            Flag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_): FlagBase(name_, help_, std::move(matcher_), options_)
             {
                 group_.Add(*this);
+            }
+
+            Flag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false): Flag(group_, name_, help_, std::move(matcher_), extraError_ ? Options::Single : Options::None)
+            {
             }
 
             virtual ~Flag() {}
@@ -1587,9 +1689,17 @@ namespace args
 
         public:
 
-            ValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &defaultValue_ = T(), const bool extraError_ = false): ValueFlagBase(name_, help_, std::move(matcher_), extraError_), value(defaultValue_)
+            ValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &defaultValue_, Options options_): ValueFlagBase(name_, help_, std::move(matcher_), options_), value(defaultValue_)
             {
                 group_.Add(*this);
+            }
+
+            ValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &defaultValue_ = T(), const bool extraError_ = false): ValueFlag(group_, name_, help_, std::move(matcher_), defaultValue_, extraError_ ? Options::Single : Options::None)
+            {
+            }
+
+            ValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_): ValueFlag(group_, name_, help_, std::move(matcher_), T(), options_)
+            {
             }
 
             virtual ~ValueFlag() {}
@@ -1737,9 +1847,17 @@ namespace args
 
         public:
 
-            MapFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, const T &defaultValue_ = T(), const bool extraError_ = false): ValueFlagBase(name_, help_, std::move(matcher_), extraError_), map(map_), value(defaultValue_)
+            MapFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, const T &defaultValue_, Options options_): ValueFlagBase(name_, help_, std::move(matcher_), options_), map(map_), value(defaultValue_)
             {
                 group_.Add(*this);
+            }
+
+            MapFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, const T &defaultValue_ = T(), const bool extraError_ = false): MapFlag(group_, name_, help_, std::move(matcher_), map_, defaultValue_, extraError_ ? Options::Single : Options::None)
+            {
+            }
+
+            MapFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, Options options_): MapFlag(group_, name_, help_, std::move(matcher_), map_, T(), options_)
+            {
             }
 
             virtual ~MapFlag() {}
@@ -1912,9 +2030,13 @@ namespace args
             T value;
             Reader reader;
         public:
-            Positional(Group &group_, const std::string &name_, const std::string &help_, const T &defaultValue_ = T()): PositionalBase(name_, help_), value(defaultValue_)
+            Positional(Group &group_, const std::string &name_, const std::string &help_, const T &defaultValue_ = T(), Options options_ = Options::None): PositionalBase(name_, help_, options_), value(defaultValue_)
             {
                 group_.Add(*this);
+            }
+
+            Positional(Group &group_, const std::string &name_, const std::string &help_, Options options_): Positional(group_, name_, help_, T(), options_)
+            {
             }
 
             virtual ~Positional() {}
