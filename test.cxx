@@ -590,6 +590,22 @@ TEST_CASE("Required flags work as expected", "[args]")
     REQUIRE_THROWS_AS(parser3.ParseArgs(std::vector<std::string>{}), args::RequiredError);
 }
 
+TEST_CASE("Hidden options are excluded from help", "[args]")
+{
+    args::ArgumentParser parser1("");
+    args::ValueFlag<int> foo(parser1, "foo", "foo", {'f', "foo"}, args::Options::Hidden);
+    args::ValueFlag<int> bar(parser1, "bar", "bar", {'b'});
+    args::Group group(parser1, "group");
+    args::ValueFlag<int> foo1(group, "foo", "foo", {'f', "foo"}, args::Options::Hidden);
+    args::ValueFlag<int> bar2(group, "bar", "bar", {'b'});
+
+    auto desc = parser1.GetChildDescriptions("", "", "", "");
+    REQUIRE(desc.size() == 3);
+    REQUIRE(std::get<0>(desc[0]) == "b[bar]");
+    REQUIRE(std::get<0>(desc[1]) == "group");
+    REQUIRE(std::get<0>(desc[2]) == "b[bar]");
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT

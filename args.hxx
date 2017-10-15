@@ -381,10 +381,42 @@ namespace args
             }
     };
 
+    enum class Options
+    {
+        /** Default options.
+         */
+        None = 0x0,
+
+        /** Flag can't be passed multiple times.
+         */
+        Single = 0x01,
+
+        /** Flag can't be omitted.
+         */
+        Required = 0x02,
+
+        /** Flag is excluded from help output.
+         */
+        Hidden = 0x04,
+    };
+
+    inline Options operator | (Options lhs, Options rhs)
+    {
+        return static_cast<Options>(static_cast<int>(lhs) | static_cast<int>(rhs));
+    }
+
+    inline Options operator & (Options lhs, Options rhs)
+    {
+        return static_cast<Options>(static_cast<int>(lhs) & static_cast<int>(rhs));
+    }
+
     /** Base class for all match types
      */
     class Base
     {
+        private:
+            const Options options;
+
         protected:
             bool matched;
             const std::string help;
@@ -394,8 +426,13 @@ namespace args
 #endif
 
         public:
-            Base(const std::string &help_) : matched(false), help(help_) {}
+            Base(const std::string &help_, Options options_ = {}) : options(options_), matched(false), help(help_) {}
             virtual ~Base() {}
+
+            Options GetOptions() const noexcept
+            {
+                return options;
+            }
 
             virtual bool Matched() const noexcept
             {
@@ -444,7 +481,7 @@ namespace args
             bool kickout;
 
         public:
-            NamedBase(const std::string &name_, const std::string &help_) : Base(help_), name(name_), kickout(false) {}
+            NamedBase(const std::string &name_, const std::string &help_, Options options_ = {}) : Base(help_, options_), name(name_), kickout(false) {}
             virtual ~NamedBase() {}
 
             virtual std::tuple<std::string, std::string> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &) const override
@@ -454,6 +491,7 @@ namespace args
                 std::get<1>(description) = help;
                 return description;
             }
+
             virtual std::string Name() const
             {
                 return name;
@@ -472,59 +510,25 @@ namespace args
             }
     };
 
-
-    enum class Options
-    {
-        /** Default options.
-         */
-        None = 0x0,
-
-        /** Flag can't be passed multiple times.
-         */
-        Single = 0x01,
-
-        /** Flag can't be omitted.
-         */
-        Required = 0x02,
-    };
-
-    inline Options operator | (Options lhs, Options rhs)
-    {
-        return static_cast<Options>(static_cast<int>(lhs) | static_cast<int>(rhs));
-    }
-
-    inline Options operator & (Options lhs, Options rhs)
-    {
-        return static_cast<Options>(static_cast<int>(lhs) & static_cast<int>(rhs));
-    }
-
     /** Base class for all flag options
      */
     class FlagBase : public NamedBase
     {
-        private:
-            const Options options;
-
         protected:
             const Matcher matcher;
 
         public:
-            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : NamedBase(name_, help_), options(extraError_ ? Options::Single : Options()), matcher(std::move(matcher_)) {}
+            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : NamedBase(name_, help_, extraError_ ? Options::Single : Options()), matcher(std::move(matcher_)) {}
 
-            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : NamedBase(name_, help_), options(options_), matcher(std::move(matcher_)) {}
+            FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : NamedBase(name_, help_, options_), matcher(std::move(matcher_)) {}
 
             virtual ~FlagBase() {}
-
-            Options GetOptions() const
-            {
-                return options;
-            }
 
             virtual FlagBase *Match(const std::string &flag)
             {
                 if (matcher.Match(flag))
                 {
-                    if ((options & Options::Single) != Options::None && matched)
+                    if ((GetOptions() & Options::Single) != Options::None && matched)
                     {
 #ifdef ARGS_NOEXCEPT
                         error = Error::Extra;
@@ -542,7 +546,7 @@ namespace args
 
             virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
             {
-                if (!Matched() && (options & Options::Required) != Options::None)
+                if (!Matched() && (GetOptions() & Options::Required) != Options::None)
                 {
 #ifdef ARGS_NOEXCEPT
                         error = Error::Required;
@@ -558,7 +562,7 @@ namespace args
             {
                 if (matcher.Match(flag))
                 {
-                    if ((options & Options::Single) != Options::None && matched)
+                    if ((GetOptions() & Options::Single) != Options::None && matched)
                     {
 #ifdef ARGS_NOEXCEPT
                         error = Error::Extra;
@@ -626,24 +630,16 @@ namespace args
      */
     class PositionalBase : public NamedBase
     {
-        private:
-            const Options options;
-
         protected:
             bool ready;
 
         public:
-            PositionalBase(const std::string &name_, const std::string &help_, Options options_ = Options::None) : NamedBase(name_, help_), options(options_), ready(true) {}
+            PositionalBase(const std::string &name_, const std::string &help_, Options options_ = Options::None) : NamedBase(name_, help_, options_), ready(true) {}
             virtual ~PositionalBase() {}
 
             bool Ready()
             {
                 return ready;
-            }
-
-            Options GetOptions() const
-            {
-                return options;
             }
 
             virtual void ParseValue(const std::string &value_) = 0;
@@ -659,7 +655,7 @@ namespace args
 
             virtual void Validate(const std::string &, const std::string &) override
             {
-                if ((options & Options::Required) != Options::None && !Matched())
+                if ((GetOptions() & Options::Required) != Options::None && !Matched())
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Required;
@@ -863,6 +859,11 @@ namespace args
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
                 for (const auto &child: children)
                 {
+                    if ((child->GetOptions() & Options::Hidden) != Options::None)
+                    {
+                        continue;
+                    }
+
                     if (const auto group = dynamic_cast<Group *>(child))
                     {
                         // Push that group description on the back if not empty
