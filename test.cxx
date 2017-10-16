@@ -622,6 +622,11 @@ TEST_CASE("Implicit values work as expected", "[args]")
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j", "-f"}));
     REQUIRE(args::get(j) == 0);
+    REQUIRE(foo);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-f"}));
+    REQUIRE(args::get(j) == 1);
+    REQUIRE_FALSE(j);
 }
 
 TEST_CASE("Nargs work as expected", "[args]")
@@ -657,6 +662,8 @@ TEST_CASE("Nargs work as expected", "[args]")
         vec.push_back(c);
     }
 
+    REQUIRE((vec == std::vector<int>{1, 2, 3}));
+    vec.assign(std::begin(b), std::end(b));
     REQUIRE((vec == std::vector<int>{1, 2, 3}));
 
     parser.SetArgumentSeparations(true, true, false, false);
