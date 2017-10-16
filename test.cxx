@@ -606,6 +606,71 @@ TEST_CASE("Hidden options are excluded from help", "[args]")
     REQUIRE(std::get<0>(desc[2]) == "b[bar]");
 }
 
+TEST_CASE("Implicit values work as expected", "[args]")
+{
+    args::ArgumentParser parser("Test command");
+    args::ImplicitValueFlag<int> j(parser, "parallel", "parallel", {'j', "parallel"}, 0, 1);
+    args::Flag foo(parser, "FOO", "test flag", {'f', "foo"});
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j"}));
+    REQUIRE(args::get(j) == 0);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j4"}));
+    REQUIRE(args::get(j) == 4);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j", "4"}));
+    REQUIRE(args::get(j) == 4);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j", "-f"}));
+    REQUIRE(args::get(j) == 0);
+}
+
+TEST_CASE("Nargs work as expected", "[args]")
+{
+    args::ArgumentParser parser("Test command");
+    args::NargsValueFlag<int> a(parser, "", "", {'a'}, 2);
+    args::NargsValueFlag<int> b(parser, "", "", {'b'}, {2, 3});
+    args::NargsValueFlag<std::string> c(parser, "", "", {'c'}, {0, 2});
+    args::Flag f(parser, "", "", {'f'});
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"}));
+    REQUIRE((args::get(a) == std::vector<int>{1, 2}));
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-a", "1", "2", "-f"}));
+    REQUIRE((args::get(a) == std::vector<int>{1, 2}));
+    REQUIRE(args::get(f) == true);
+
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a", "1"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a1"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a1", "2"}), args::ParseError);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "1", "2", "-f"}));
+    REQUIRE((args::get(b) == std::vector<int>{1, 2}));
+    REQUIRE(args::get(f) == true);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "1", "2", "3"}));
+    REQUIRE((args::get(b) == std::vector<int>{1, 2, 3}));
+    REQUIRE(args::get(f) == false);
+
+    std::vector<int> vec;
+    for (int c : b)
+    {
+        vec.push_back(c);
+    }
+
+    REQUIRE((vec == std::vector<int>{1, 2, 3}));
+
+    parser.SetArgumentSeparations(true, true, false, false);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"}), args::ParseError);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-c", "-f"}));
+    REQUIRE(args::get(c).empty());
+    REQUIRE(args::get(f) == true);
+
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-cf"}));
+    REQUIRE((args::get(c) == std::vector<std::string>{"f"}));
+    REQUIRE(args::get(f) == false);
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
