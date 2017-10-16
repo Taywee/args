@@ -1,4 +1,4 @@
-/* Copyright © 2016 Taylor C. Richberger <taywee@gmx.com>
+/* Copyright © 2016-2017 Taylor C. Richberger <taywee@gmx.com> and Pavel Belikov
  * This code is released under the license described in the LICENSE file
  */
 
