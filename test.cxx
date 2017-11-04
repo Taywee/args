@@ -599,7 +599,7 @@ TEST_CASE("Hidden options are excluded from help", "[args]")
     args::ValueFlag<int> foo1(group, "foo", "foo", {'f', "foo"}, args::Options::Hidden);
     args::ValueFlag<int> bar2(group, "bar", "bar", {'b'});
 
-    auto desc = parser1.GetChildDescriptions("", "", "", "");
+    auto desc = parser1.GetDescription("", "", "", "", 0);
     REQUIRE(desc.size() == 3);
     REQUIRE(std::get<0>(desc[0]) == "b[bar]");
     REQUIRE(std::get<0>(desc[1]) == "group");
@@ -676,6 +676,74 @@ TEST_CASE("Nargs work as expected", "[args]")
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-cf"}));
     REQUIRE((args::get(c) == std::vector<std::string>{"f"}));
     REQUIRE(args::get(f) == false);
+}
+
+TEST_CASE("Simple commands work as expected", "[args]")
+{
+    args::ArgumentParser p("git-like parser");
+    args::ValueFlag<std::string> gitdir(p, "path", "", {"git-dir"}, args::Options::Global);
+    args::HelpFlag h(p, "help", "help", {"help"}, args::Options::Global);
+    args::PositionalList<std::string> pathsList(p, "paths", "files to commit", args::Options::Global);
+    args::Command add(p, "add", "Add file contents to the index");
+    args::Command commit(p, "commit", "record changes to the repository");
+
+    p.RequireCommand(true);
+    p.ParseArgs(std::vector<std::string>{"add", "--git-dir", "A", "B", "C", "D"});
+    REQUIRE(add);
+    REQUIRE(!commit);
+    REQUIRE((args::get(pathsList) == std::vector<std::string>{"B", "C", "D"}));
+    REQUIRE(args::get(gitdir) == "A");
+}
+
+TEST_CASE("Subparser commands work as expected", "[args]")
+{
+    args::Group globals;
+    args::ValueFlag<std::string> gitdir(globals, "path", "", {"git-dir"});
+    args::HelpFlag h(globals, "help", "help", {"help"});
+
+    args::ArgumentParser p("git-like parser");
+    args::GlobalOptions g(p, globals);
+
+    std::vector<std::string> paths;
+
+    args::Command add(p, "add", "Add file contents to the index", [&](args::Subparser &c)
+    {
+        args::PositionalList<std::string> pathsList(c, "paths", "files to add");
+        c.Parse();
+        paths.assign(std::begin(pathsList), std::end(pathsList));
+    });
+
+    args::Command commit(p, "commit", "record changes to the repository", [&](args::Subparser &c)
+    {
+        args::PositionalList<std::string> pathsList(c, "paths", "files to commit");
+        c.Parse();
+        paths.assign(std::begin(pathsList), std::end(pathsList));
+    });
+
+    p.RequireCommand(true);
+    p.ParseArgs(std::vector<std::string>{"add", "--git-dir", "A", "B", "C", "D"});
+    REQUIRE(add);
+    REQUIRE(!commit);
+    REQUIRE((paths == std::vector<std::string>{"B", "C", "D"}));
+    REQUIRE(args::get(gitdir) == "A");
+}
+
+TEST_CASE("Subparser commands with kick-out flags work as expected", "[args]")
+{
+    args::ArgumentParser p("git-like parser");
+
+    std::vector<std::string> kickedOut;
+    args::Command add(p, "add", "Add file contents to the index", [&](args::Subparser &c)
+    {
+        args::Flag kickoutFlag(c, "kick-out", "kick-out flag", {'k'}, args::Options::KickOut);
+        c.Parse();
+        REQUIRE(kickoutFlag);
+        kickedOut = c.KickedOut();
+    });
+
+    p.ParseArgs(std::vector<std::string>{"add", "-k", "A", "B", "C", "D"});
+    REQUIRE(add);
+    REQUIRE((kickedOut == std::vector<std::string>{"A", "B", "C", "D"}));
 }
 
 #undef ARGS_HXX
