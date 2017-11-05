@@ -276,6 +276,11 @@ namespace args
             }
             return shortFlags;
         }
+
+        std::string str() const
+        {
+            return isShort ? std::string(1, shortFlag) : longFlag;
+        }
     };
 
 
@@ -346,6 +351,13 @@ namespace args
                 return longFlags.find(flag) != longFlags.end();
             }
 
+            /** (INTERNAL) Check if there is a match of a flag
+             */
+            bool Match(const EitherFlag &flag) const
+            {
+                return flag.isShort ? Match(flag.shortFlag) : Match(flag.longFlag);
+            }
+
             /** (INTERNAL) Get all flag strings as a vector, with the prefixes embedded
              */
             std::vector<std::string> GetFlagStrings(const std::string &shortPrefix, const std::string &longPrefix) const
@@ -399,6 +411,14 @@ namespace args
         /** Flag is excluded from help output.
          */
         Hidden = 0x04,
+
+        /** Flag is global and can be used in any subcommand.
+         */
+        Global = 0x08,
+
+        /** Flag stops a parser.
+         */
+        KickOut = 0x10,
     };
 
     inline Options operator | (Options lhs, Options rhs)
@@ -411,12 +431,17 @@ namespace args
         return static_cast<Options>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
 
+    class FlagBase;
+    class PositionalBase;
+    class Command;
+    class ArgumentParser;
+
     /** Base class for all match types
      */
     class Base
     {
         private:
-            const Options options;
+            Options options;
 
         protected:
             bool matched;
@@ -449,11 +474,61 @@ namespace args
                 return Matched();
             }
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &) const
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &, unsigned indentLevel) const
             {
-                std::tuple<std::string, std::string> description;
+                std::tuple<std::string, std::string, unsigned> description;
                 std::get<1>(description) = help;
-                return description;
+                std::get<2>(description) = indentLevel;
+                return { std::move(description) };
+            }
+
+            virtual std::vector<Command*> GetCommands()
+            {
+                return {};
+            }
+
+            virtual bool IsGroup() const
+            {
+                return false;
+            }
+
+            virtual FlagBase *Match(const EitherFlag &)
+            {
+                return nullptr;
+            }
+
+            virtual PositionalBase *GetNextPositional()
+            {
+                return nullptr;
+            }
+
+            virtual bool HasFlag() const
+            {
+                return false;
+            }
+
+            virtual std::vector<std::string> GetProgramLine() const
+            {
+                return {};
+            }
+
+            /// Sets a kick-out value for building subparsers
+            void KickOut(bool kickout_) noexcept
+            {
+                if (kickout_)
+                {
+                    options = options | Options::KickOut;
+                }
+                else
+                {
+                    options = static_cast<Options>(static_cast<int>(options) & ~static_cast<int>(Options::KickOut));
+                }
+            }
+
+            /// Gets the kick-out value for building subparsers
+            bool KickOut() const noexcept
+            {
+                return (options & Options::KickOut) != Options::None;
             }
 
             virtual void Reset() noexcept
@@ -485,29 +560,18 @@ namespace args
             NamedBase(const std::string &name_, const std::string &help_, Options options_ = {}) : Base(help_, options_), name(name_), kickout(false) {}
             virtual ~NamedBase() {}
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &, unsigned indentLevel) const override
             {
-                std::tuple<std::string, std::string> description;
+                std::tuple<std::string, std::string, unsigned> description;
                 std::get<0>(description) = Name();
                 std::get<1>(description) = help;
-                return description;
+                std::get<2>(description) = indentLevel;
+                return { std::move(description) };
             }
 
             virtual std::string Name() const
             {
                 return name;
-            }
-
-            /// Sets a kick-out value for building subparsers
-            void KickOut(bool kickout_) noexcept
-            {
-                this->kickout = kickout_;
-            }
-
-            /// Gets the kick-out value for building subparsers
-            bool KickOut() const noexcept
-            {
-                return kickout;
             }
     };
 
@@ -545,7 +609,7 @@ namespace args
 
             virtual ~FlagBase() {}
 
-            virtual FlagBase *Match(const std::string &flag)
+            virtual FlagBase *Match(const EitherFlag &flag) override
             {
                 if (matcher.Match(flag))
                 {
@@ -555,7 +619,7 @@ namespace args
                         error = Error::Extra;
 #else
                         std::ostringstream problem;
-                        problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
+                        problem << "Flag '" << flag.str() << "' was passed multiple times, but is only allowed to be passed once";
                         throw ExtraError(problem.str());
 #endif
                     }
@@ -579,29 +643,9 @@ namespace args
                 }
             }
 
-            virtual FlagBase *Match(const char flag)
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &, const std::string &, unsigned indentLevel) const override
             {
-                if (matcher.Match(flag))
-                {
-                    if ((GetOptions() & Options::Single) != Options::None && matched)
-                    {
-#ifdef ARGS_NOEXCEPT
-                        error = Error::Extra;
-#else
-                        std::ostringstream problem;
-                        problem << "Flag '" << flag << "' was passed multiple times, but is only allowed to be passed once";
-                        throw ExtraError(problem.str());
-#endif
-                    }
-                    matched = true;
-                    return this;
-                }
-                return nullptr;
-            }
-
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &, const std::string &) const override
-            {
-                std::tuple<std::string, std::string> description;
+                std::tuple<std::string, std::string, unsigned> description;
                 const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
@@ -614,7 +658,13 @@ namespace args
                 }
                 std::get<0>(description) = flagstream.str();
                 std::get<1>(description) = help;
-                return description;
+                std::get<2>(description) = indentLevel;
+                return { std::move(description) };
+            }
+
+            virtual bool HasFlag() const override
+            {
+                return true;
             }
 
             /** Defines how many values can be consumed by this option.
@@ -639,9 +689,9 @@ namespace args
             ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : FlagBase(name_, help_, std::move(matcher_), options_) {}
             virtual ~ValueFlagBase() {}
 
-            virtual std::tuple<std::string, std::string> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, unsigned indentLevel) const override
             {
-                std::tuple<std::string, std::string> description;
+                std::tuple<std::string, std::string, unsigned> description;
                 const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix, Name(), shortSeparator, longSeparator);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
@@ -654,7 +704,8 @@ namespace args
                 }
                 std::get<0>(description) = flagstream.str();
                 std::get<1>(description) = help;
-                return description;
+                std::get<2>(description) = indentLevel;
+                return { std::move(description) };
             }
 
             virtual Nargs NumberOfArguments() const noexcept override
@@ -688,6 +739,16 @@ namespace args
 #ifdef ARGS_NOEXCEPT
                 error = Error::None;
 #endif
+            }
+
+            virtual PositionalBase *GetNextPositional() override
+            {
+                return Ready() ? this : nullptr;
+            }
+
+            virtual std::vector<std::string> GetProgramLine() const override
+            {
+                return {Name()};
             }
 
             virtual void Validate(const std::string &, const std::string &) override
@@ -745,9 +806,9 @@ namespace args
 
                 static bool AllChildGroups(const Group &group)
                 {
-                    return std::find_if(std::begin(group.Children()), std::end(group.Children()), [](const Base* child) -> bool {
-                            return dynamic_cast<const Group *>(child) && !child->Matched();
-                            }) == std::end(group.Children());
+                    return std::none_of(std::begin(group.Children()), std::end(group.Children()), [](const Base* child) -> bool {
+                            return child->IsGroup() && !child->Matched();
+                            });
                 }
 
                 static bool DontCare(const Group &)
@@ -766,93 +827,13 @@ namespace args
                 }
             };
             /// If help is empty, this group will not be printed in help output
-            Group(const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare) : Base(help_), validator(validator_) {}
+            Group(const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare, Options options = {}) : Base(help_, options), validator(validator_) {}
             /// If help is empty, this group will not be printed in help output
-            Group(Group &group_, const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare) : Base(help_), validator(validator_)
+            Group(Group &group_, const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare, Options options = {}) : Base(help_, options), validator(validator_)
             {
                 group_.Add(*this);
             }
             virtual ~Group() {}
-
-            /** Return the first FlagBase that matches flag, or nullptr
-             *
-             * \param flag The flag with prefixes stripped
-             * \return the first matching FlagBase pointer, or nullptr if there is no match
-             */
-            template <typename T>
-            FlagBase *Match(const T &flag)
-            {
-                for (Base *child: children)
-                {
-                    if (FlagBase *flagBase = dynamic_cast<FlagBase *>(child))
-                    {
-                        if (FlagBase *match = flagBase->Match(flag))
-                        {
-                            return match;
-                        }
-                    } else if (Group *group = dynamic_cast<Group *>(child))
-                    {
-                        if (FlagBase *match = group->Match(flag))
-                        {
-                            return match;
-                        }
-                    }
-                }
-                return nullptr;
-            }
-
-            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
-            {
-                for (Base *child: children)
-                {
-                    child->Validate(shortPrefix, longPrefix);
-                }
-            }
-
-            /** Get the next ready positional, or nullptr if there is none
-             *
-             * \return the first ready PositionalBase pointer, or nullptr if there is no match
-             */
-            PositionalBase *GetNextPositional()
-            {
-                for (Base *child: children)
-                {
-                    auto next = dynamic_cast<PositionalBase *>(child);
-                    auto group = dynamic_cast<Group *>(child);
-                    if (group)
-                    {
-                        next = group->GetNextPositional();
-                    }
-                    if (next && next->Ready())
-                    {
-                        return next;
-                    }
-                }
-                return nullptr;
-            }
-
-            /** Get whether this has any FlagBase children
-             *
-             * \return Whether or not there are any FlagBase children
-             */
-            bool HasFlag() const
-            {
-                for (Base *child: children)
-                {
-                    if (dynamic_cast<FlagBase *>(child))
-                    {
-                        return true;
-                    }
-                    if (auto group = dynamic_cast<Group *>(child))
-                    {
-                        if (group->HasFlag())
-                        {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
 
             /** Append a child to this Group.
              */
@@ -868,11 +849,61 @@ namespace args
                 return children;
             }
 
+            /** Return the first FlagBase that matches flag, or nullptr
+             *
+             * \param flag The flag with prefixes stripped
+             * \return the first matching FlagBase pointer, or nullptr if there is no match
+             */
+            virtual FlagBase *Match(const EitherFlag &flag) override
+            {
+                for (Base *child: Children())
+                {
+                    if (FlagBase *match = child->Match(flag))
+                    {
+                        return match;
+                    }
+                }
+                return nullptr;
+            }
+
+            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
+            {
+                for (Base *child: Children())
+                {
+                    child->Validate(shortPrefix, longPrefix);
+                }
+            }
+
+            /** Get the next ready positional, or nullptr if there is none
+             *
+             * \return the first ready PositionalBase pointer, or nullptr if there is no match
+             */
+            virtual PositionalBase *GetNextPositional() override
+            {
+                for (Base *child: Children())
+                {
+                    if (auto next = child->GetNextPositional())
+                    {
+                        return next;
+                    }
+                }
+                return nullptr;
+            }
+
+            /** Get whether this has any FlagBase children
+             *
+             * \return Whether or not there are any FlagBase children
+             */
+            virtual bool HasFlag() const override
+            {
+                return std::any_of(Children().begin(), Children().end(), [](Base *child) { return child->HasFlag(); });
+            }
+
             /** Count the number of matched children this group has
              */
             std::vector<Base *>::size_type MatchedChildren() const
             {
-                return std::count_if(std::begin(children), std::end(children), [](const Base *child){return child->Matched();});
+                return std::count_if(std::begin(Children()), std::end(Children()), [](const Base *child){return child->Matched();});
             }
 
             /** Whether or not this group matches validation
@@ -891,64 +922,69 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            std::vector<std::tuple<std::string, std::string, unsigned int>> GetChildDescriptions(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, const unsigned int indent = 0) const
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, const unsigned int indent) const
             {
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
-                for (const auto &child: children)
+
+                // Push that group description on the back if not empty
+                unsigned addindent = 0;
+                if (!help.empty())
+                {
+                    descriptions.emplace_back(help, "", indent);
+                    addindent = 1;
+                }
+
+                for (Base *child: Children())
                 {
                     if ((child->GetOptions() & Options::Hidden) != Options::None)
                     {
                         continue;
                     }
 
-                    if (const auto group = dynamic_cast<Group *>(child))
-                    {
-                        // Push that group description on the back if not empty
-                        unsigned char addindent = 0;
-                        if (!group->help.empty())
-                        {
-                            descriptions.emplace_back(group->help, "", indent);
-                            addindent = 1;
-                        }
-                        auto groupDescriptions = group->GetChildDescriptions(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + addindent);
-                        descriptions.insert(
-                            std::end(descriptions),
-                            std::make_move_iterator(std::begin(groupDescriptions)),
-                            std::make_move_iterator(std::end(groupDescriptions)));
-                    } else if (const auto named = dynamic_cast<NamedBase *>(child))
-                    {
-                        const auto description = named->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator);
-                        descriptions.emplace_back(std::get<0>(description), std::get<1>(description), indent);
-                    }
+                    auto groupDescriptions = child->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + addindent);
+                    descriptions.insert(
+                        std::end(descriptions),
+                        std::make_move_iterator(std::begin(groupDescriptions)),
+                        std::make_move_iterator(std::end(groupDescriptions)));
                 }
                 return descriptions;
             }
 
             /** Get the names of positional parameters
              */
-            std::vector<std::string> GetPosNames() const
+            virtual std::vector<std::string> GetProgramLine() const override
             {
                 std::vector <std::string> names;
-                for (const auto &child: children)
+                for (Base *child: Children())
                 {
-                    if (const Group *group = dynamic_cast<Group *>(child))
-                    {
-                        auto groupNames = group->GetPosNames();
-                        names.insert(
-                            std::end(names),
-                            std::make_move_iterator(std::begin(groupNames)),
-                            std::make_move_iterator(std::end(groupNames)));
-                    } else if (const PositionalBase *pos = dynamic_cast<PositionalBase *>(child))
-                    {
-                        names.emplace_back(pos->Name());
-                    }
+                    auto groupNames = child->GetProgramLine();
+                    names.insert(
+                        std::end(names),
+                        std::make_move_iterator(std::begin(groupNames)),
+                        std::make_move_iterator(std::end(groupNames)));
                 }
                 return names;
             }
 
+            virtual std::vector<Command*> GetCommands() override
+            {
+                std::vector<Command*> res;
+                for (const auto &child : Children())
+                {
+                    auto subparsers = child->GetCommands();
+                    res.insert(std::end(res), std::begin(subparsers), std::end(subparsers));
+                }
+                return res;
+            }
+
+            virtual bool IsGroup() const override
+            {
+                return true;
+            }
+
             virtual void Reset() noexcept override
             {
-                for (auto &child: children)
+                for (auto &child: Children())
                 {
                     child->Reset();
                 }
@@ -966,8 +1002,8 @@ namespace args
                     return error;
                 }
 
-                auto it = std::find_if(std::begin(children), std::end(children), [](const Base *child){return child->GetError() != Error::None;});
-                if (it == std::end(children))
+                auto it = std::find_if(Children().begin(), Children().end(), [](const Base *child){return child->GetError() != Error::None;});
+                if (it == Children().end())
                 {
                     return Error::None;
                 } else
@@ -979,10 +1015,272 @@ namespace args
 
     };
 
+    class GlobalOptions : public Group
+    {
+        public:
+            GlobalOptions(Group &base, Base &options) : Group(base, {}, Group::Validators::DontCare, Options::Global)
+            {
+                Add(options);
+            }
+    };
+
+    class Subparser : public Group
+    {
+        private:
+            std::vector<std::string> args;
+            std::vector<std::string> kicked;
+            ArgumentParser &parser;
+            bool isParsed = false;
+
+        public:
+            Subparser(std::vector<std::string> args_, ArgumentParser &parser_) : args(std::move(args_)), parser(parser_)
+            {
+            }
+
+            Subparser(const Subparser&) = delete;
+            Subparser(Subparser&&) = delete;
+            Subparser &operator = (const Subparser&) = delete;
+            Subparser &operator = (Subparser&&) = delete;
+
+            bool IsParsed() const
+            {
+                return isParsed;
+            }
+
+            void Parse();
+
+            const std::vector<std::string> &KickedOut() const noexcept
+            {
+                return kicked;
+            }
+    };
+
+    class Command : public Group
+    {
+        private:
+            std::string name;
+            std::string description;
+            std::function<void(Subparser&)> parserCoroutine;
+            bool commandIsRequired = false;
+
+        protected:
+
+            Command *selectedCommand = nullptr;
+            Subparser *subparser = nullptr;
+
+            class RaiiSubparser
+            {
+                public:
+                    RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_);
+
+                    ~RaiiSubparser()
+                    {
+                        command->subparser = nullptr;
+                    }
+
+                    Subparser &Parser()
+                    {
+                        return parser;
+                    }
+
+                private:
+                    Command *command;
+                    Subparser parser;
+            };
+
+            Command() = default;
+
+            std::function<void(Subparser&)> &GetCoroutine()
+            {
+                return selectedCommand != nullptr ? selectedCommand->GetCoroutine() : parserCoroutine;
+            }
+
+        public:
+            Command(Group &base_, std::string name_, std::string description_, std::function<void(Subparser&)> coroutine_ = {})
+                : name(std::move(name_)), description(std::move(description_)), parserCoroutine(std::move(coroutine_))
+            {
+                base_.Add(*this);
+            }
+
+            const std::function<void(Subparser&)> &GetCoroutine() const
+            {
+                return parserCoroutine;
+            }
+
+            const std::string &Name() const
+            {
+                return name;
+            }
+
+            virtual bool IsGroup() const override
+            {
+                return false;
+            }
+
+            virtual bool Matched() const noexcept override
+            {
+                return Base::Matched();
+            }
+
+            operator bool() const noexcept
+            {
+                return Matched();
+            }
+
+            void Match() noexcept
+            {
+                matched = true;
+            }
+
+            void SelectCommand(Command *c) noexcept
+            {
+                selectedCommand = c;
+
+                if (c != nullptr)
+                {
+                    c->Match();
+                }
+            }
+
+            void RequireCommand(bool value)
+            {
+                commandIsRequired = value;
+            }
+
+            virtual FlagBase *Match(const EitherFlag &flag)
+            {
+                if (selectedCommand != nullptr)
+                {
+                    if (auto *res = selectedCommand->Match(flag))
+                    {
+                        return res;
+                    }
+
+                    for (auto *child: Children())
+                    {
+                        if ((child->GetOptions() & Options::Global) != Options::None)
+                        {
+                            if (auto *res = child->Match(flag))
+                            {
+                                return res;
+                            }
+                        }
+                    }
+
+                    return nullptr;
+                }
+
+                if (subparser != nullptr)
+                {
+                    return subparser->Match(flag);
+                }
+
+                return Matched() ? Group::Match(flag) : nullptr;
+            }
+
+            virtual PositionalBase *GetNextPositional()
+            {
+                if (selectedCommand != nullptr)
+                {
+                    if (auto *res = selectedCommand->GetNextPositional())
+                    {
+                        return res;
+                    }
+
+                    for (auto *child: Children())
+                    {
+                        if ((child->GetOptions() & Options::Global) != Options::None)
+                        {
+                            if (auto *res = child->GetNextPositional())
+                            {
+                                return res;
+                            }
+                        }
+                    }
+
+                    return nullptr;
+                }
+
+                if (subparser != nullptr)
+                {
+                    return subparser->GetNextPositional();
+                }
+
+                return Matched() ? Group::GetNextPositional() : nullptr;
+            }
+
+            virtual bool HasFlag() const
+            {
+                if (selectedCommand != nullptr)
+                {
+                    return selectedCommand->HasFlag();
+                }
+
+                return Matched() ? Group::HasFlag() : false;
+            }
+
+            virtual std::vector<std::string> GetProgramLine() const
+            {
+                if (selectedCommand != nullptr)
+                {
+                    return selectedCommand->GetProgramLine();
+                }
+
+                if (Matched())
+                {
+                    return Group::GetProgramLine();
+                }
+
+                return {};
+            }
+
+            virtual std::vector<Command*> GetCommands() override
+            {
+                if (selectedCommand != nullptr)
+                {
+                    return selectedCommand->GetCommands();
+                }
+
+                if (Matched())
+                {
+                    return Group::GetCommands();
+                }
+
+                return { this };
+            }
+
+            virtual void Validate(const std::string &shortprefix, const std::string &longprefix) override
+            {
+                for (Base *child: Children())
+                {
+                    if (child->IsGroup() && !child->Matched())
+                    {
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Validation;
+#else
+                        std::ostringstream problem;
+                        problem << "Group validation failed somewhere!";
+                        throw ValidationError(problem.str());
+#endif
+                    }
+
+                    child->Validate(shortprefix, longprefix);
+                }
+            }
+
+            virtual void Reset() noexcept override
+            {
+                Group::Reset();
+                selectedCommand = nullptr;
+            }
+    };
+
     /** The main user facing command line argument parser class
      */
-    class ArgumentParser : public Group
+    class ArgumentParser : public Command
     {
+        friend class Subparser;
+
         private:
             std::string prog;
             std::string proglinePostfix;
@@ -1192,6 +1490,83 @@ namespace args
                 return true;
             }
 
+            template <typename It>
+            It Parse(It begin, It end)
+            {
+                bool terminated = false;
+
+                std::vector<Command *> commands = GetCommands();
+
+                // Check all arg chunks
+                for (auto it = begin; it != end; ++it)
+                {
+                    const auto &chunk = *it;
+
+                    if (!terminated && chunk == terminator)
+                    {
+                        terminated = true;
+                    } else if (!terminated && ParseOption(chunk) == OptionType::LongFlag)
+                    {
+                        if (!ParseLong(it, end))
+                        {
+                            return it;
+                        }
+                    } else if (!terminated && ParseOption(chunk) == OptionType::ShortFlag)
+                    {
+                        if (!ParseShort(it, end))
+                        {
+                            return it;
+                        }
+                    } else if (!terminated && !commands.empty())
+                    {
+                        auto itCommand = std::find_if(commands.begin(), commands.end(), [&chunk](Command *c) { return c->Name() == chunk; });
+                        if (itCommand == commands.end())
+                        {
+                            RaiseParseError("Unknown command: " + chunk);
+                            return it;
+                        }
+
+                        SelectCommand(*itCommand);
+
+                        if (const auto &coroutine = GetCoroutine())
+                        {
+                            ++it;
+                            RaiiSubparser coro(*this, std::vector<std::string>(it, end));
+                            coroutine(coro.Parser());
+#ifdef ARGS_NOEXCEPT
+                            if (GetError() != Error::None)
+                            {
+                                return end;
+                            }
+#endif
+
+                            break;
+                        }
+
+                        commands = GetCommands();
+                    } else
+                    {
+                        auto pos = GetNextPositional();
+                        if (pos)
+                        {
+                            pos->ParseValue(chunk);
+
+                            if (pos->KickOut())
+                            {
+                                return ++it;
+                            }
+                        } else
+                        {
+                            RaiseParseError("Passed in argument, but no positional arguments were ready to receive it: " + chunk);
+                            return it;
+                        }
+                    }
+                }
+
+                Validate(shortprefix, longprefix);
+                return end;
+            }
+
         public:
             /** A simple structure of parameters for easy user-modifyable help menus
              */
@@ -1236,7 +1611,6 @@ namespace args
                 bool showProglinePositionals = true;
             } helpParams;
             ArgumentParser(const std::string &description_, const std::string &epilog_ = std::string()) :
-                Group("", Group::Validators::AllChildGroups),
                 description(description_),
                 epilog(epilog_),
                 longprefix("--"),
@@ -1247,6 +1621,11 @@ namespace args
                 allowJoinedLongValue(true),
                 allowSeparateShortValue(true),
                 allowSeparateLongValue(true) {}
+
+            ArgumentParser(Group &global_, const std::string &description_, const std::string &epilog_ = std::string()) : ArgumentParser(description_, epilog_)
+            {
+                Add(global_);
+            }
 
             /** The program name for help generation
              */
@@ -1386,7 +1765,7 @@ namespace args
                         prognameline << " {OPTIONS}";
                     }
                 }
-                for (const std::string &posname: GetPosNames())
+                for (const std::string &posname: GetProgramLine())
                 {
                     hasarguments = true;
                     if (helpParams.showProglinePositionals)
@@ -1418,7 +1797,7 @@ namespace args
                 }
                 help_ << "\n";
                 help_ << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
-                for (const auto &desc: GetChildDescriptions(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " "))
+                for (const auto &desc: Group::GetDescription(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " ", 0))
                 {
                     const auto groupindent = std::get<2>(desc) * helpParams.eachgroupindent;
                     const auto flags = Wrap(std::get<0>(desc), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter));
@@ -1477,6 +1856,12 @@ namespace args
                 return help_.str();
             }
 
+            virtual void Reset() noexcept override
+            {
+                Command::Reset();
+                matched = true;
+            }
+
             /** Parse all arguments.
              *
              * \param begin an iterator to the beginning of the argument list
@@ -1488,64 +1873,9 @@ namespace args
             {
                 // Reset all Matched statuses and errors
                 Reset();
-                bool terminated = false;
+                return Parse(begin, end);
 
-                // Check all arg chunks
-                for (auto it = begin; it != end; ++it)
-                {
-                    const auto &chunk = *it;
-
-                    if (!terminated && chunk == terminator)
-                    {
-                        terminated = true;
-                    } else if (!terminated && ParseOption(chunk) == OptionType::LongFlag)
-                    {
-                        if (!ParseLong(it, end))
-                        {
-                            return it;
-                        }
-                    } else if (!terminated && ParseOption(chunk) == OptionType::ShortFlag)
-                    {
-                        if (!ParseShort(it, end))
-                        {
-                            return it;
-                        }
-                    } else
-                    {
-                        auto pos = GetNextPositional();
-                        if (pos)
-                        {
-                            pos->ParseValue(chunk);
-
-                            if (pos->KickOut())
-                            {
-                                return ++it;
-                            }
-                        } else
-                        {
-                            RaiseParseError("Passed in argument, but no positional arguments were ready to receive it: " + chunk);
-                            return it;
-                        }
-                    }
-                }
-
-                for (Base *child: Children())
-                {
-                    child->Validate(shortprefix, longprefix);
-                }
-
-                if (!Matched())
-                {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Validation;
-#else
-                    std::ostringstream problem;
-                    problem << "Group validation failed somewhere!";
-                    throw ValidationError(problem.str());
-#endif
-                }
-
-                return end;
+                //TODO: check for required subparsers
             }
 
             /** Parse all arguments.
@@ -1575,6 +1905,22 @@ namespace args
                 return ParseArgs(args) == std::end(args);
             }
     };
+
+    Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_) : command(&parser_), parser(std::move(args_), parser_)
+    {
+        while (command->selectedCommand != nullptr)
+        {
+            command = command->selectedCommand;
+        }
+
+        command->subparser = &parser;
+    }
+
+    void Subparser::Parse()
+    {
+        auto it = parser.Parse(args.begin(), args.end());
+        kicked.assign(it, args.end());
+    }
 
     inline std::ostream &operator<<(std::ostream &os, const ArgumentParser &parser)
     {
@@ -1622,11 +1968,11 @@ namespace args
     class HelpFlag : public Flag
     {
         public:
-            HelpFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_): Flag(group_, name_, help_, std::move(matcher_)) {}
+            HelpFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_ = {}): Flag(group_, name_, help_, std::move(matcher_), options_) {}
 
             virtual ~HelpFlag() {}
 
-            virtual FlagBase *Match(const std::string &arg) override
+            virtual FlagBase *Match(const EitherFlag &arg) override
             {
                 if (FlagBase::Match(arg))
                 {
@@ -1634,21 +1980,7 @@ namespace args
                     error = Error::Help;
                     return this;
 #else
-                    throw Help(arg);
-#endif
-                }
-                return nullptr;
-            }
-
-            virtual FlagBase *Match(const char arg) override
-            {
-                if (FlagBase::Match(arg))
-                {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Help;
-                    return this;
-#else
-                    throw Help(std::string(1, arg));
+                    throw Help(arg.str());
 #endif
                 }
                 return nullptr;
@@ -1675,17 +2007,7 @@ namespace args
 
             virtual ~CounterFlag() {}
 
-            virtual FlagBase *Match(const std::string &arg) override
-            {
-                auto me = FlagBase::Match(arg);
-                if (me)
-                {
-                    ++count;
-                }
-                return me;
-            }
-
-            virtual FlagBase *Match(const char arg) override
+            virtual FlagBase *Match(const EitherFlag &arg) override
             {
                 auto me = FlagBase::Match(arg);
                 if (me)
@@ -2341,9 +2663,13 @@ namespace args
             typedef std::reverse_iterator<iterator> reverse_iterator;
             typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-            PositionalList(Group &group_, const std::string &name_, const std::string &help_, const Container &defaultValues_ = Container()): PositionalBase(name_, help_), values(defaultValues_)
+            PositionalList(Group &group_, const std::string &name_, const std::string &help_, const Container &defaultValues_ = Container(), Options options_ = {}): PositionalBase(name_, help_, options_), values(defaultValues_)
             {
                 group_.Add(*this);
+            }
+
+            PositionalList(Group &group_, const std::string &name_, const std::string &help_, Options options_): PositionalList(group_, name_, help_, {}, options_)
+            {
             }
 
             virtual ~PositionalList() {}
