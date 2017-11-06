@@ -294,7 +294,7 @@ TEST_CASE("Argument groups should nest", "[args]")
 
 struct DoublesReader
 {
-    void operator()(const std::string &name, const std::string &value, std::tuple<double, double> &destination)
+    void operator()(const std::string &, const std::string &value, std::tuple<double, double> &destination)
     {
         size_t commapos = 0;
         std::get<0>(destination) = std::stod(value, &commapos);
@@ -421,10 +421,10 @@ enum class MappingEnum
 
 struct ToLowerReader
 {
-    void operator()(const std::string &name, const std::string &value, std::string &destination)
+    void operator()(const std::string &, const std::string &value, std::string &destination)
     {
         destination = value;
-        std::transform(destination.begin(), destination.end(), destination.begin(), ::tolower);
+        std::transform(destination.begin(), destination.end(), destination.begin(), [](char c) -> char { return static_cast<char>(tolower(c)); });
     }
 };
 
@@ -657,9 +657,9 @@ TEST_CASE("Nargs work as expected", "[args]")
     REQUIRE(args::get(f) == false);
 
     std::vector<int> vec;
-    for (int c : b)
+    for (int be : b)
     {
-        vec.push_back(c);
+        vec.push_back(be);
     }
 
     REQUIRE((vec == std::vector<int>{1, 2, 3}));
