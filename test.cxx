@@ -599,11 +599,11 @@ TEST_CASE("Hidden options are excluded from help", "[args]")
     args::ValueFlag<int> foo1(group, "foo", "foo", {'f', "foo"}, args::Options::Hidden);
     args::ValueFlag<int> bar2(group, "bar", "bar", {'b'});
 
-    auto desc = parser1.GetDescription("", "", "", "", 0);
+    auto desc = parser1.GetDescription(parser1.helpParams, 0);
     REQUIRE(desc.size() == 3);
-    REQUIRE(std::get<0>(desc[0]) == "b[bar]");
+    REQUIRE(std::get<0>(desc[0]) == "-b[bar]");
     REQUIRE(std::get<0>(desc[1]) == "group");
-    REQUIRE(std::get<0>(desc[2]) == "b[bar]");
+    REQUIRE(std::get<0>(desc[2]) == "-b[bar]");
 }
 
 TEST_CASE("Implicit values work as expected", "[args]")

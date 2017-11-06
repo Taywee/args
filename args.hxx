@@ -431,6 +431,57 @@ namespace args
         return static_cast<Options>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
 
+    /** A simple structure of parameters for easy user-modifyable help menus
+     */
+    struct HelpParams
+    {
+        /** The width of the help menu
+         */
+        unsigned int width = 80;
+        /** The indent of the program line
+         */
+        unsigned int progindent = 2;
+        /** The indent of the program trailing lines for long parameters
+         */
+        unsigned int progtailindent = 4;
+        /** The indent of the description and epilogs
+         */
+        unsigned int descriptionindent = 4;
+        /** The indent of the flags
+         */
+        unsigned int flagindent = 6;
+        /** The indent of the flag descriptions
+         */
+        unsigned int helpindent = 40;
+        /** The additional indent each group adds
+         */
+        unsigned int eachgroupindent = 2;
+
+        /** The minimum gutter between each flag and its help
+         */
+        unsigned int gutter = 1;
+
+        /** Show the terminator when both options and positional parameters are present
+         */
+        bool showTerminator = true;
+
+        /** Show the {OPTIONS} on the prog line when this is true
+         */
+        bool showProglineOptions = true;
+
+        /** Show the positionals on the prog line when this is true
+         */
+        bool showProglinePositionals = true;
+
+        std::string shortPrefix;
+
+        std::string longPrefix;
+
+        std::string shortSeparator;
+
+        std::string longSeparator;
+    };
+
     class FlagBase;
     class PositionalBase;
     class Command;
@@ -474,7 +525,7 @@ namespace args
                 return Matched();
             }
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &, unsigned indentLevel) const
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const
             {
                 std::tuple<std::string, std::string, unsigned> description;
                 std::get<1>(description) = help;
@@ -560,7 +611,7 @@ namespace args
             NamedBase(const std::string &name_, const std::string &help_, Options options_ = {}) : Base(help_, options_), name(name_), kickout(false) {}
             virtual ~NamedBase() {}
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &, unsigned indentLevel) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
                 std::get<0>(description) = Name();
@@ -643,10 +694,10 @@ namespace args
                 }
             }
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &, const std::string &, unsigned indentLevel) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix);
+                const auto flagStrings = matcher.GetFlagStrings(params.shortPrefix, params.longPrefix);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
@@ -689,10 +740,10 @@ namespace args
             ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : FlagBase(name_, help_, std::move(matcher_), options_) {}
             virtual ~ValueFlagBase() {}
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, unsigned indentLevel) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix, Name(), shortSeparator, longSeparator);
+                const auto flagStrings = matcher.GetFlagStrings(params.shortPrefix, params.longPrefix, Name(), params.shortSeparator, params.longSeparator);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
@@ -922,7 +973,7 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, const unsigned int indent) const
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned int indent) const
             {
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
 
@@ -941,7 +992,7 @@ namespace args
                         continue;
                     }
 
-                    auto groupDescriptions = child->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + addindent);
+                    auto groupDescriptions = child->GetDescription(params, indent + addindent);
                     descriptions.insert(
                         std::end(descriptions),
                         std::make_move_iterator(std::begin(groupDescriptions)),
@@ -1568,63 +1619,17 @@ namespace args
             }
 
         public:
-            /** A simple structure of parameters for easy user-modifyable help menus
-             */
-            struct HelpParams
-            {
-                /** The width of the help menu
-                 */
-                unsigned int width = 80;
-                /** The indent of the program line
-                 */
-                unsigned int progindent = 2;
-                /** The indent of the program trailing lines for long parameters
-                 */
-                unsigned int progtailindent = 4;
-                /** The indent of the description and epilogs
-                 */
-                unsigned int descriptionindent = 4;
-                /** The indent of the flags
-                 */
-                unsigned int flagindent = 6;
-                /** The indent of the flag descriptions
-                 */
-                unsigned int helpindent = 40;
-                /** The additional indent each group adds
-                 */
-                unsigned int eachgroupindent = 2;
+            HelpParams helpParams;
 
-                /** The minimum gutter between each flag and its help
-                 */
-                unsigned int gutter = 1;
-
-                /** Show the terminator when both options and positional parameters are present
-                 */
-                bool showTerminator = true;
-
-                /** Show the {OPTIONS} on the prog line when this is true
-                 */
-                bool showProglineOptions = true;
-
-                /** Show the positionals on the prog line when this is true
-                 */
-                bool showProglinePositionals = true;
-            } helpParams;
             ArgumentParser(const std::string &description_, const std::string &epilog_ = std::string()) :
                 description(description_),
                 epilog(epilog_),
-                longprefix("--"),
-                shortprefix("-"),
-                longseparator("="),
-                terminator("--"),
-                allowJoinedShortValue(true),
-                allowJoinedLongValue(true),
-                allowSeparateShortValue(true),
-                allowSeparateLongValue(true) {}
-
-            ArgumentParser(Group &global_, const std::string &description_, const std::string &epilog_ = std::string()) : ArgumentParser(description_, epilog_)
+                terminator("--")
             {
-                Add(global_);
+                LongPrefix("--");
+                ShortPrefix("-");
+                LongSeparator("=");
+                SetArgumentSeparations(true, true, true, true);
             }
 
             /** The program name for help generation
@@ -1653,7 +1658,7 @@ namespace args
              */
             void Description(const std::string &description_)
             { this->description = description_; }
-            
+
             /** The description that appears below options
              */
             const std::string &Epilog() const
@@ -1670,7 +1675,10 @@ namespace args
             /** The prefix for long flags
              */
             void LongPrefix(const std::string &longprefix_)
-            { this->longprefix = longprefix_; }
+            {
+                this->longprefix = longprefix_;
+                this->helpParams.longPrefix = longprefix_;
+            }
 
             /** The prefix for short flags
              */
@@ -1679,7 +1687,10 @@ namespace args
             /** The prefix for short flags
              */
             void ShortPrefix(const std::string &shortprefix_)
-            { this->shortprefix = shortprefix_; }
+            {
+                this->shortprefix = shortprefix_;
+                this->helpParams.shortPrefix = shortprefix_;
+            }
 
             /** The separator for long flags
              */
@@ -1699,6 +1710,7 @@ namespace args
                 } else
                 {
                     this->longseparator = longseparator_;
+                    this->helpParams.longSeparator = allowJoinedLongValue ? longseparator_ : " ";
                 }
             }
 
@@ -1744,6 +1756,9 @@ namespace args
                 this->allowJoinedLongValue = allowJoinedLongValue_;
                 this->allowSeparateShortValue = allowSeparateShortValue_;
                 this->allowSeparateLongValue = allowSeparateLongValue_;
+
+                this->helpParams.longSeparator = allowJoinedLongValue ? longseparator : " ";
+                this->helpParams.shortSeparator = allowJoinedShortValue ? "" : " ";
             }
 
             /** Pass the help menu into an ostream
@@ -1797,7 +1812,7 @@ namespace args
                 }
                 help_ << "\n";
                 help_ << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
-                for (const auto &desc: Group::GetDescription(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " ", 0))
+                for (const auto &desc: Group::GetDescription(helpParams, 0))
                 {
                     const auto groupindent = std::get<2>(desc) * helpParams.eachgroupindent;
                     const auto flags = Wrap(std::get<0>(desc), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter));
