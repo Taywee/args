@@ -431,6 +431,85 @@ namespace args
         return static_cast<Options>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
 
+    /** A simple structure of parameters for easy user-modifyable help menus
+     */
+    struct HelpParams
+    {
+        /** The width of the help menu
+         */
+        unsigned int width = 80;
+        /** The indent of the program line
+         */
+        unsigned int progindent = 2;
+        /** The indent of the program trailing lines for long parameters
+         */
+        unsigned int progtailindent = 4;
+        /** The indent of the description and epilogs
+         */
+        unsigned int descriptionindent = 4;
+        /** The indent of the flags
+         */
+        unsigned int flagindent = 6;
+        /** The indent of the flag descriptions
+         */
+        unsigned int helpindent = 40;
+        /** The additional indent each group adds
+         */
+        unsigned int eachgroupindent = 2;
+
+        /** The minimum gutter between each flag and its help
+         */
+        unsigned int gutter = 1;
+
+        /** Show the terminator when both options and positional parameters are present
+         */
+        bool showTerminator = true;
+
+        /** Show the {OPTIONS} on the prog line when this is true
+         */
+        bool showProglineOptions = true;
+
+        /** Show the positionals on the prog line when this is true
+         */
+        bool showProglinePositionals = true;
+
+        /** The prefix for short flags
+         */
+        std::string shortPrefix;
+
+        /** The prefix for long flags
+         */
+        std::string longPrefix;
+
+        /** The separator for short flags
+         */
+        std::string shortSeparator;
+
+        /** The separator for long flags
+         */
+        std::string longSeparator;
+
+        /** The program name for help generation
+         */
+        std::string programName;
+
+        /** Show command's flags
+         */
+        bool showCommandChildren = false;
+
+        /** Show command's descriptions and epilog
+         */
+        bool showCommandFullHelp = false;
+
+        /** The postfix for progline when showProglineOptions is true and command has any flags
+         */
+        std::string proglineOptions = "{OPTIONS}";
+
+        /** The prefix for progline when command has any subcommands
+         */
+        std::string proglineCommand = "COMMAND";
+    };
+
     class FlagBase;
     class PositionalBase;
     class Command;
@@ -474,7 +553,7 @@ namespace args
                 return Matched();
             }
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &, unsigned indentLevel) const
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const
             {
                 std::tuple<std::string, std::string, unsigned> description;
                 std::get<1>(description) = help;
@@ -507,7 +586,17 @@ namespace args
                 return false;
             }
 
-            virtual std::vector<std::string> GetProgramLine() const
+            virtual bool HasPositional() const
+            {
+                return false;
+            }
+
+            virtual bool HasCommand() const
+            {
+                return false;
+            }
+
+            virtual std::vector<std::string> GetProgramLine(const HelpParams &) const
             {
                 return {};
             }
@@ -560,7 +649,7 @@ namespace args
             NamedBase(const std::string &name_, const std::string &help_, Options options_ = {}) : Base(help_, options_), name(name_), kickout(false) {}
             virtual ~NamedBase() {}
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &, const std::string &, const std::string &, const std::string &, unsigned indentLevel) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
                 std::get<0>(description) = Name();
@@ -643,10 +732,10 @@ namespace args
                 }
             }
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &, const std::string &, unsigned indentLevel) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix);
+                const auto flagStrings = matcher.GetFlagStrings(params.shortPrefix, params.longPrefix);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
@@ -689,10 +778,10 @@ namespace args
             ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : FlagBase(name_, help_, std::move(matcher_), options_) {}
             virtual ~ValueFlagBase() {}
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, unsigned indentLevel) const override
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                const auto flagStrings = matcher.GetFlagStrings(shortPrefix, longPrefix, Name(), shortSeparator, longSeparator);
+                const auto flagStrings = matcher.GetFlagStrings(params.shortPrefix, params.longPrefix, Name(), params.shortSeparator, params.longSeparator);
                 std::ostringstream flagstream;
                 for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
                 {
@@ -746,9 +835,14 @@ namespace args
                 return Ready() ? this : nullptr;
             }
 
-            virtual std::vector<std::string> GetProgramLine() const override
+            virtual bool HasPositional() const override
             {
-                return {Name()};
+                return true;
+            }
+
+            virtual std::vector<std::string> GetProgramLine(const HelpParams &params) const override
+            {
+                return { "[" + Name() + ']' };
             }
 
             virtual void Validate(const std::string &, const std::string &) override
@@ -899,6 +993,24 @@ namespace args
                 return std::any_of(Children().begin(), Children().end(), [](Base *child) { return child->HasFlag(); });
             }
 
+            /** Get whether this has any PositionalBase children
+             *
+             * \return Whether or not there are any PositionalBase children
+             */
+            virtual bool HasPositional() const override
+            {
+                return std::any_of(Children().begin(), Children().end(), [](Base *child) { return child->HasPositional(); });
+            }
+
+            /** Get whether this has any Command children
+             *
+             * \return Whether or not there are any Command children
+             */
+            virtual bool HasCommand() const override
+            {
+                return std::any_of(Children().begin(), Children().end(), [](Base *child) { return child->HasCommand(); });
+            }
+
             /** Count the number of matched children this group has
              */
             std::vector<Base *>::size_type MatchedChildren() const
@@ -922,7 +1034,7 @@ namespace args
 
             /** Get all the child descriptions for help generation
              */
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const std::string &shortPrefix, const std::string &longPrefix, const std::string &shortSeparator, const std::string &longSeparator, const unsigned int indent) const
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned int indent) const
             {
                 std::vector<std::tuple<std::string, std::string, unsigned int>> descriptions;
 
@@ -941,7 +1053,7 @@ namespace args
                         continue;
                     }
 
-                    auto groupDescriptions = child->GetDescription(shortPrefix, longPrefix, shortSeparator, longSeparator, indent + addindent);
+                    auto groupDescriptions = child->GetDescription(params, indent + addindent);
                     descriptions.insert(
                         std::end(descriptions),
                         std::make_move_iterator(std::begin(groupDescriptions)),
@@ -952,12 +1064,17 @@ namespace args
 
             /** Get the names of positional parameters
              */
-            virtual std::vector<std::string> GetProgramLine() const override
+            virtual std::vector<std::string> GetProgramLine(const HelpParams &params) const override
             {
                 std::vector <std::string> names;
                 for (Base *child: Children())
                 {
-                    auto groupNames = child->GetProgramLine();
+                    if ((child->GetOptions() & Options::Hidden) != Options::None)
+                    {
+                        continue;
+                    }
+
+                    auto groupNames = child->GetProgramLine(params);
                     names.insert(
                         std::end(names),
                         std::make_move_iterator(std::begin(groupNames)),
@@ -984,6 +1101,8 @@ namespace args
 
             virtual void Reset() noexcept override
             {
+                Base::Reset();
+
                 for (auto &child: Children())
                 {
                     child->Reset();
@@ -1029,11 +1148,18 @@ namespace args
         private:
             std::vector<std::string> args;
             std::vector<std::string> kicked;
-            ArgumentParser &parser;
+            ArgumentParser *parser = nullptr;
+            const HelpParams &helpParams;
+            const Command &command;
             bool isParsed = false;
 
         public:
-            Subparser(std::vector<std::string> args_, ArgumentParser &parser_) : args(std::move(args_)), parser(parser_)
+            Subparser(std::vector<std::string> args_, ArgumentParser &parser_, const Command &command_, const HelpParams &helpParams_)
+                : args(std::move(args_)), parser(&parser_), helpParams(helpParams_), command(command_)
+            {
+            }
+
+            Subparser(const Command &command_, const HelpParams &helpParams_) : helpParams(helpParams_), command(command_)
             {
             }
 
@@ -1041,6 +1167,11 @@ namespace args
             Subparser(Subparser&&) = delete;
             Subparser &operator = (const Subparser&) = delete;
             Subparser &operator = (Subparser&&) = delete;
+
+            const Command &GetCommand()
+            {
+                return command;
+            }
 
             bool IsParsed() const
             {
@@ -1058,24 +1189,35 @@ namespace args
     class Command : public Group
     {
         private:
+            friend class Subparser;
+
             std::string name;
+            std::string help;
             std::string description;
+            std::string epilog;
+            std::string proglinePostfix;
+
             std::function<void(Subparser&)> parserCoroutine;
             bool commandIsRequired = false;
+            Command *selectedCommand = nullptr;
+
+            mutable std::vector<std::tuple<std::string, std::string, unsigned>> subparserDescription;
+            mutable std::vector<std::string> subparserProgramLine;
+            mutable bool subparserHasFlag = false;
+            mutable bool subparserHasPositional = false;
+            mutable Subparser *subparser = nullptr;
 
         protected:
-
-            Command *selectedCommand = nullptr;
-            Subparser *subparser = nullptr;
 
             class RaiiSubparser
             {
                 public:
                     RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_);
+                    RaiiSubparser(const Command &command_, const HelpParams &params_);
 
                     ~RaiiSubparser()
                     {
-                        command->subparser = nullptr;
+                        command.subparser = oldSubparser;
                     }
 
                     Subparser &Parser()
@@ -1084,8 +1226,9 @@ namespace args
                     }
 
                 private:
-                    Command *command;
+                    const Command &command;
                     Subparser parser;
+                    Subparser *oldSubparser;
             };
 
             Command() = default;
@@ -1095,12 +1238,64 @@ namespace args
                 return selectedCommand != nullptr ? selectedCommand->GetCoroutine() : parserCoroutine;
             }
 
+            Command &SelectedCommand()
+            {
+                Command *res = this;
+                while (res->selectedCommand != nullptr)
+                {
+                    res = res->selectedCommand;
+                }
+
+                return *res;
+            }
+
+            const Command &SelectedCommand() const
+            {
+                const Command *res = this;
+                while (res->selectedCommand != nullptr)
+                {
+                    res = res->selectedCommand;
+                }
+
+                return *res;
+            }
+
         public:
-            Command(Group &base_, std::string name_, std::string description_, std::function<void(Subparser&)> coroutine_ = {})
-                : name(std::move(name_)), description(std::move(description_)), parserCoroutine(std::move(coroutine_))
+            Command(Group &base_, std::string name_, std::string help_, std::function<void(Subparser&)> coroutine_ = {})
+                : name(std::move(name_)), help(std::move(help_)), parserCoroutine(std::move(coroutine_))
             {
                 base_.Add(*this);
             }
+
+            /** The description that appears on the prog line after options
+             */
+            const std::string &ProglinePostfix() const
+            { return proglinePostfix; }
+
+            /** The description that appears on the prog line after options
+             */
+            void ProglinePostfix(const std::string &proglinePostfix_)
+            { this->proglinePostfix = proglinePostfix_; }
+
+            /** The description that appears above options
+             */
+            const std::string &Description() const
+            { return description; }
+            /** The description that appears above options
+             */
+
+            void Description(const std::string &description_)
+            { this->description = description_; }
+
+            /** The description that appears below options
+             */
+            const std::string &Epilog() const
+            { return epilog; }
+
+            /** The description that appears below options
+             */
+            void Epilog(const std::string &epilog_)
+            { this->epilog = epilog_; }
 
             const std::function<void(Subparser&)> &GetCoroutine() const
             {
@@ -1110,6 +1305,11 @@ namespace args
             const std::string &Name() const
             {
                 return name;
+            }
+
+            const std::string &Help() const
+            {
+                return help;
             }
 
             virtual bool IsGroup() const override
@@ -1211,27 +1411,51 @@ namespace args
 
             virtual bool HasFlag() const
             {
-                if (selectedCommand != nullptr)
-                {
-                    return selectedCommand->HasFlag();
-                }
-
-                return Matched() ? Group::HasFlag() : false;
+                return subparserHasFlag || Group::HasFlag();
             }
 
-            virtual std::vector<std::string> GetProgramLine() const
+            virtual bool HasPositional() const
             {
-                if (selectedCommand != nullptr)
+                return subparserHasPositional || Group::HasPositional();
+            }
+
+            virtual bool HasCommand() const
+            {
+                return true;
+            }
+
+            std::vector<std::string> GetCommandProgramLine(const HelpParams &params) const
+            {
+                auto res = Group::GetProgramLine(params);
+                res.insert(res.end(), subparserProgramLine.begin(), subparserProgramLine.end());
+
+                if (!params.proglineCommand.empty() && Group::HasCommand())
                 {
-                    return selectedCommand->GetProgramLine();
+                    res.insert(res.begin(), commandIsRequired ? params.proglineCommand : "[" + params.proglineCommand + "]");
                 }
 
-                if (Matched())
+                if (!Name().empty())
                 {
-                    return Group::GetProgramLine();
+                    res.insert(res.begin(), Name());
                 }
 
-                return {};
+                if ((subparserHasFlag || Group::HasFlag()) && params.showProglineOptions)
+                {
+                    res.push_back(params.proglineOptions);
+                }
+
+                if (!ProglinePostfix().empty())
+                {
+                    res.push_back(ProglinePostfix());
+                }
+
+                return res;
+            }
+
+            virtual std::vector<std::string> GetProgramLine(const HelpParams &params) const
+            {
+                auto &command = SelectedCommand();
+                return command.Matched() ? command.GetCommandProgramLine(params) : std::vector<std::string>();
             }
 
             virtual std::vector<Command*> GetCommands() override
@@ -1247,6 +1471,108 @@ namespace args
                 }
 
                 return { this };
+            }
+
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned int indent) const
+            {
+                if (selectedCommand != nullptr)
+                {
+                    return selectedCommand->GetDescription(params, indent);
+                }
+
+                std::vector<std::tuple<std::string, std::string, unsigned>> descriptions;
+                unsigned addindent = 0;
+
+                if ((params.showCommandChildren || params.showCommandFullHelp) && !Matched() && parserCoroutine)
+                {
+                    RaiiSubparser coro(*this, params);
+#ifndef ARGS_NOEXCEPT
+                    try
+                    {
+                        parserCoroutine(coro.Parser());
+                    }
+                    catch (args::Help)
+                    {
+                    }
+#else
+                    parserCoroutine(coro.Parser());
+#endif
+                }
+
+
+                if (!Matched())
+                {
+                    if (params.showCommandFullHelp)
+                    {
+                        std::ostringstream s;
+                        bool empty = true;
+                        for (const auto &progline : GetCommandProgramLine(params))
+                        {
+                            if (!empty)
+                            {
+                                s << ' ';
+                            }
+                            else
+                            {
+                                empty = false;
+                            }
+
+                            s << progline;
+                        }
+
+                        descriptions.emplace_back(s.str(), "", indent);
+                    }
+                    else
+                    {
+                        descriptions.emplace_back(Name(), help, indent);
+                    }
+
+                    if (!params.showCommandChildren && !params.showCommandFullHelp)
+                    {
+                        return descriptions;
+                    }
+
+                    addindent = 1;
+                }
+
+                if (params.showCommandFullHelp && !Matched())
+                {
+                    descriptions.emplace_back("", "", indent + addindent);
+                    descriptions.emplace_back(Description().empty() ? Help() : Description(), "", indent + addindent);
+                    descriptions.emplace_back("", "", indent + addindent);
+                }
+
+                for (Base *child: Children())
+                {
+                    if ((child->GetOptions() & Options::Hidden) != Options::None)
+                    {
+                        continue;
+                    }
+
+                    auto groupDescriptions = child->GetDescription(params, indent + addindent);
+                    descriptions.insert(
+                                        std::end(descriptions),
+                                        std::make_move_iterator(std::begin(groupDescriptions)),
+                                        std::make_move_iterator(std::end(groupDescriptions)));
+                }
+
+                for (auto childDescription: subparserDescription)
+                {
+                    std::get<2>(childDescription) += indent + addindent;
+                    descriptions.push_back(std::move(childDescription));
+                }
+
+                if (params.showCommandFullHelp && !Matched())
+                {
+                    descriptions.emplace_back("", "", indent + addindent);
+                    if (!Epilog().empty())
+                    {
+                        descriptions.emplace_back(Epilog(), "", indent + addindent);
+                        descriptions.emplace_back("", "", indent + addindent);
+                    }
+                }
+
+                return descriptions;
             }
 
             virtual void Validate(const std::string &shortprefix, const std::string &longprefix) override
@@ -1272,6 +1598,10 @@ namespace args
             {
                 Group::Reset();
                 selectedCommand = nullptr;
+                subparserProgramLine.clear();
+                subparserDescription.clear();
+                subparserHasFlag = false;
+                subparserHasPositional = false;
             }
     };
 
@@ -1282,11 +1612,6 @@ namespace args
         friend class Subparser;
 
         private:
-            std::string prog;
-            std::string proglinePostfix;
-            std::string description;
-            std::string epilog;
-
             std::string longprefix;
             std::string shortprefix;
 
@@ -1568,100 +1893,28 @@ namespace args
             }
 
         public:
-            /** A simple structure of parameters for easy user-modifyable help menus
-             */
-            struct HelpParams
+            HelpParams helpParams;
+
+            ArgumentParser(const std::string &description_, const std::string &epilog_ = std::string())
             {
-                /** The width of the help menu
-                 */
-                unsigned int width = 80;
-                /** The indent of the program line
-                 */
-                unsigned int progindent = 2;
-                /** The indent of the program trailing lines for long parameters
-                 */
-                unsigned int progtailindent = 4;
-                /** The indent of the description and epilogs
-                 */
-                unsigned int descriptionindent = 4;
-                /** The indent of the flags
-                 */
-                unsigned int flagindent = 6;
-                /** The indent of the flag descriptions
-                 */
-                unsigned int helpindent = 40;
-                /** The additional indent each group adds
-                 */
-                unsigned int eachgroupindent = 2;
-
-                /** The minimum gutter between each flag and its help
-                 */
-                unsigned int gutter = 1;
-
-                /** Show the terminator when both options and positional parameters are present
-                 */
-                bool showTerminator = true;
-
-                /** Show the {OPTIONS} on the prog line when this is true
-                 */
-                bool showProglineOptions = true;
-
-                /** Show the positionals on the prog line when this is true
-                 */
-                bool showProglinePositionals = true;
-            } helpParams;
-            ArgumentParser(const std::string &description_, const std::string &epilog_ = std::string()) :
-                description(description_),
-                epilog(epilog_),
-                longprefix("--"),
-                shortprefix("-"),
-                longseparator("="),
-                terminator("--"),
-                allowJoinedShortValue(true),
-                allowJoinedLongValue(true),
-                allowSeparateShortValue(true),
-                allowSeparateLongValue(true) {}
-
-            ArgumentParser(Group &global_, const std::string &description_, const std::string &epilog_ = std::string()) : ArgumentParser(description_, epilog_)
-            {
-                Add(global_);
+                Description(description_);
+                Epilog(epilog_);
+                LongPrefix("--");
+                ShortPrefix("-");
+                LongSeparator("=");
+                Terminator("--");
+                SetArgumentSeparations(true, true, true, true);
+                matched = true;
             }
 
             /** The program name for help generation
              */
             const std::string &Prog() const
-            { return prog; }
+            { return helpParams.programName; }
             /** The program name for help generation
              */
             void Prog(const std::string &prog_)
-            { this->prog = prog_; }
-
-            /** The description that appears on the prog line after options
-             */
-            const std::string &ProglinePostfix() const
-            { return proglinePostfix; }
-            /** The description that appears on the prog line after options
-             */
-            void ProglinePostfix(const std::string &proglinePostfix_)
-            { this->proglinePostfix = proglinePostfix_; }
-
-            /** The description that appears above options
-             */
-            const std::string &Description() const
-            { return description; }
-            /** The description that appears above options
-             */
-            void Description(const std::string &description_)
-            { this->description = description_; }
-            
-            /** The description that appears below options
-             */
-            const std::string &Epilog() const
-            { return epilog; }
-            /** The description that appears below options
-             */
-            void Epilog(const std::string &epilog_)
-            { this->epilog = epilog_; }
+            { this->helpParams.programName = prog_; }
 
             /** The prefix for long flags
              */
@@ -1670,7 +1923,10 @@ namespace args
             /** The prefix for long flags
              */
             void LongPrefix(const std::string &longprefix_)
-            { this->longprefix = longprefix_; }
+            {
+                this->longprefix = longprefix_;
+                this->helpParams.longPrefix = longprefix_;
+            }
 
             /** The prefix for short flags
              */
@@ -1679,7 +1935,10 @@ namespace args
             /** The prefix for short flags
              */
             void ShortPrefix(const std::string &shortprefix_)
-            { this->shortprefix = shortprefix_; }
+            {
+                this->shortprefix = shortprefix_;
+                this->helpParams.shortPrefix = shortprefix_;
+            }
 
             /** The separator for long flags
              */
@@ -1699,6 +1958,7 @@ namespace args
                 } else
                 {
                     this->longseparator = longseparator_;
+                    this->helpParams.longSeparator = allowJoinedLongValue ? longseparator_ : " ";
                 }
             }
 
@@ -1744,39 +2004,31 @@ namespace args
                 this->allowJoinedLongValue = allowJoinedLongValue_;
                 this->allowSeparateShortValue = allowSeparateShortValue_;
                 this->allowSeparateLongValue = allowSeparateLongValue_;
+
+                this->helpParams.longSeparator = allowJoinedLongValue ? longseparator : " ";
+                this->helpParams.shortSeparator = allowJoinedShortValue ? "" : " ";
             }
 
             /** Pass the help menu into an ostream
              */
             void Help(std::ostream &help_) const
             {
-                bool hasoptions = false;
-                bool hasarguments = false;
+                auto &command = SelectedCommand();
+                const auto &description = command.Description().empty() ? command.Help() : command.Description();
+                const auto description_text = Wrap(description, helpParams.width - helpParams.descriptionindent);
+                const auto epilog_text = Wrap(command.Epilog(), helpParams.width - helpParams.descriptionindent);
 
-                const auto description_text = Wrap(this->description, helpParams.width - helpParams.descriptionindent);
-                const auto epilog_text = Wrap(this->epilog, helpParams.width - helpParams.descriptionindent);
+                const bool hasoptions = command.HasFlag();
+                const bool hasarguments = command.HasPositional();
+
                 std::ostringstream prognameline;
-                prognameline << prog;
-                if (HasFlag())
+                prognameline << Prog();
+
+                for (const std::string &posname: command.GetProgramLine(helpParams))
                 {
-                    hasoptions = true;
-                    if (helpParams.showProglineOptions)
-                    {
-                        prognameline << " {OPTIONS}";
-                    }
+                    prognameline << ' ' << posname;
                 }
-                for (const std::string &posname: GetProgramLine())
-                {
-                    hasarguments = true;
-                    if (helpParams.showProglinePositionals)
-                    {
-                        prognameline << " [" << posname << ']';
-                    }
-                }
-                if (!proglinePostfix.empty())
-                {
-                    prognameline << ' ' << proglinePostfix;
-                }
+
                 const auto proglines = Wrap(prognameline.str(), helpParams.width - (helpParams.progindent + 4), helpParams.width - helpParams.progindent);
                 auto progit = std::begin(proglines);
                 if (progit != std::end(proglines))
@@ -1791,14 +2043,21 @@ namespace args
 
                 help_ << '\n';
 
-                for (const auto &line: description_text)
+                if (!description_text.empty())
                 {
-                    help_ << std::string(helpParams.descriptionindent, ' ') << line << "\n";
+                    for (const auto &line: description_text)
+                    {
+                        help_ << std::string(helpParams.descriptionindent, ' ') << line << "\n";
+                    }
+                    help_ << "\n";
                 }
-                help_ << "\n";
+
+                bool lastDescriptionIsNewline = false;
+
                 help_ << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
-                for (const auto &desc: Group::GetDescription(shortprefix, longprefix, allowJoinedShortValue ? "" : " ", allowJoinedLongValue ? longseparator : " ", 0))
+                for (const auto &desc: command.GetDescription(helpParams, 0))
                 {
+                    lastDescriptionIsNewline = std::get<0>(desc).empty() && std::get<1>(desc).empty();
                     const auto groupindent = std::get<2>(desc) * helpParams.eachgroupindent;
                     const auto flags = Wrap(std::get<0>(desc), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter));
                     const auto info = Wrap(std::get<1>(desc), helpParams.width - (helpParams.helpindent + groupindent));
@@ -1832,13 +2091,18 @@ namespace args
                 }
                 if (hasoptions && hasarguments && helpParams.showTerminator)
                 {
+                    lastDescriptionIsNewline = false;
                     for (const auto &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
                     {
                         help_ << std::string(helpParams.flagindent, ' ') << item << '\n';
                     }
                 }
 
-                help_ << "\n";
+                if (!lastDescriptionIsNewline)
+                {
+                    help_ << "\n";
+                }
+
                 for (const auto &line: epilog_text)
                 {
                     help_ << std::string(helpParams.descriptionindent, ' ') << line << "\n";
@@ -1874,8 +2138,6 @@ namespace args
                 // Reset all Matched statuses and errors
                 Reset();
                 return Parse(begin, end);
-
-                //TODO: check for required subparsers
             }
 
             /** Parse all arguments.
@@ -1897,28 +2159,44 @@ namespace args
              */
             bool ParseCLI(const int argc, const char * const * argv)
             {
-                if (prog.empty())
+                if (Prog().empty())
                 {
-                    prog.assign(argv[0]);
+                    Prog(argv[0]);
                 }
                 const std::vector<std::string> args(argv + 1, argv + argc);
                 return ParseArgs(args) == std::end(args);
             }
     };
 
-    Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_) : command(&parser_), parser(std::move(args_), parser_)
+    Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_)
+        : command(parser_.SelectedCommand()), parser(std::move(args_), parser_, command, parser_.helpParams), oldSubparser(command.subparser)
     {
-        while (command->selectedCommand != nullptr)
-        {
-            command = command->selectedCommand;
-        }
+        command.subparser = &parser;
+    }
 
-        command->subparser = &parser;
+    Command::RaiiSubparser::RaiiSubparser(const Command &command_, const HelpParams &params_): command(command_), parser(command, params_)
+    {
+        command.subparser = &parser;
     }
 
     void Subparser::Parse()
     {
-        auto it = parser.Parse(args.begin(), args.end());
+        isParsed = true;
+        command.subparserDescription = GetDescription(helpParams, 0);
+        command.subparserHasFlag = HasFlag();
+        command.subparserHasPositional = HasPositional();
+        command.subparserProgramLine = GetProgramLine(helpParams);
+        if (parser == nullptr)
+        {
+#ifndef ARGS_NOEXCEPT
+            throw args::Help("");
+#else
+            error = Error::Help;
+            return;
+#endif
+        }
+
+        auto it = parser->Parse(args.begin(), args.end());
         kicked.assign(it, args.end());
     }
 

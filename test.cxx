@@ -599,11 +599,11 @@ TEST_CASE("Hidden options are excluded from help", "[args]")
     args::ValueFlag<int> foo1(group, "foo", "foo", {'f', "foo"}, args::Options::Hidden);
     args::ValueFlag<int> bar2(group, "bar", "bar", {'b'});
 
-    auto desc = parser1.GetDescription("", "", "", "", 0);
+    auto desc = parser1.GetDescription(parser1.helpParams, 0);
     REQUIRE(desc.size() == 3);
-    REQUIRE(std::get<0>(desc[0]) == "b[bar]");
+    REQUIRE(std::get<0>(desc[0]) == "-b[bar]");
     REQUIRE(std::get<0>(desc[1]) == "group");
-    REQUIRE(std::get<0>(desc[2]) == "b[bar]");
+    REQUIRE(std::get<0>(desc[2]) == "-b[bar]");
 }
 
 TEST_CASE("Implicit values work as expected", "[args]")
@@ -744,6 +744,117 @@ TEST_CASE("Subparser commands with kick-out flags work as expected", "[args]")
     p.ParseArgs(std::vector<std::string>{"add", "-k", "A", "B", "C", "D"});
     REQUIRE(add);
     REQUIRE((kickedOut == std::vector<std::string>{"A", "B", "C", "D"}));
+}
+
+TEST_CASE("Subparser help works as expected", "[args]")
+{
+    args::ArgumentParser p("git-like parser");
+    args::Flag g(p, "GLOBAL", "global flag", {'g'}, args::Options::Global);
+
+    args::Command add(p, "add", "add file contents to the index", [&](args::Subparser &c)
+    {
+        args::Flag flag(c, "FLAG", "flag", {'f'});
+        c.Parse();
+    });
+
+    args::Command commit(p, "commit", "record changes to the repository", [&](args::Subparser &c)
+    {
+        args::Flag flag(c, "FLAG", "flag", {'f'});
+        c.Parse();
+    });
+
+    p.Prog("git");
+
+    std::ostringstream s;
+
+    auto d = p.GetDescription(p.helpParams, 0);
+    s << p;
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add                               add file contents to the index
+      commit                            record changes to the repository
+
+)");
+
+    p.ParseArgs(std::vector<std::string>{"add"});
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git add {OPTIONS}
+
+    add file contents to the index
+
+  OPTIONS:
+
+      -f                                flag
+
+)");
+
+    p.ParseArgs(std::vector<std::string>{});
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add                               add file contents to the index
+      commit                            record changes to the repository
+
+)");
+
+    p.helpParams.showCommandChildren = true;
+    p.ParseArgs(std::vector<std::string>{});
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add                               add file contents to the index
+        -f                                flag
+      commit                            record changes to the repository
+        -f                                flag
+
+)");
+
+    commit.Epilog("epilog");
+    p.helpParams.showCommandFullHelp = true;
+    p.ParseArgs(std::vector<std::string>{});
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add {OPTIONS}
+
+        add file contents to the index
+
+        -f                                flag
+
+      commit {OPTIONS}
+
+        record changes to the repository
+
+        -f                                flag
+
+        epilog
+
+)");
+
 }
 
 #undef ARGS_HXX
