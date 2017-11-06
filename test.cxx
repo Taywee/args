@@ -746,6 +746,36 @@ TEST_CASE("Subparser commands with kick-out flags work as expected", "[args]")
     REQUIRE((kickedOut == std::vector<std::string>{"A", "B", "C", "D"}));
 }
 
+TEST_CASE("Subparser help works as expected", "[args]")
+{
+    args::ArgumentParser p("git-like parser");
+    args::Flag g(p, "GLOBAL", "global flag", {'g'}, args::Options::Global);
+
+    args::Command add(p, "add", "add file contents to the index", [&](args::Subparser &c)
+    {
+        args::Flag flag(c, "FLAG", "flag", {'f'});
+        c.Parse();
+    });
+
+    args::Command commit(p, "commit", "record changes to the repository", [&](args::Subparser &c)
+    {
+        args::Flag flag(c, "FLAG", "flag", {'f'});
+        c.Parse();
+    });
+
+    auto d = p.GetDescription(p.helpParams, 0);
+    REQUIRE(d.size() == 3);
+    REQUIRE(std::get<0>(d[0]) == "-g");
+    REQUIRE(std::get<0>(d[1]) == "add");
+    REQUIRE(std::get<0>(d[2]) == "commit");
+
+    p.ParseArgs(std::vector<std::string>{"add"});
+    d = p.GetDescription(p.helpParams, 0);
+    REQUIRE(d.size() == 2);
+    REQUIRE(std::get<0>(d[0]) == "add");
+    REQUIRE(std::get<0>(d[1]) == "-f");
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT

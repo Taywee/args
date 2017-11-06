@@ -473,12 +473,20 @@ namespace args
          */
         bool showProglinePositionals = true;
 
+        /** The prefix for short flags
+         */
         std::string shortPrefix;
 
+        /** The prefix for long flags
+         */
         std::string longPrefix;
 
+        /** The separator for short flags
+         */
         std::string shortSeparator;
 
+        /** The separator for long flags
+         */
         std::string longSeparator;
     };
 
@@ -1081,10 +1089,11 @@ namespace args
             std::vector<std::string> args;
             std::vector<std::string> kicked;
             ArgumentParser &parser;
+            Command &command;
             bool isParsed = false;
 
         public:
-            Subparser(std::vector<std::string> args_, ArgumentParser &parser_) : args(std::move(args_)), parser(parser_)
+            Subparser(std::vector<std::string> args_, ArgumentParser &parser_, Command &command_) : args(std::move(args_)), parser(parser_), command(command_)
             {
             }
 
@@ -1092,6 +1101,11 @@ namespace args
             Subparser(Subparser&&) = delete;
             Subparser &operator = (const Subparser&) = delete;
             Subparser &operator = (Subparser&&) = delete;
+
+            Command &GetCommand()
+            {
+                return command;
+            }
 
             bool IsParsed() const
             {
@@ -1109,10 +1123,13 @@ namespace args
     class Command : public Group
     {
         private:
+            friend class Subparser;
+
             std::string name;
             std::string description;
             std::function<void(Subparser&)> parserCoroutine;
             bool commandIsRequired = false;
+            std::vector<std::tuple<std::string, std::string, unsigned>> subparserDescription;
 
         protected:
 
@@ -1144,6 +1161,17 @@ namespace args
             std::function<void(Subparser&)> &GetCoroutine()
             {
                 return selectedCommand != nullptr ? selectedCommand->GetCoroutine() : parserCoroutine;
+            }
+
+            Command &SelectedCommand()
+            {
+                Command *res = this;
+                while (res->selectedCommand != nullptr)
+                {
+                    res = res->selectedCommand;
+                }
+
+                return *res;
             }
 
         public:
@@ -1298,6 +1326,54 @@ namespace args
                 }
 
                 return { this };
+            }
+
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned int indent) const
+            {
+                if (selectedCommand != nullptr)
+                {
+                    return selectedCommand->GetDescription(params, indent);
+                }
+
+                std::vector<std::tuple<std::string, std::string, unsigned>> descriptions;
+                unsigned addindent = 0;
+
+                std::tuple<std::string, std::string, unsigned> desc;
+                std::get<0>(desc) = Name();
+                std::get<1>(desc) = description;
+                std::get<2>(desc) = indent;
+                if (!Name().empty())
+                {
+                    addindent = 1;
+                    descriptions.push_back(desc);
+                }
+
+                if (!Matched())
+                {
+                    return descriptions;
+                }
+
+                for (Base *child: Children())
+                {
+                    if ((child->GetOptions() & Options::Hidden) != Options::None)
+                    {
+                        continue;
+                    }
+
+                    auto groupDescriptions = child->GetDescription(params, indent + addindent);
+                    descriptions.insert(
+                                        std::end(descriptions),
+                                        std::make_move_iterator(std::begin(groupDescriptions)),
+                                        std::make_move_iterator(std::end(groupDescriptions)));
+                }
+
+                for (auto childDescription: subparserDescription)
+                {
+                    std::get<2>(childDescription) += indent + addindent;
+                    descriptions.push_back(std::move(childDescription));
+                }
+
+                return descriptions;
             }
 
             virtual void Validate(const std::string &shortprefix, const std::string &longprefix) override
@@ -1630,6 +1706,7 @@ namespace args
                 ShortPrefix("-");
                 LongSeparator("=");
                 SetArgumentSeparations(true, true, true, true);
+                matched = true;
             }
 
             /** The program name for help generation
@@ -1921,18 +1998,15 @@ namespace args
             }
     };
 
-    Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_) : command(&parser_), parser(std::move(args_), parser_)
+    Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_) : command(&parser_), parser(std::move(args_), parser_, parser_.SelectedCommand())
     {
-        while (command->selectedCommand != nullptr)
-        {
-            command = command->selectedCommand;
-        }
-
-        command->subparser = &parser;
+        parser.GetCommand().subparser = &parser;
     }
 
     void Subparser::Parse()
     {
+        isParsed = true;
+        command.subparserDescription = GetDescription(parser.helpParams, 0);
         auto it = parser.Parse(args.begin(), args.end());
         kicked.assign(it, args.end());
     }
