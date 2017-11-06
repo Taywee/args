@@ -769,7 +769,7 @@ TEST_CASE("Subparser help works as expected", "[args]")
 
     auto d = p.GetDescription(p.helpParams, 0);
     s << p;
-    REQUIRE(s.str() == R"(  git {OPTIONS}
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
 
     git-like parser
 
@@ -797,7 +797,7 @@ TEST_CASE("Subparser help works as expected", "[args]")
     p.ParseArgs(std::vector<std::string>{});
     s.str("");
     s << p;
-    REQUIRE(s.str() == R"(  git {OPTIONS}
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
 
     git-like parser
 
@@ -809,12 +809,11 @@ TEST_CASE("Subparser help works as expected", "[args]")
 
 )");
 
-
     p.helpParams.showCommandChildren = true;
     p.ParseArgs(std::vector<std::string>{});
     s.str("");
     s << p;
-    REQUIRE(s.str() == R"(  git {OPTIONS}
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
 
     git-like parser
 
@@ -833,7 +832,7 @@ TEST_CASE("Subparser help works as expected", "[args]")
     p.ParseArgs(std::vector<std::string>{});
     s.str("");
     s << p;
-    REQUIRE(s.str() == R"(  git {OPTIONS}
+    REQUIRE(s.str() == R"(  git [COMMAND] {OPTIONS}
 
     git-like parser
 

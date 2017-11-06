@@ -504,6 +504,10 @@ namespace args
         /** The postfix for progline when showProglineOptions is true and command has any flags
          */
         std::string proglineOptions = "{OPTIONS}";
+
+        /** The prefix for progline when command has any subcommands
+         */
+        std::string proglineCommand = "COMMAND";
     };
 
     class FlagBase;
@@ -583,6 +587,11 @@ namespace args
             }
 
             virtual bool HasPositional() const
+            {
+                return false;
+            }
+
+            virtual bool HasCommand() const
             {
                 return false;
             }
@@ -993,6 +1002,15 @@ namespace args
                 return std::any_of(Children().begin(), Children().end(), [](Base *child) { return child->HasPositional(); });
             }
 
+            /** Get whether this has any Command children
+             *
+             * \return Whether or not there are any Command children
+             */
+            virtual bool HasCommand() const override
+            {
+                return std::any_of(Children().begin(), Children().end(), [](Base *child) { return child->HasCommand(); });
+            }
+
             /** Count the number of matched children this group has
              */
             std::vector<Base *>::size_type MatchedChildren() const
@@ -1393,28 +1411,28 @@ namespace args
 
             virtual bool HasFlag() const
             {
-                if (selectedCommand != nullptr)
-                {
-                    return selectedCommand->HasFlag();
-                }
-
-                return Matched() ? subparserHasFlag || Group::HasFlag() : false;
+                return subparserHasFlag || Group::HasFlag();
             }
 
             virtual bool HasPositional() const
             {
-                if (selectedCommand != nullptr)
-                {
-                    return selectedCommand->HasPositional();
-                }
+                return subparserHasPositional || Group::HasPositional();
+            }
 
-                return Matched() ? subparserHasPositional || Group::HasPositional() : false;
+            virtual bool HasCommand() const
+            {
+                return true;
             }
 
             std::vector<std::string> GetCommandProgramLine(const HelpParams &params) const
             {
                 auto res = Group::GetProgramLine(params);
                 res.insert(res.end(), subparserProgramLine.begin(), subparserProgramLine.end());
+
+                if (!params.proglineCommand.empty() && Group::HasCommand())
+                {
+                    res.insert(res.begin(), commandIsRequired ? params.proglineCommand : "[" + params.proglineCommand + "]");
+                }
 
                 if (!Name().empty())
                 {
@@ -1995,13 +2013,13 @@ namespace args
              */
             void Help(std::ostream &help_) const
             {
-                const bool hasoptions = HasFlag();
-                const bool hasarguments = HasPositional();
-
                 auto &command = SelectedCommand();
                 const auto &description = command.Description().empty() ? command.Help() : command.Description();
                 const auto description_text = Wrap(description, helpParams.width - helpParams.descriptionindent);
                 const auto epilog_text = Wrap(command.Epilog(), helpParams.width - helpParams.descriptionindent);
+
+                const bool hasoptions = command.HasFlag();
+                const bool hasarguments = command.HasPositional();
 
                 std::ostringstream prognameline;
                 prognameline << Prog();
