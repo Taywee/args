@@ -763,17 +763,36 @@ TEST_CASE("Subparser help works as expected", "[args]")
         c.Parse();
     });
 
+    p.Prog("git");
+
+    std::ostringstream s;
+
     auto d = p.GetDescription(p.helpParams, 0);
-    REQUIRE(d.size() == 3);
-    REQUIRE(std::get<0>(d[0]) == "-g");
-    REQUIRE(std::get<0>(d[1]) == "add");
-    REQUIRE(std::get<0>(d[2]) == "commit");
+    s << p;
+    REQUIRE(s.str() == R"(  git {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add                               add file contents to the index
+      commit                            record changes to the repository
+
+)");
 
     p.ParseArgs(std::vector<std::string>{"add"});
-    d = p.GetDescription(p.helpParams, 0);
-    REQUIRE(d.size() == 2);
-    REQUIRE(std::get<0>(d[0]) == "add");
-    REQUIRE(std::get<0>(d[1]) == "-f");
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git add {OPTIONS}
+
+    add file contents to the index
+
+  OPTIONS:
+
+      -f                                flag
+
+)");
 }
 
 #undef ARGS_HXX
