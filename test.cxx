@@ -793,6 +793,69 @@ TEST_CASE("Subparser help works as expected", "[args]")
       -f                                flag
 
 )");
+
+    p.ParseArgs(std::vector<std::string>{});
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add                               add file contents to the index
+      commit                            record changes to the repository
+
+)");
+
+
+    p.helpParams.showCommandChildren = true;
+    p.ParseArgs(std::vector<std::string>{});
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add                               add file contents to the index
+        -f                                flag
+      commit                            record changes to the repository
+        -f                                flag
+
+)");
+
+    commit.Epilog("epilog");
+    p.helpParams.showCommandFullHelp = true;
+    p.ParseArgs(std::vector<std::string>{});
+    s.str("");
+    s << p;
+    REQUIRE(s.str() == R"(  git {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      -g                                global flag
+      add {OPTIONS}
+
+        add file contents to the index
+
+        -f                                flag
+
+      commit {OPTIONS}
+
+        record changes to the repository
+
+        -f                                flag
+
+        epilog
+
+)");
+
 }
 
 #undef ARGS_HXX
