@@ -2,10 +2,9 @@
 
 #### Note that this library is essentially in maintenance mode.  I haven't had the time to work on it or give it the love that it deserves.  I'm not adding new features, but I will fix bugs.  I will also very gladly accept pull requests.
 
-[![build status](https://gitgud.io/Taywee/args/badges/master/build.svg)](https://gitgud.io/Taywee/args/commits/master)
-[![build status](https://travis-ci.org/pavel-belikov/args.svg?branch=master)](https://travis-ci.org/pavel-belikov/args)
-[![Build status](https://ci.appveyor.com/api/projects/status/976ht5hvt14wq78n?svg=true)](https://ci.appveyor.com/project/pavel-belikov/args)
-[![Coverage Status](https://coveralls.io/repos/github/pavel-belikov/args/badge.svg)](https://coveralls.io/github/pavel-belikov/args)
+[![build status](https://travis-ci.org/Taywee/args.svg?branch=master)](https://travis-ci.org/Taywee/args)
+[![Build status](https://ci.appveyor.com/api/projects/status/nlnlmpttdjlndyc2?svg=true)](https://ci.appveyor.com/project/Taywee/args)
+[![Coverage Status](https://coveralls.io/repos/github/Taywee/args/badge.svg?branch=master)](https://coveralls.io/github/Taywee/args?branch=master)
 
 A simple, small, flexible, single-header C++11 argument parsing library, in
 fewer than 2K lines of code.
