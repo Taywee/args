@@ -857,6 +857,46 @@ TEST_CASE("Subparser help works as expected", "[args]")
 
 }
 
+TEST_CASE("Subparser validation works as expected", "[args]")
+{
+    args::ArgumentParser p("parser");
+    args::Command a(p, "a", "command a", [](args::Subparser &s)
+    {
+        args::ValueFlag<std::string> f(s, "", "", {'f'}, args::Options::Required);
+        s.Parse();
+    });
+
+    args::Command b(p, "b", "command b");
+    args::ValueFlag<std::string> f(b, "", "", {'f'}, args::Options::Required);
+
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{}));
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"a"}), args::RequiredError);
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"a", "-f", "F"}));
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"b"}), args::RequiredError);
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"b", "-f", "F"}));
+
+    p.RequireCommand(true);
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{}), args::ValidationError);
+
+    p.RequireCommand(false);
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{}));
+}
+
+TEST_CASE("Global options work as expected", "[args]")
+{
+    args::Group globals;
+    args::Flag f(globals, "f", "f", {'f'});
+
+    args::ArgumentParser p("parser");
+    args::GlobalOptions g(p, globals);
+    args::Command a(p, "a", "command a");
+    args::Command b(p, "b", "command b");
+
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-f"}));
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"a", "-f"}));
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"b", "-f"}));
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT

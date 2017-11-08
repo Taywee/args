@@ -527,7 +527,7 @@ namespace args
             const std::string help;
 #ifdef ARGS_NOEXCEPT
             /// Only for ARGS_NOEXCEPT
-            Error error;
+            mutable Error error;
 #endif
 
         public:
@@ -544,7 +544,7 @@ namespace args
                 return matched;
             }
 
-            virtual void Validate(const std::string &, const std::string &)
+            virtual void Validate(const std::string &, const std::string &) const
             {
             }
 
@@ -674,7 +674,7 @@ namespace args
 #ifndef ARGS_NOEXCEPT
             if (max < min)
             {
-                throw std::invalid_argument("Nargs: max > min");
+                throw UsageError("Nargs: max > min");
             }
 #endif
         }
@@ -718,7 +718,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
+            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 if (!Matched() && (GetOptions() & Options::Required) != Options::None)
                 {
@@ -757,6 +757,20 @@ namespace args
             {
                 return true;
             }
+
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            virtual Error GetError() const override
+            {
+                const auto nargs = NumberOfArguments();
+                if (nargs.min > nargs.max)
+                {
+                    return Error::Usage;
+                }
+
+                return error;
+            }
+#endif
 
             /** Defines how many values can be consumed by this option.
              *
@@ -847,7 +861,7 @@ namespace args
                 return { "[" + Name() + ']' };
             }
 
-            virtual void Validate(const std::string &, const std::string &) override
+            virtual void Validate(const std::string &, const std::string &) const override
             {
                 if ((GetOptions() & Options::Required) != Options::None && !Matched())
                 {
@@ -962,7 +976,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
+            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 for (Base *child: Children())
                 {
@@ -1207,6 +1221,7 @@ namespace args
             mutable std::vector<std::string> subparserProgramLine;
             mutable bool subparserHasFlag = false;
             mutable bool subparserHasPositional = false;
+            mutable bool subparserHasCommand = false;
             mutable Subparser *subparser = nullptr;
 
         protected:
@@ -1431,7 +1446,7 @@ namespace args
                 auto res = Group::GetProgramLine(params);
                 res.insert(res.end(), subparserProgramLine.begin(), subparserProgramLine.end());
 
-                if (!params.proglineCommand.empty() && Group::HasCommand())
+                if (!params.proglineCommand.empty() && (Group::HasCommand() || subparserHasCommand))
                 {
                     res.insert(res.begin(), commandIsRequired ? params.proglineCommand : "[" + params.proglineCommand + "]");
                 }
@@ -1577,8 +1592,13 @@ namespace args
                 return descriptions;
             }
 
-            virtual void Validate(const std::string &shortprefix, const std::string &longprefix) override
+            virtual void Validate(const std::string &shortprefix, const std::string &longprefix) const override
             {
+                if (!Matched())
+                {
+                    return;
+                }
+
                 for (Base *child: Children())
                 {
                     if (child->IsGroup() && !child->Matched())
@@ -1594,6 +1614,22 @@ namespace args
 
                     child->Validate(shortprefix, longprefix);
                 }
+
+                if (subparser != nullptr)
+                {
+                    subparser->Validate(shortprefix, longprefix);
+                }
+
+                if (selectedCommand == nullptr && commandIsRequired && (Group::HasCommand() || subparserHasCommand))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Validation;
+#else
+                    std::ostringstream problem;
+                    problem << "Command is required";
+                    throw ValidationError(problem.str());
+#endif
+                }
             }
 
             virtual void Reset() noexcept override
@@ -1604,6 +1640,7 @@ namespace args
                 subparserDescription.clear();
                 subparserHasFlag = false;
                 subparserHasPositional = false;
+                subparserHasCommand = false;
             }
     };
 
@@ -2207,6 +2244,7 @@ namespace args
         command.subparserDescription = GetDescription(helpParams, 0);
         command.subparserHasFlag = HasFlag();
         command.subparserHasPositional = HasPositional();
+        command.subparserHasCommand = HasCommand();
         command.subparserProgramLine = GetProgramLine(helpParams);
         if (parser == nullptr)
         {
@@ -2219,6 +2257,7 @@ namespace args
         }
 
         auto it = parser->Parse(args.begin(), args.end());
+        command.Validate(parser->ShortPrefix(), parser->LongPrefix());
         kicked.assign(it, args.end());
     }
 
