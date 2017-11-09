@@ -1374,6 +1374,11 @@ namespace args
             const std::string &Help() const
             { return help; }
 
+            /** If value is true, parser will fail if no command was parsed.
+             */
+            void RequireCommand(bool value)
+            { commandIsRequired = value; }
+
             virtual bool IsGroup() const override
             { return false; }
 
@@ -1394,11 +1399,6 @@ namespace args
                 {
                     c->Match();
                 }
-            }
-
-            void RequireCommand(bool value)
-            {
-                commandIsRequired = value;
             }
 
             virtual FlagBase *Match(const EitherFlag &flag) override
