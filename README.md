@@ -59,6 +59,9 @@ It:
 * Allows you to create subparsers somewhat like argparse, through the use of
   kick-out arguments (check the gitlike.cxx example program for a simple sample
   of this)
+* Allow one value flag to take a specific number of values (like `--foo first
+  second`, where --foo slurps both arguments).
+* Allow you to have value flags only optionally accept values
 
 # What does it not do?
 
@@ -66,14 +69,9 @@ There are tons of things this library does not do!
 
 ## It will not ever:
 
-* Allow one value flag to take a specific number of values (like `--foo first
-  second`, where --foo slurps both arguments).  You can instead split that with
-  a flag list (`--foo first --foo second`) or a custom type extraction (
-  `--foo first,second`)
 * Allow you to intermix multiple different prefix types (eg. `++foo` and
   `--foo` in the same parser), though shortopt and longopt prefixes can be
   different.
-* Allow you to have value flags only optionally accept values
 * Allow you to make flags sensitive to order (like gnu find), or make them
   sensitive to relative ordering with positionals.  The only orderings that are
   order-sensitive are:
@@ -152,7 +150,7 @@ groups and spit out messages accordingly.
 
 Yes.  tests.cxx in the git repository has a set of standard tests (which are
 still relatively small in number, but I would welcome some expansion here), and
-thanks to GitLab's CI, these tests run with every single push:
+thanks to Travis CI and AppVeyor, these tests run with every single push:
 
 ```shell
 % make runtests

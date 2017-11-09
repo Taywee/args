@@ -160,7 +160,8 @@ namespace args
         Required,
         Map,
         Extra,
-        Help
+        Help,
+        Subparser,
     };
 #else
     /** Base error class
@@ -233,6 +234,15 @@ namespace args
         public:
             Help(const std::string &flag) : Error(flag) {}
             virtual ~Help() {};
+    };
+
+    /** (INTERNAL) An exception that emulates coroutine-like control flow for subparsers.
+     */
+    class SubparserError : public Error
+    {
+        public:
+            SubparserError() : Error("") {}
+            virtual ~SubparserError() {};
     };
 #endif
 
@@ -394,6 +404,8 @@ namespace args
             }
     };
 
+    /** Attributes for flags.
+     */
     enum class Options
     {
         /** Default options.
@@ -527,7 +539,7 @@ namespace args
             const std::string help;
 #ifdef ARGS_NOEXCEPT
             /// Only for ARGS_NOEXCEPT
-            Error error;
+            mutable Error error;
 #endif
 
         public:
@@ -544,7 +556,7 @@ namespace args
                 return matched;
             }
 
-            virtual void Validate(const std::string &, const std::string &)
+            virtual void Validate(const std::string &, const std::string &) const
             {
             }
 
@@ -664,6 +676,10 @@ namespace args
             }
     };
 
+    /** A number of arguments which can be consumed by an option.
+     *
+     * Represents a closed interval [min, max].
+     */
     struct Nargs
     {
         const size_t min;
@@ -674,7 +690,7 @@ namespace args
 #ifndef ARGS_NOEXCEPT
             if (max < min)
             {
-                throw std::invalid_argument("Nargs: max > min");
+                throw UsageError("Nargs: max > min");
             }
 #endif
         }
@@ -718,7 +734,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
+            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 if (!Matched() && (GetOptions() & Options::Required) != Options::None)
                 {
@@ -757,6 +773,20 @@ namespace args
             {
                 return true;
             }
+
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            virtual Error GetError() const override
+            {
+                const auto nargs = NumberOfArguments();
+                if (nargs.min > nargs.max)
+                {
+                    return Error::Usage;
+                }
+
+                return error;
+            }
+#endif
 
             /** Defines how many values can be consumed by this option.
              *
@@ -847,7 +877,7 @@ namespace args
                 return { "[" + Name() + ']' };
             }
 
-            virtual void Validate(const std::string &, const std::string &) override
+            virtual void Validate(const std::string &, const std::string &) const override
             {
                 if ((GetOptions() & Options::Required) != Options::None && !Matched())
                 {
@@ -962,7 +992,7 @@ namespace args
                 return nullptr;
             }
 
-            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) override
+            virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 for (Base *child: Children())
                 {
@@ -1136,6 +1166,8 @@ namespace args
 
     };
 
+    /** Class for using global options in ArgumentParser.
+     */
     class GlobalOptions : public Group
     {
         public:
@@ -1145,6 +1177,23 @@ namespace args
             }
     };
 
+    /** Utility class for building subparsers with coroutines/callbacks.
+     *
+     * Brief example:
+     * \code
+     * Command command(argumentParser, "command", "my command", [](args::Subparser &s)
+     * {
+     *      // your command flags/positionals
+     *      s.Parse(); //required
+     *      //your command code
+     * });
+     * \endcode
+     *
+     * For ARGS_NOEXCEPT mode don't forget to check `s.GetError()` after `s.Parse()`
+     * and return if it isn't equals to args::Error::None.
+     *
+     * \sa Command
+     */
     class Subparser : public Group
     {
         private:
@@ -1175,19 +1224,31 @@ namespace args
                 return command;
             }
 
+            /** (INTERNAL) Determines whether Parse was called or not.
+             */
             bool IsParsed() const
             {
                 return isParsed;
             }
 
+            /** Continue parsing arguments for new command.
+             */
             void Parse();
 
+            /** Returns a vector of kicked out arguments.
+             *
+             * \sa Base::KickOut
+             */
             const std::vector<std::string> &KickedOut() const noexcept
             {
                 return kicked;
             }
     };
 
+    /** Main class for building subparsers.
+     *
+     * /sa Subparser
+     */
     class Command : public Group
     {
         private:
@@ -1200,13 +1261,17 @@ namespace args
             std::string proglinePostfix;
 
             std::function<void(Subparser&)> parserCoroutine;
-            bool commandIsRequired = false;
+            bool commandIsRequired = true;
             Command *selectedCommand = nullptr;
 
             mutable std::vector<std::tuple<std::string, std::string, unsigned>> subparserDescription;
             mutable std::vector<std::string> subparserProgramLine;
             mutable bool subparserHasFlag = false;
             mutable bool subparserHasPositional = false;
+            mutable bool subparserHasCommand = false;
+#ifdef ARGS_NOEXCEPT
+            mutable Error subparserError = Error::None;
+#endif
             mutable Subparser *subparser = nullptr;
 
         protected:
@@ -1299,40 +1364,34 @@ namespace args
             void Epilog(const std::string &epilog_)
             { this->epilog = epilog_; }
 
-            const std::function<void(Subparser&)> &GetCoroutine() const
-            {
-                return parserCoroutine;
-            }
-
+            /** The name of command
+             */
             const std::string &Name() const
-            {
-                return name;
-            }
+            { return name; }
 
+            /** The description of command
+             */
             const std::string &Help() const
-            {
-                return help;
-            }
+            { return help; }
+
+            /** If value is true, parser will fail if no command was parsed.
+             *
+             * Default: true.
+             */
+            void RequireCommand(bool value)
+            { commandIsRequired = value; }
 
             virtual bool IsGroup() const override
-            {
-                return false;
-            }
+            { return false; }
 
             virtual bool Matched() const noexcept override
-            {
-                return Base::Matched();
-            }
+            { return Base::Matched(); }
 
             operator bool() const noexcept
-            {
-                return Matched();
-            }
+            { return Matched(); }
 
             void Match() noexcept
-            {
-                matched = true;
-            }
+            { matched = true; }
 
             void SelectCommand(Command *c) noexcept
             {
@@ -1342,11 +1401,6 @@ namespace args
                 {
                     c->Match();
                 }
-            }
-
-            void RequireCommand(bool value)
-            {
-                commandIsRequired = value;
             }
 
             virtual FlagBase *Match(const EitherFlag &flag) override
@@ -1431,7 +1485,7 @@ namespace args
                 auto res = Group::GetProgramLine(params);
                 res.insert(res.end(), subparserProgramLine.begin(), subparserProgramLine.end());
 
-                if (!params.proglineCommand.empty() && Group::HasCommand())
+                if (!params.proglineCommand.empty() && (Group::HasCommand() || subparserHasCommand))
                 {
                     res.insert(res.begin(), commandIsRequired ? params.proglineCommand : "[" + params.proglineCommand + "]");
                 }
@@ -1493,7 +1547,7 @@ namespace args
                     {
                         parserCoroutine(coro.Parser());
                     }
-                    catch (args::Help)
+                    catch (args::SubparserError)
                     {
                     }
 #else
@@ -1577,8 +1631,13 @@ namespace args
                 return descriptions;
             }
 
-            virtual void Validate(const std::string &shortprefix, const std::string &longprefix) override
+            virtual void Validate(const std::string &shortprefix, const std::string &longprefix) const override
             {
+                if (!Matched())
+                {
+                    return;
+                }
+
                 for (Base *child: Children())
                 {
                     if (child->IsGroup() && !child->Matched())
@@ -1594,6 +1653,22 @@ namespace args
 
                     child->Validate(shortprefix, longprefix);
                 }
+
+                if (subparser != nullptr)
+                {
+                    subparser->Validate(shortprefix, longprefix);
+                }
+
+                if (selectedCommand == nullptr && commandIsRequired && (Group::HasCommand() || subparserHasCommand))
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Validation;
+#else
+                    std::ostringstream problem;
+                    problem << "Command is required";
+                    throw ValidationError(problem.str());
+#endif
+                }
             }
 
             virtual void Reset() noexcept override
@@ -1604,7 +1679,34 @@ namespace args
                 subparserDescription.clear();
                 subparserHasFlag = false;
                 subparserHasPositional = false;
+                subparserHasCommand = false;
+#ifdef ARGS_NOEXCEPT
+                subparserError = Error::None;
+#endif
             }
+
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            virtual Error GetError() const override
+            {
+                if (!Matched())
+                {
+                    return Error::None;
+                }
+
+                if (error != Error::None)
+                {
+                    return error;
+                }
+
+                if (subparserError != Error::None)
+                {
+                    return subparserError;
+                }
+
+                return Group::GetError();
+            }
+#endif
     };
 
     /** The main user facing command line argument parser class
@@ -1877,9 +1979,21 @@ namespace args
                             RaiiSubparser coro(*this, std::vector<std::string>(it, end));
                             coroutine(coro.Parser());
 #ifdef ARGS_NOEXCEPT
-                            if (GetError() != Error::None)
+                            error = GetError();
+                            if (error != Error::None)
                             {
                                 return end;
+                            }
+
+                            if (!coro.Parser().IsParsed())
+                            {
+                                error = Error::Usage;
+                                return end;
+                            }
+#else
+                            if (!coro.Parser().IsParsed())
+                            {
+                                throw UsageError("Subparser::Parse was not called");
                             }
 #endif
 
@@ -2011,10 +2125,10 @@ namespace args
 
             /** Change allowed option separation.
              *
-             * \param allowJoinedShortValue Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field)
-             * \param allowJoinedLongValue Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field)
-             * \param allowSeparateShortValue Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
-             * \param allowSeparateLongValue Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             * \param allowJoinedShortValue_ Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field)
+             * \param allowJoinedLongValue_ Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field)
+             * \param allowSeparateShortValue_ Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             * \param allowSeparateLongValue_ Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
              */
             void SetArgumentSeparations(
                 const bool allowJoinedShortValue_,
@@ -2159,6 +2273,13 @@ namespace args
             {
                 // Reset all Matched statuses and errors
                 Reset();
+#ifdef ARGS_NOEXCEPT
+                error = GetError();
+                if (error != Error::None)
+                {
+                    return end;
+                }
+#endif
                 return Parse(begin, end);
             }
 
@@ -2204,22 +2325,29 @@ namespace args
     void Subparser::Parse()
     {
         isParsed = true;
+        Reset();
         command.subparserDescription = GetDescription(helpParams, 0);
         command.subparserHasFlag = HasFlag();
         command.subparserHasPositional = HasPositional();
+        command.subparserHasCommand = HasCommand();
         command.subparserProgramLine = GetProgramLine(helpParams);
         if (parser == nullptr)
         {
 #ifndef ARGS_NOEXCEPT
-            throw args::Help("");
+            throw args::SubparserError();
 #else
-            error = Error::Help;
+            error = Error::Subparser;
             return;
 #endif
         }
 
         auto it = parser->Parse(args.begin(), args.end());
+        command.Validate(parser->ShortPrefix(), parser->LongPrefix());
         kicked.assign(it, args.end());
+
+#ifdef ARGS_NOEXCEPT
+        command.subparserError = GetError();
+#endif
     }
 
     inline std::ostream &operator<<(std::ostream &os, const ArgumentParser &parser)
