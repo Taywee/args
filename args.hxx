@@ -1261,7 +1261,7 @@ namespace args
             std::string proglinePostfix;
 
             std::function<void(Subparser&)> parserCoroutine;
-            bool commandIsRequired = false;
+            bool commandIsRequired = true;
             Command *selectedCommand = nullptr;
 
             mutable std::vector<std::tuple<std::string, std::string, unsigned>> subparserDescription;
@@ -1375,6 +1375,8 @@ namespace args
             { return help; }
 
             /** If value is true, parser will fail if no command was parsed.
+             *
+             * Default: true.
              */
             void RequireCommand(bool value)
             { commandIsRequired = value; }

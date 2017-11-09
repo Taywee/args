@@ -770,6 +770,7 @@ TEST_CASE("Subparser help works as expected", "[args]")
     });
 
     p.Prog("git");
+    p.RequireCommand(false);
 
     std::ostringstream s;
 
@@ -877,14 +878,11 @@ TEST_CASE("Subparser validation works as expected", "[args]")
 
     args::Command c(p, "c", "command c", [](args::Subparser&){});
 
-    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{}));
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{}), args::ValidationError);
     REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"a"}), args::RequiredError);
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"a", "-f", "F"}));
     REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"b"}), args::RequiredError);
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"b", "-f", "F"}));
-
-    p.RequireCommand(true);
-    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{}), args::ValidationError);
 
     p.RequireCommand(false);
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{}));
@@ -903,6 +901,8 @@ TEST_CASE("Global options work as expected", "[args]")
     args::GlobalOptions g(p, globals);
     args::Command a(p, "a", "command a");
     args::Command b(p, "b", "command b");
+
+    p.RequireCommand(false);
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-f"}));
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"a", "-f"}));
@@ -1012,7 +1012,7 @@ TEST_CASE("Subparser validation works as expected in noexcept mode", "[args]")
     argstest::Command c(p, "c", "command c", [](argstest::Subparser&){});
 
     p.ParseArgs(std::vector<std::string>{});
-    REQUIRE(p.GetError() == argstest::Error::None);
+    REQUIRE(p.GetError() == argstest::Error::Validation);
 
     p.ParseArgs(std::vector<std::string>{"a"});
     REQUIRE((size_t)p.GetError() == (size_t)argstest::Error::Required);
@@ -1025,10 +1025,6 @@ TEST_CASE("Subparser validation works as expected in noexcept mode", "[args]")
 
     p.ParseArgs(std::vector<std::string>{"b", "-f", "F"});
     REQUIRE(p.GetError() == argstest::Error::None);
-
-    p.RequireCommand(true);
-    p.ParseArgs(std::vector<std::string>{});
-    REQUIRE(p.GetError() == argstest::Error::Validation);
 
     p.RequireCommand(false);
     p.ParseArgs(std::vector<std::string>{});
@@ -1046,3 +1042,4 @@ TEST_CASE("Nargs work as expected in noexcept mode", "[args]")
     parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"});
     REQUIRE(parser.GetError() == argstest::Error::Usage);
 }
+
