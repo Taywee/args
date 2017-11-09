@@ -160,7 +160,8 @@ namespace args
         Required,
         Map,
         Extra,
-        Help
+        Help,
+        Subparser,
     };
 #else
     /** Base error class
@@ -233,6 +234,15 @@ namespace args
         public:
             Help(const std::string &flag) : Error(flag) {}
             virtual ~Help() {};
+    };
+
+    /** (INTERNAL) An exception that emulates coroutine-like control flow for subparsers.
+     */
+    class SubparserError : public Error
+    {
+        public:
+            SubparserError() : Error("") {}
+            virtual ~SubparserError() {};
     };
 #endif
 
@@ -1222,6 +1232,9 @@ namespace args
             mutable bool subparserHasFlag = false;
             mutable bool subparserHasPositional = false;
             mutable bool subparserHasCommand = false;
+#ifdef ARGS_NOEXCEPT
+            mutable Error subparserError = Error::None;
+#endif
             mutable Subparser *subparser = nullptr;
 
         protected:
@@ -1508,7 +1521,7 @@ namespace args
                     {
                         parserCoroutine(coro.Parser());
                     }
-                    catch (args::Help)
+                    catch (args::SubparserError)
                     {
                     }
 #else
@@ -1641,7 +1654,33 @@ namespace args
                 subparserHasFlag = false;
                 subparserHasPositional = false;
                 subparserHasCommand = false;
+#ifdef ARGS_NOEXCEPT
+                subparserError = Error::None;
+#endif
             }
+
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            virtual Error GetError() const override
+            {
+                if (!Matched())
+                {
+                    return Error::None;
+                }
+
+                if (error != Error::None)
+                {
+                    return error;
+                }
+
+                if (subparserError != Error::None)
+                {
+                    return subparserError;
+                }
+
+                return Group::GetError();
+            }
+#endif
     };
 
     /** The main user facing command line argument parser class
@@ -1914,9 +1953,21 @@ namespace args
                             RaiiSubparser coro(*this, std::vector<std::string>(it, end));
                             coroutine(coro.Parser());
 #ifdef ARGS_NOEXCEPT
-                            if (GetError() != Error::None)
+                            error = GetError();
+                            if (error != Error::None)
                             {
                                 return end;
+                            }
+
+                            if (!coro.Parser().IsParsed())
+                            {
+                                error = Error::Usage;
+                                return end;
+                            }
+#else
+                            if (!coro.Parser().IsParsed())
+                            {
+                                throw UsageError("Subparser::Parse was not called");
                             }
 #endif
 
@@ -2196,6 +2247,13 @@ namespace args
             {
                 // Reset all Matched statuses and errors
                 Reset();
+#ifdef ARGS_NOEXCEPT
+                error = GetError();
+                if (error != Error::None)
+                {
+                    return end;
+                }
+#endif
                 return Parse(begin, end);
             }
 
@@ -2241,6 +2299,7 @@ namespace args
     void Subparser::Parse()
     {
         isParsed = true;
+        Reset();
         command.subparserDescription = GetDescription(helpParams, 0);
         command.subparserHasFlag = HasFlag();
         command.subparserHasPositional = HasPositional();
@@ -2249,9 +2308,9 @@ namespace args
         if (parser == nullptr)
         {
 #ifndef ARGS_NOEXCEPT
-            throw args::Help("");
+            throw args::SubparserError();
 #else
-            error = Error::Help;
+            error = Error::Subparser;
             return;
 #endif
         }
@@ -2259,6 +2318,10 @@ namespace args
         auto it = parser->Parse(args.begin(), args.end());
         command.Validate(parser->ShortPrefix(), parser->LongPrefix());
         kicked.assign(it, args.end());
+
+#ifdef ARGS_NOEXCEPT
+        command.subparserError = GetError();
+#endif
     }
 
     inline std::ostream &operator<<(std::ostream &os, const ArgumentParser &parser)

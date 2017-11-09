@@ -635,7 +635,10 @@ TEST_CASE("Nargs work as expected", "[args]")
     args::NargsValueFlag<int> a(parser, "", "", {'a'}, 2);
     args::NargsValueFlag<int> b(parser, "", "", {'b'}, {2, 3});
     args::NargsValueFlag<std::string> c(parser, "", "", {'c'}, {0, 2});
+    args::NargsValueFlag<int> d(parser, "", "", {'d'}, {1, 3});
     args::Flag f(parser, "", "", {'f'});
+
+    REQUIRE_THROWS_AS(args::Nargs(3, 2), args::UsageError);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"}));
     REQUIRE((args::get(a) == std::vector<int>{1, 2}));
@@ -676,6 +679,9 @@ TEST_CASE("Nargs work as expected", "[args]")
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-cf"}));
     REQUIRE((args::get(c) == std::vector<std::string>{"f"}));
     REQUIRE(args::get(f) == false);
+
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-d"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-b"}), args::ParseError);
 }
 
 TEST_CASE("Simple commands work as expected", "[args]")
@@ -869,6 +875,8 @@ TEST_CASE("Subparser validation works as expected", "[args]")
     args::Command b(p, "b", "command b");
     args::ValueFlag<std::string> f(b, "", "", {'f'}, args::Options::Required);
 
+    args::Command c(p, "c", "command c", [](args::Subparser&){});
+
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{}));
     REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"a"}), args::RequiredError);
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"a", "-f", "F"}));
@@ -880,6 +888,10 @@ TEST_CASE("Subparser validation works as expected", "[args]")
 
     p.RequireCommand(false);
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{}));
+
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"c"}), args::UsageError);
+
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"unknown-command"}), args::ParseError);
 }
 
 TEST_CASE("Global options work as expected", "[args]")
@@ -959,4 +971,78 @@ TEST_CASE("Noexcept mode works as expected", "[args]")
     REQUIRE(parser.GetError() == argstest::Error::Map);
     parser.ParseArgs(std::vector<std::string>{"--mf", "yellow"});
     REQUIRE(parser.GetError() == argstest::Error::None);
+}
+
+TEST_CASE("Required flags work as expected in noexcept mode", "[args]")
+{
+    argstest::ArgumentParser parser1("Test command");
+    argstest::ValueFlag<int> foo(parser1, "foo", "foo", {'f', "foo"}, argstest::Options::Required);
+    argstest::ValueFlag<int> bar(parser1, "bar", "bar", {'b', "bar"});
+
+    parser1.ParseArgs(std::vector<std::string>{"-f", "42"});
+    REQUIRE(foo.Get() == 42);
+    REQUIRE(parser1.GetError() == argstest::Error::None);
+
+    parser1.ParseArgs(std::vector<std::string>{"-b4"});
+    REQUIRE(parser1.GetError() == argstest::Error::Required);
+
+    argstest::ArgumentParser parser2("Test command");
+    argstest::Positional<int> pos1(parser2, "a", "a");
+    parser2.ParseArgs(std::vector<std::string>{});
+    REQUIRE(parser2.GetError() == argstest::Error::None);
+
+    argstest::ArgumentParser parser3("Test command");
+    argstest::Positional<int> pos2(parser3, "a", "a", argstest::Options::Required);
+    parser3.ParseArgs(std::vector<std::string>{});
+    REQUIRE(parser3.GetError() == argstest::Error::Required);
+}
+
+TEST_CASE("Subparser validation works as expected in noexcept mode", "[args]")
+{
+    argstest::ArgumentParser p("parser");
+    argstest::Command a(p, "a", "command a", [](argstest::Subparser &s)
+    {
+        argstest::ValueFlag<std::string> f(s, "", "", {'f'}, argstest::Options::Required);
+        s.Parse();
+    });
+
+    argstest::Command b(p, "b", "command b");
+    argstest::ValueFlag<std::string> f(b, "", "", {'f'}, argstest::Options::Required);
+
+    argstest::Command c(p, "c", "command c", [](argstest::Subparser&){});
+
+    p.ParseArgs(std::vector<std::string>{});
+    REQUIRE(p.GetError() == argstest::Error::None);
+
+    p.ParseArgs(std::vector<std::string>{"a"});
+    REQUIRE((size_t)p.GetError() == (size_t)argstest::Error::Required);
+
+    p.ParseArgs(std::vector<std::string>{"a", "-f", "F"});
+    REQUIRE(p.GetError() == argstest::Error::None);
+
+    p.ParseArgs(std::vector<std::string>{"b"});
+    REQUIRE(p.GetError() == argstest::Error::Required);
+
+    p.ParseArgs(std::vector<std::string>{"b", "-f", "F"});
+    REQUIRE(p.GetError() == argstest::Error::None);
+
+    p.RequireCommand(true);
+    p.ParseArgs(std::vector<std::string>{});
+    REQUIRE(p.GetError() == argstest::Error::Validation);
+
+    p.RequireCommand(false);
+    p.ParseArgs(std::vector<std::string>{});
+    REQUIRE(p.GetError() == argstest::Error::None);
+
+    p.ParseArgs(std::vector<std::string>{"c"});
+    REQUIRE(p.GetError() == argstest::Error::Usage);
+}
+
+TEST_CASE("Nargs work as expected in noexcept mode", "[args]")
+{
+    argstest::ArgumentParser parser("Test command");
+    argstest::NargsValueFlag<int> a(parser, "", "", {'a'}, {3, 2});
+
+    parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"});
+    REQUIRE(parser.GetError() == argstest::Error::Usage);
 }
