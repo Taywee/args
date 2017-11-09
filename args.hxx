@@ -404,6 +404,8 @@ namespace args
             }
     };
 
+    /** Attributes for flags.
+     */
     enum class Options
     {
         /** Default options.
@@ -674,6 +676,10 @@ namespace args
             }
     };
 
+    /** A number of arguments which can be consumed by an option.
+     *
+     * Represents a closed interval [min, max].
+     */
     struct Nargs
     {
         const size_t min;
@@ -1160,6 +1166,8 @@ namespace args
 
     };
 
+    /** Class for using global options in ArgumentParser.
+     */
     class GlobalOptions : public Group
     {
         public:
@@ -1169,6 +1177,23 @@ namespace args
             }
     };
 
+    /** Utility class for building subparsers with coroutines/callbacks.
+     *
+     * Brief example:
+     * \code
+     * Command command(argumentParser, "command", "my command", [](args::Subparser &s)
+     * {
+     *      // your command flags/positionals
+     *      s.Parse(); //required
+     *      //your command code
+     * });
+     * \endcode
+     *
+     * For ARGS_NOEXCEPT mode don't forget to check `s.GetError()` after `s.Parse()`
+     * and return if it isn't equals to args::Error::None.
+     *
+     * \sa Command
+     */
     class Subparser : public Group
     {
         private:
@@ -1199,19 +1224,31 @@ namespace args
                 return command;
             }
 
+            /** (INTERNAL) Determines whether Parse was called or not.
+             */
             bool IsParsed() const
             {
                 return isParsed;
             }
 
+            /** Continue parsing arguments for new command.
+             */
             void Parse();
 
+            /** Returns a vector of kicked out arguments.
+             *
+             * \sa Base::KickOut
+             */
             const std::vector<std::string> &KickedOut() const noexcept
             {
                 return kicked;
             }
     };
 
+    /** Main class for building subparsers.
+     *
+     * /sa Subparser
+     */
     class Command : public Group
     {
         private:
@@ -1327,40 +1364,27 @@ namespace args
             void Epilog(const std::string &epilog_)
             { this->epilog = epilog_; }
 
-            const std::function<void(Subparser&)> &GetCoroutine() const
-            {
-                return parserCoroutine;
-            }
-
+            /** The name of command
+             */
             const std::string &Name() const
-            {
-                return name;
-            }
+            { return name; }
 
+            /** The description of command
+             */
             const std::string &Help() const
-            {
-                return help;
-            }
+            { return help; }
 
             virtual bool IsGroup() const override
-            {
-                return false;
-            }
+            { return false; }
 
             virtual bool Matched() const noexcept override
-            {
-                return Base::Matched();
-            }
+            { return Base::Matched(); }
 
             operator bool() const noexcept
-            {
-                return Matched();
-            }
+            { return Matched(); }
 
             void Match() noexcept
-            {
-                matched = true;
-            }
+            { matched = true; }
 
             void SelectCommand(Command *c) noexcept
             {
@@ -2099,10 +2123,10 @@ namespace args
 
             /** Change allowed option separation.
              *
-             * \param allowJoinedShortValue Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field)
-             * \param allowJoinedLongValue Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field)
-             * \param allowSeparateShortValue Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
-             * \param allowSeparateLongValue Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             * \param allowJoinedShortValue_ Allow a short flag that accepts an argument to be passed its argument immediately next to it (ie. in the same argv field)
+             * \param allowJoinedLongValue_ Allow a long flag that accepts an argument to be passed its argument separated by the longseparator (ie. in the same argv field)
+             * \param allowSeparateShortValue_ Allow a short flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
+             * \param allowSeparateLongValue_ Allow a long flag that accepts an argument to be passed its argument separated by whitespace (ie. in the next argv field)
              */
             void SetArgumentSeparations(
                 const bool allowJoinedShortValue_,
