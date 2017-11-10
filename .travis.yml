@@ -42,7 +42,7 @@ matrix:
               apt:
                   sources: ['ubuntu-toolchain-r-test']
                   packages: ['g++-6']
-          env: COMPILER=g++-6 CONFIG=Debug
+          env: COMPILER=g++-6 CONFIG=Debug FLAGS='-fsanitize=address,undefined -fno-sanitize-recover=all'
 
         - os: linux
           addons:
