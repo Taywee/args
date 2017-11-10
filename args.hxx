@@ -532,18 +532,18 @@ namespace args
     class Base
     {
         private:
-            Options options;
+            Options options = {};
 
         protected:
-            bool matched;
+            bool matched = false;
             const std::string help;
 #ifdef ARGS_NOEXCEPT
             /// Only for ARGS_NOEXCEPT
-            mutable Error error;
+            mutable Error error = Error::None;
 #endif
 
         public:
-            Base(const std::string &help_, Options options_ = {}) : options(options_), matched(false), help(help_) {}
+            Base(const std::string &help_, Options options_ = {}) : options(options_), help(help_) {}
             virtual ~Base() {}
 
             Options GetOptions() const noexcept
@@ -655,10 +655,10 @@ namespace args
     {
         protected:
             const std::string name;
-            bool kickout;
+            bool kickout = false;
 
         public:
-            NamedBase(const std::string &name_, const std::string &help_, Options options_ = {}) : Base(help_, options_), name(name_), kickout(false) {}
+            NamedBase(const std::string &name_, const std::string &help_, Options options_ = {}) : Base(help_, options_), name(name_) {}
             virtual ~NamedBase() {}
 
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &, const unsigned indentLevel) const override
@@ -1723,10 +1723,10 @@ namespace args
 
             std::string terminator;
 
-            bool allowJoinedShortValue;
-            bool allowJoinedLongValue;
-            bool allowSeparateShortValue;
-            bool allowSeparateLongValue;
+            bool allowJoinedShortValue = true;
+            bool allowJoinedLongValue = true;
+            bool allowSeparateShortValue = true;
+            bool allowSeparateLongValue = true;
 
         protected:
             enum class OptionType
