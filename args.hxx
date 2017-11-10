@@ -2317,7 +2317,7 @@ namespace args
         command.subparser = &parser;
     }
 
-    Command::RaiiSubparser::RaiiSubparser(const Command &command_, const HelpParams &params_): command(command_), parser(command, params_)
+    Command::RaiiSubparser::RaiiSubparser(const Command &command_, const HelpParams &params_): command(command_), parser(command, params_), oldSubparser(command.subparser)
     {
         command.subparser = &parser;
     }
