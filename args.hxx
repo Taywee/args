@@ -291,6 +291,11 @@ namespace args
         {
             return isShort ? std::string(1, shortFlag) : longFlag;
         }
+
+        std::string str(const std::string &shortPrefix, const std::string &longPrefix) const
+        {
+            return isShort ? shortPrefix + std::string(1, shortFlag) : longPrefix + longFlag;
+        }
     };
 
 
@@ -316,7 +321,22 @@ namespace args
             Matcher(ShortIt shortFlagsStart, ShortIt shortFlagsEnd, LongIt longFlagsStart, LongIt longFlagsEnd) :
                 shortFlags(shortFlagsStart, shortFlagsEnd),
                 longFlags(longFlagsStart, longFlagsEnd)
-            {}
+            {
+                if (shortFlags.empty() && longFlags.empty())
+                {
+#ifndef ARGS_NOEXCEPT
+                    throw UsageError("empty Matcher");
+#endif
+                }
+            }
+
+#ifdef ARGS_NOEXCEPT
+            /// Only for ARGS_NOEXCEPT
+            Error GetError() const noexcept
+            {
+                return shortFlags.empty() && longFlags.empty() ? Error::Usage : Error::None;
+            }
+#endif
 
             /** Specify short and long flags separately as iterables
              *
@@ -324,7 +344,7 @@ namespace args
              */
             template <typename Short, typename Long>
             Matcher(Short &&shortIn, Long &&longIn) :
-                shortFlags(std::begin(shortIn), std::end(shortIn)), longFlags(std::begin(longIn), std::end(longIn))
+                Matcher(std::begin(shortIn), std::end(shortIn), std::begin(longIn), std::end(longIn))
             {}
 
             /** Specify a mixed single initializer-list of both short and long flags
@@ -340,7 +360,7 @@ namespace args
              *     args::Matcher{"foo", 'f', 'F', "FoO"}
              */
             Matcher(std::initializer_list<EitherFlag> in) :
-                shortFlags(EitherFlag::GetShort(in)), longFlags(EitherFlag::GetLong(in)) {}
+                Matcher(EitherFlag::GetShort(in), EitherFlag::GetLong(in)) {}
 
             Matcher(Matcher &&other) : shortFlags(std::move(other.shortFlags)), longFlags(std::move(other.longFlags))
             {}
@@ -370,37 +390,55 @@ namespace args
 
             /** (INTERNAL) Get all flag strings as a vector, with the prefixes embedded
              */
-            std::vector<std::string> GetFlagStrings(const std::string &shortPrefix, const std::string &longPrefix) const
+            std::vector<EitherFlag> GetFlagStrings() const
             {
-                std::vector<std::string> flagStrings;
+                std::vector<EitherFlag> flagStrings;
                 flagStrings.reserve(shortFlags.size() + longFlags.size());
                 for (const char flag: shortFlags)
                 {
-                    flagStrings.emplace_back(shortPrefix + std::string(1, flag));
+                    flagStrings.emplace_back(flag);
                 }
                 for (const std::string &flag: longFlags)
                 {
-                    flagStrings.emplace_back(longPrefix + flag);
+                    flagStrings.emplace_back(flag);
                 }
                 return flagStrings;
             }
 
-            /** (INTERNAL) Get all flag strings as a vector, with the prefixes and names embedded
+            /** (INTERNAL) Get long flag if it exists or any short flag
              */
-            std::vector<std::string> GetFlagStrings(const std::string &shortPrefix, const std::string &longPrefix, const std::string &name, const std::string &shortSeparator, const std::string longSeparator) const
+            EitherFlag GetLongOrAny() const
             {
-                const std::string bracedname(std::string("[") + name + "]");
-                std::vector<std::string> flagStrings;
-                flagStrings.reserve(shortFlags.size() + longFlags.size());
-                for (const char flag: shortFlags)
+                if (!longFlags.empty())
                 {
-                    flagStrings.emplace_back(shortPrefix + std::string(1, flag) + shortSeparator + bracedname);
+                    return *longFlags.begin();
                 }
-                for (const std::string &flag: longFlags)
+
+                if (!shortFlags.empty())
                 {
-                    flagStrings.emplace_back(longPrefix + flag + longSeparator + bracedname);
+                    return *shortFlags.begin();
                 }
-                return flagStrings;
+
+                // should be unreachable
+                return ' ';
+            }
+
+            /** (INTERNAL) Get short flag if it exists or any long flag
+             */
+            EitherFlag GetShortOrAny() const
+            {
+                if (!shortFlags.empty())
+                {
+                    return *shortFlags.begin();
+                }
+
+                if (!longFlags.empty())
+                {
+                    return *longFlags.begin();
+                }
+
+                // should be unreachable
+                return ' ';
             }
     };
 
@@ -442,6 +480,11 @@ namespace args
     {
         return static_cast<Options>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
+
+    class FlagBase;
+    class PositionalBase;
+    class Command;
+    class ArgumentParser;
 
     /** A simple structure of parameters for easy user-modifyable help menus
      */
@@ -520,12 +563,15 @@ namespace args
         /** The prefix for progline when command has any subcommands
          */
         std::string proglineCommand = "COMMAND";
-    };
 
-    class FlagBase;
-    class PositionalBase;
-    class Command;
-    class ArgumentParser;
+        /** Show flags in program line
+         */
+        bool proglineShowFlags = false;
+
+        /** Use short flags in program lines when possible
+         */
+        bool proglinePreferShortFlags = false;
+    };
 
     /** Base class for all match types
      */
@@ -549,6 +595,11 @@ namespace args
             Options GetOptions() const noexcept
             {
                 return options;
+            }
+
+            bool IsRequired() const noexcept
+            {
+                return (GetOptions() & Options::Required) != Options::None;
             }
 
             virtual bool Matched() const noexcept
@@ -698,6 +749,16 @@ namespace args
         Nargs(size_t num_) : min(num_), max(num_)
         {
         }
+
+        friend bool operator == (const Nargs &lhs, const Nargs &rhs)
+        {
+            return lhs.min == rhs.min && lhs.max == rhs.max;
+        }
+
+        friend bool operator != (const Nargs &lhs, const Nargs &rhs)
+        {
+            return !(lhs == rhs);
+        }
     };
 
     /** Base class for all flag options
@@ -736,7 +797,7 @@ namespace args
 
             virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
-                if (!Matched() && (GetOptions() & Options::Required) != Options::None)
+                if (!Matched() && IsRequired())
                 {
 #ifdef ARGS_NOEXCEPT
                         (void)shortPrefix;
@@ -744,26 +805,51 @@ namespace args
                         error = Error::Required;
 #else
                         std::ostringstream problem;
-                        problem << "Flag '" << matcher.GetFlagStrings(shortPrefix, longPrefix).at(0) << "' is required";
+                        problem << "Flag '" << matcher.GetLongOrAny().str(shortPrefix, longPrefix) << "' is required";
                         throw RequiredError(problem.str());
 #endif
                 }
             }
 
+            virtual std::vector<std::string> GetProgramLine(const HelpParams &params) const override
+            {
+                if (!params.proglineShowFlags)
+                {
+                    return {};
+                }
+
+                const std::string postfix = NumberOfArguments() == 0 ? std::string() : Name();
+                const EitherFlag flag = params.proglinePreferShortFlags ? matcher.GetShortOrAny() : matcher.GetLongOrAny();
+                std::string res = flag.str(params.shortPrefix, params.longPrefix);
+                if (!postfix.empty())
+                {
+                    res += " <" + postfix + ">";
+                }
+
+                return { IsRequired() ? res : "[" + res + "]" };
+            }
+
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                const auto flagStrings = matcher.GetFlagStrings(params.shortPrefix, params.longPrefix);
-                std::ostringstream flagstream;
-                for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
+                const std::string postfix = NumberOfArguments() == 0 ? std::string() : Name();
+                std::string flags;
+                for (const auto &flag : matcher.GetFlagStrings())
                 {
-                    if (it != std::begin(flagStrings))
+                    if (!flags.empty())
                     {
-                        flagstream << ", ";
+                        flags += ", ";
                     }
-                    flagstream << *it;
+
+                    flags += flag.isShort ? params.shortPrefix : params.longPrefix;
+                    flags += flag.str();
+                    if (!postfix.empty())
+                    {
+                        flags += flag.isShort ? params.shortSeparator : params.longSeparator;
+                        flags += "[" + postfix + "]";
+                    }
                 }
-                std::get<0>(description) = flagstream.str();
+                std::get<0>(description) = std::move(flags);
                 std::get<1>(description) = help;
                 std::get<2>(description) = indentLevel;
                 return { std::move(description) };
@@ -782,6 +868,12 @@ namespace args
                 if (nargs.min > nargs.max)
                 {
                     return Error::Usage;
+                }
+
+                const auto matcherError = matcher.GetError();
+                if (matcherError != Error::None)
+                {
+                    return matcherError;
                 }
 
                 return error;
@@ -809,25 +901,6 @@ namespace args
             ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : FlagBase(name_, help_, std::move(matcher_), extraError_) {}
             ValueFlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_) : FlagBase(name_, help_, std::move(matcher_), options_) {}
             virtual ~ValueFlagBase() {}
-
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
-            {
-                std::tuple<std::string, std::string, unsigned> description;
-                const auto flagStrings = matcher.GetFlagStrings(params.shortPrefix, params.longPrefix, Name(), params.shortSeparator, params.longSeparator);
-                std::ostringstream flagstream;
-                for (auto it = std::begin(flagStrings); it != std::end(flagStrings); ++it)
-                {
-                    if (it != std::begin(flagStrings))
-                    {
-                        flagstream << ", ";
-                    }
-                    flagstream << *it;
-                }
-                std::get<0>(description) = flagstream.str();
-                std::get<1>(description) = help;
-                std::get<2>(description) = indentLevel;
-                return { std::move(description) };
-            }
 
             virtual Nargs NumberOfArguments() const noexcept override
             {
@@ -874,12 +947,12 @@ namespace args
 
             virtual std::vector<std::string> GetProgramLine(const HelpParams &) const override
             {
-                return { "[" + Name() + ']' };
+                return { IsRequired() ? Name() : "[" + Name() + ']' };
             }
 
             virtual void Validate(const std::string &, const std::string &) const override
             {
-                if ((GetOptions() & Options::Required) != Options::None && !Matched())
+                if (IsRequired() && !Matched())
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Required;
@@ -1327,6 +1400,25 @@ namespace args
                 return *res;
             }
 
+            void UpdateSubparserHelp(const HelpParams &params) const
+            {
+                if (parserCoroutine)
+                {
+                    RaiiSubparser coro(*this, params);
+#ifndef ARGS_NOEXCEPT
+                    try
+                    {
+                        parserCoroutine(coro.Parser());
+                    }
+                    catch (args::SubparserError)
+                    {
+                    }
+#else
+                    parserCoroutine(coro.Parser());
+#endif
+                }
+            }
+
         public:
             Command(Group &base_, std::string name_, std::string help_, std::function<void(Subparser&)> coroutine_ = {})
                 : name(std::move(name_)), help(std::move(help_)), parserCoroutine(std::move(coroutine_))
@@ -1482,6 +1574,8 @@ namespace args
 
             std::vector<std::string> GetCommandProgramLine(const HelpParams &params) const
             {
+                UpdateSubparserHelp(params);
+
                 auto res = Group::GetProgramLine(params);
                 res.insert(res.end(), subparserProgramLine.begin(), subparserProgramLine.end());
 
@@ -1495,7 +1589,7 @@ namespace args
                     res.insert(res.begin(), Name());
                 }
 
-                if ((subparserHasFlag || Group::HasFlag()) && params.showProglineOptions)
+                if ((subparserHasFlag || Group::HasFlag()) && params.showProglineOptions && !params.proglineShowFlags)
                 {
                     res.push_back(params.proglineOptions);
                 }
@@ -1510,8 +1604,12 @@ namespace args
 
             virtual std::vector<std::string> GetProgramLine(const HelpParams &params) const override
             {
-                auto &command = SelectedCommand();
-                return command.Matched() ? command.GetCommandProgramLine(params) : std::vector<std::string>();
+                if (!Matched())
+                {
+                    return {};
+                }
+
+                return GetCommandProgramLine(params);
             }
 
             virtual std::vector<Command*> GetCommands() override
@@ -1531,30 +1629,10 @@ namespace args
 
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned int indent) const override
             {
-                if (selectedCommand != nullptr)
-                {
-                    return selectedCommand->GetDescription(params, indent);
-                }
-
                 std::vector<std::tuple<std::string, std::string, unsigned>> descriptions;
                 unsigned addindent = 0;
 
-                if ((params.showCommandChildren || params.showCommandFullHelp) && !Matched() && parserCoroutine)
-                {
-                    RaiiSubparser coro(*this, params);
-#ifndef ARGS_NOEXCEPT
-                    try
-                    {
-                        parserCoroutine(coro.Parser());
-                    }
-                    catch (args::SubparserError)
-                    {
-                    }
-#else
-                    parserCoroutine(coro.Parser());
-#endif
-                }
-
+                UpdateSubparserHelp(params);
 
                 if (!Matched())
                 {
@@ -1562,7 +1640,7 @@ namespace args
                     {
                         std::ostringstream s;
                         bool empty = true;
-                        for (const auto &progline : GetCommandProgramLine(params))
+                        for (const auto &progline: GetCommandProgramLine(params))
                         {
                             if (!empty)
                             {
