@@ -958,6 +958,12 @@ TEST_CASE("GetProgramLine works as expected", "[args]")
     REQUIRE(line(b) == "b -f <STRING> [positional]");
 }
 
+TEST_CASE("Matcher validation works as expected", "[args]")
+{
+    args::ArgumentParser parser("Test command");
+    REQUIRE_THROWS_AS(args::ValueFlag<int>(parser, "", "", {}), args::UsageError);
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
@@ -1088,6 +1094,17 @@ TEST_CASE("Nargs work as expected in noexcept mode", "[args]")
     argstest::ArgumentParser parser("Test command");
     argstest::NargsValueFlag<int> a(parser, "", "", {'a'}, {3, 2});
 
+    REQUIRE(parser.GetError() == argstest::Error::Usage);
+    parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"});
+    REQUIRE(parser.GetError() == argstest::Error::Usage);
+}
+
+TEST_CASE("Matcher validation works as expected in noexcept mode", "[args]")
+{
+    argstest::ArgumentParser parser("Test command");
+    argstest::ValueFlag<int> a(parser, "", "", {});
+
+    REQUIRE(parser.GetError() == argstest::Error::Usage);
     parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"});
     REQUIRE(parser.GetError() == argstest::Error::Usage);
 }

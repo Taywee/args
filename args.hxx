@@ -344,7 +344,7 @@ namespace args
              */
             template <typename Short, typename Long>
             Matcher(Short &&shortIn, Long &&longIn) :
-                shortFlags(std::begin(shortIn), std::end(shortIn)), longFlags(std::begin(longIn), std::end(longIn))
+                Matcher(std::begin(shortIn), std::end(shortIn), std::begin(longIn), std::end(longIn))
             {}
 
             /** Specify a mixed single initializer-list of both short and long flags
@@ -360,7 +360,7 @@ namespace args
              *     args::Matcher{"foo", 'f', 'F', "FoO"}
              */
             Matcher(std::initializer_list<EitherFlag> in) :
-                shortFlags(EitherFlag::GetShort(in)), longFlags(EitherFlag::GetLong(in)) {}
+                Matcher(EitherFlag::GetShort(in), EitherFlag::GetLong(in)) {}
 
             Matcher(Matcher &&other) : shortFlags(std::move(other.shortFlags)), longFlags(std::move(other.longFlags))
             {}
