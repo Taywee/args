@@ -909,6 +909,55 @@ TEST_CASE("Global options work as expected", "[args]")
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"b", "-f"}));
 }
 
+TEST_CASE("GetProgramLine works as expected", "[args]")
+{
+    args::ArgumentParser p("parser");
+    args::Flag g(p, "g", "g", {'g'}, args::Options::Global);
+    args::Flag hidden(p, "hidden", "hidden flag", {'h'}, args::Options::Hidden);
+    args::Command a(p, "a", "command a", [](args::Subparser &s)
+    {
+        args::ValueFlag<std::string> f(s, "STRING", "my f flag", {'f', "f-long"}, args::Options::Required);
+        args::Positional<std::string> pos(s, "positional", "positional", args::Options::Required);
+        s.Parse();
+    });
+
+    args::Command b(p, "b", "command b");
+    args::ValueFlag<std::string> f(b, "STRING", "my f flag", {'f'}, args::Options::Required);
+    args::Positional<std::string> pos(b, "positional", "positional");
+
+    auto line = [&](args::Command &element)
+    {
+        p.Reset();
+        auto strings = element.GetCommandProgramLine(p.helpParams);
+        std::string res;
+        for (const std::string &s: strings)
+        {
+            if (!res.empty())
+            {
+                res += ' ';
+            }
+
+            res += s;
+        }
+
+        return res;
+    };
+
+    REQUIRE(line(p) == "COMMAND {OPTIONS}");
+    REQUIRE(line(a) == "a positional {OPTIONS}");
+    REQUIRE(line(b) == "b [positional] {OPTIONS}");
+
+    p.helpParams.proglineShowFlags = true;
+    REQUIRE(line(p) == "COMMAND [-g]");
+    REQUIRE(line(a) == "a --f-long <STRING> positional");
+    REQUIRE(line(b) == "b -f <STRING> [positional]");
+
+    p.helpParams.proglinePreferShortFlags = true;
+    REQUIRE(line(p) == "COMMAND [-g]");
+    REQUIRE(line(a) == "a -f <STRING> positional");
+    REQUIRE(line(b) == "b -f <STRING> [positional]");
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
