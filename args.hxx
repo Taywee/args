@@ -571,6 +571,26 @@ namespace args
         /** Use short flags in program lines when possible
          */
         bool proglinePreferShortFlags = false;
+
+        /** Program line prefix
+         */
+        std::string usageString;
+
+        /** String shown in help before flags descriptions
+         */
+        std::string optionsString = "OPTIONS:";
+
+        /** Display value name after all the long and short flags
+         */
+        bool useValueNameOnce = false;
+
+        /** Show value name
+         */
+        bool showValueName = true;
+
+        /** Add newline before flag description
+         */
+        bool addNewlineBeforeDescription = false;
     };
 
     /** Base class for all match types
@@ -832,9 +852,11 @@ namespace args
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                const std::string postfix = NumberOfArguments() == 0 ? std::string() : Name();
+                const std::string postfix = !params.showValueName || NumberOfArguments() == 0 ? std::string() : Name();
                 std::string flags;
-                for (const auto &flag : matcher.GetFlagStrings())
+                const auto flagStrings = matcher.GetFlagStrings();
+                const bool useValueNameOnce = flagStrings.size() == 1 ? false : params.useValueNameOnce;
+                for (const auto &flag : flagStrings)
                 {
                     if (!flags.empty())
                     {
@@ -843,12 +865,18 @@ namespace args
 
                     flags += flag.isShort ? params.shortPrefix : params.longPrefix;
                     flags += flag.str();
-                    if (!postfix.empty())
+                    if (!postfix.empty() && !useValueNameOnce)
                     {
                         flags += flag.isShort ? params.shortSeparator : params.longSeparator;
                         flags += "[" + postfix + "]";
                     }
                 }
+
+                if (!postfix.empty() && useValueNameOnce)
+                {
+                    flags += " [" + postfix + "]";
+                }
+
                 std::get<0>(description) = std::move(flags);
                 std::get<1>(description) = help;
                 std::get<2>(description) = indentLevel;
@@ -2236,7 +2264,7 @@ namespace args
                 const bool hasarguments = command.HasPositional();
 
                 std::ostringstream prognameline;
-                prognameline << Prog();
+                prognameline << helpParams.usageString << Prog();
 
                 for (const std::string &posname: command.GetProgramLine(helpParams))
                 {
@@ -2268,7 +2296,11 @@ namespace args
 
                 bool lastDescriptionIsNewline = false;
 
-                help_ << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
+                if (!helpParams.optionsString.empty())
+                {
+                    help_ << std::string(helpParams.progindent, ' ') << helpParams.optionsString << "\n\n";
+                }
+
                 for (const auto &desc: command.GetDescription(helpParams, 0))
                 {
                     lastDescriptionIsNewline = std::get<0>(desc).empty() && std::get<1>(desc).empty();
@@ -2289,7 +2321,7 @@ namespace args
 
                     auto infoit = std::begin(info);
                     // groupindent is on both sides of this inequality, and therefore can be removed
-                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent || infoit == std::end(info))
+                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent || infoit == std::end(info) || helpParams.addNewlineBeforeDescription)
                     {
                         help_ << '\n';
                     } else

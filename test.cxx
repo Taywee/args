@@ -964,6 +964,78 @@ TEST_CASE("Matcher validation works as expected", "[args]")
     REQUIRE_THROWS_AS(args::ValueFlag<int>(parser, "", "", {}), args::UsageError);
 }
 
+TEST_CASE("HelpParams work as expected", "[args]")
+{
+    args::ArgumentParser p("parser");
+    args::ValueFlag<std::string> f(p, "name", "description", {'f', "foo"});
+    args::ValueFlag<std::string> g(p, "name", "description", {'g'});
+    p.Prog("prog");
+
+    REQUIRE(p.Help() == R"(  prog {OPTIONS}
+
+    parser
+
+  OPTIONS:
+
+      -f[name], --foo=[name]            description
+      -g[name]                          description
+
+)");
+
+    p.helpParams.usageString = "usage: ";
+    p.helpParams.optionsString = "Options";
+    p.helpParams.useValueNameOnce = true;
+    REQUIRE(p.Help() == R"(  usage: prog {OPTIONS}
+
+    parser
+
+  Options
+
+      -f, --foo [name]                  description
+      -g[name]                          description
+
+)");
+
+    p.helpParams.showValueName = false;
+    p.helpParams.optionsString = {};
+    REQUIRE(p.Help() == R"(  usage: prog {OPTIONS}
+
+    parser
+
+      -f, --foo                         description
+      -g                                description
+
+)");
+
+    p.helpParams.helpindent = 12;
+    p.helpParams.optionsString = "Options";
+    REQUIRE(p.Help() == R"(  usage: prog {OPTIONS}
+
+    parser
+
+  Options
+
+      -f, --foo
+            description
+      -g    description
+
+)");
+
+    p.helpParams.addNewlineBeforeDescription = true;
+    REQUIRE(p.Help() == R"(  usage: prog {OPTIONS}
+
+    parser
+
+  Options
+
+      -f, --foo
+            description
+      -g
+            description
+
+)");
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
