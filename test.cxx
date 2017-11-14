@@ -968,7 +968,7 @@ TEST_CASE("HelpParams work as expected", "[args]")
 {
     args::ArgumentParser p("parser");
     args::ValueFlag<std::string> f(p, "name", "description", {'f', "foo"});
-    args::ValueFlag<std::string> g(p, "name", "description", {'g'});
+    args::ValueFlag<std::string> g(p, "name", "description\n  d1\n  d2", {'g'});
     p.Prog("prog");
 
     REQUIRE(p.Help() == R"(  prog {OPTIONS}
@@ -979,6 +979,8 @@ TEST_CASE("HelpParams work as expected", "[args]")
 
       -f[name], --foo=[name]            description
       -g[name]                          description
+                                          d1
+                                          d2
 
 )");
 
@@ -993,6 +995,8 @@ TEST_CASE("HelpParams work as expected", "[args]")
 
       -f, --foo [name]                  description
       -g[name]                          description
+                                          d1
+                                          d2
 
 )");
 
@@ -1004,6 +1008,8 @@ TEST_CASE("HelpParams work as expected", "[args]")
 
       -f, --foo                         description
       -g                                description
+                                          d1
+                                          d2
 
 )");
 
@@ -1018,6 +1024,8 @@ TEST_CASE("HelpParams work as expected", "[args]")
       -f, --foo
             description
       -g    description
+              d1
+              d2
 
 )");
 
@@ -1032,8 +1040,30 @@ TEST_CASE("HelpParams work as expected", "[args]")
             description
       -g
             description
+              d1
+              d2
 
 )");
+
+    args::ValueFlag<std::string> e(p, "name", "some reaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaally loooooooooooooooooooooooooooong description", {'e'});
+    REQUIRE(p.Help() == R"(  usage: prog {OPTIONS}
+
+    parser
+
+  Options
+
+      -f, --foo
+            description
+      -g
+            description
+              d1
+              d2
+      -e
+            some reaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaally
+            loooooooooooooooooooooooooooong description
+
+)");
+
 }
 
 #undef ARGS_HXX

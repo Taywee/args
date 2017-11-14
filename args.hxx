@@ -114,37 +114,48 @@ namespace args
 
         std::istringstream stream(in);
         std::vector<std::string> output;
-        std::ostringstream line;
-        std::string::size_type linesize = 0;
+        std::string line;
+        bool empty = true;
+
+        for (char c : in)
+        {
+            if (!isspace(c))
+            {
+                break;
+            }
+            line += c;
+        }
+
         while (stream)
         {
             std::string item;
             stream >> item;
             auto itemsize = Glyphs(item);
-            if ((linesize + 1 + itemsize) > currentwidth)
+            if ((line.length() + 1 + itemsize) > currentwidth)
             {
-                if (linesize > 0)
+                if (!empty)
                 {
-                    output.push_back(line.str());
-                    line.str(std::string());
-                    linesize = 0;
+                    output.push_back(line);
+                    line.clear();
+                    empty = true;
                     currentwidth = width;
                 }
             }
             if (itemsize > 0)
             {
-                if (linesize)
+                if (!empty)
                 {
-                    ++linesize;
-                    line << " ";
+                    line += ' ';
                 }
-                line << item;
-                linesize += itemsize;
+
+                line += item;
+                empty = false;
             }
         }
-        if (linesize > 0)
+
+        if (!empty)
         {
-            output.push_back(line.str());
+            output.push_back(line);
         }
         return output;
     }
