@@ -114,37 +114,48 @@ namespace args
 
         std::istringstream stream(in);
         std::vector<std::string> output;
-        std::ostringstream line;
-        std::string::size_type linesize = 0;
+        std::string line;
+        bool empty = true;
+
+        for (char c : in)
+        {
+            if (!isspace(c))
+            {
+                break;
+            }
+            line += c;
+        }
+
         while (stream)
         {
             std::string item;
             stream >> item;
             auto itemsize = Glyphs(item);
-            if ((linesize + 1 + itemsize) > currentwidth)
+            if ((line.length() + 1 + itemsize) > currentwidth)
             {
-                if (linesize > 0)
+                if (!empty)
                 {
-                    output.push_back(line.str());
-                    line.str(std::string());
-                    linesize = 0;
+                    output.push_back(line);
+                    line.clear();
+                    empty = true;
                     currentwidth = width;
                 }
             }
             if (itemsize > 0)
             {
-                if (linesize)
+                if (!empty)
                 {
-                    ++linesize;
-                    line << " ";
+                    line += ' ';
                 }
-                line << item;
-                linesize += itemsize;
+
+                line += item;
+                empty = false;
             }
         }
-        if (linesize > 0)
+
+        if (!empty)
         {
-            output.push_back(line.str());
+            output.push_back(line);
         }
         return output;
     }
@@ -571,6 +582,26 @@ namespace args
         /** Use short flags in program lines when possible
          */
         bool proglinePreferShortFlags = false;
+
+        /** Program line prefix
+         */
+        std::string usageString;
+
+        /** String shown in help before flags descriptions
+         */
+        std::string optionsString = "OPTIONS:";
+
+        /** Display value name after all the long and short flags
+         */
+        bool useValueNameOnce = false;
+
+        /** Show value name
+         */
+        bool showValueName = true;
+
+        /** Add newline before flag description
+         */
+        bool addNewlineBeforeDescription = false;
     };
 
     /** Base class for all match types
@@ -832,23 +863,28 @@ namespace args
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                const std::string postfix = NumberOfArguments() == 0 ? std::string() : Name();
+                const std::string postfix = !params.showValueName || NumberOfArguments() == 0 ? std::string() : Name();
                 std::string flags;
-                for (const auto &flag : matcher.GetFlagStrings())
+                const auto flagStrings = matcher.GetFlagStrings();
+                const bool useValueNameOnce = flagStrings.size() == 1 ? false : params.useValueNameOnce;
+                for (auto it = flagStrings.begin(); it != flagStrings.end(); ++it)
                 {
-                    if (!flags.empty())
+                    auto &flag = *it;
+                    if (it != flagStrings.begin())
                     {
                         flags += ", ";
                     }
 
                     flags += flag.isShort ? params.shortPrefix : params.longPrefix;
                     flags += flag.str();
-                    if (!postfix.empty())
+
+                    if (!postfix.empty() && (!useValueNameOnce || it + 1 == flagStrings.end()))
                     {
                         flags += flag.isShort ? params.shortSeparator : params.longSeparator;
                         flags += "[" + postfix + "]";
                     }
                 }
+
                 std::get<0>(description) = std::move(flags);
                 std::get<1>(description) = help;
                 std::get<2>(description) = indentLevel;
@@ -2236,7 +2272,7 @@ namespace args
                 const bool hasarguments = command.HasPositional();
 
                 std::ostringstream prognameline;
-                prognameline << Prog();
+                prognameline << helpParams.usageString << Prog();
 
                 for (const std::string &posname: command.GetProgramLine(helpParams))
                 {
@@ -2268,7 +2304,11 @@ namespace args
 
                 bool lastDescriptionIsNewline = false;
 
-                help_ << std::string(helpParams.progindent, ' ') << "OPTIONS:\n\n";
+                if (!helpParams.optionsString.empty())
+                {
+                    help_ << std::string(helpParams.progindent, ' ') << helpParams.optionsString << "\n\n";
+                }
+
                 for (const auto &desc: command.GetDescription(helpParams, 0))
                 {
                     lastDescriptionIsNewline = std::get<0>(desc).empty() && std::get<1>(desc).empty();
@@ -2289,7 +2329,7 @@ namespace args
 
                     auto infoit = std::begin(info);
                     // groupindent is on both sides of this inequality, and therefore can be removed
-                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent || infoit == std::end(info))
+                    if ((helpParams.flagindent + flagssize + helpParams.gutter) > helpParams.helpindent || infoit == std::end(info) || helpParams.addNewlineBeforeDescription)
                     {
                         help_ << '\n';
                     } else
