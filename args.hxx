@@ -867,25 +867,22 @@ namespace args
                 std::string flags;
                 const auto flagStrings = matcher.GetFlagStrings();
                 const bool useValueNameOnce = flagStrings.size() == 1 ? false : params.useValueNameOnce;
-                for (const auto &flag : flagStrings)
+                for (auto it = flagStrings.begin(); it != flagStrings.end(); ++it)
                 {
-                    if (!flags.empty())
+                    auto &flag = *it;
+                    if (it != flagStrings.begin())
                     {
                         flags += ", ";
                     }
 
                     flags += flag.isShort ? params.shortPrefix : params.longPrefix;
                     flags += flag.str();
-                    if (!postfix.empty() && !useValueNameOnce)
+
+                    if (!postfix.empty() && (!useValueNameOnce || it + 1 == flagStrings.end()))
                     {
                         flags += flag.isShort ? params.shortSeparator : params.longSeparator;
                         flags += "[" + postfix + "]";
                     }
-                }
-
-                if (!postfix.empty() && useValueNameOnce)
-                {
-                    flags += " [" + postfix + "]";
                 }
 
                 std::get<0>(description) = std::move(flags);

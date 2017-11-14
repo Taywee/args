@@ -993,7 +993,7 @@ TEST_CASE("HelpParams work as expected", "[args]")
 
   Options
 
-      -f, --foo [name]                  description
+      -f, --foo=[name]                  description
       -g[name]                          description
                                           d1
                                           d2
