@@ -40,10 +40,10 @@ describe the usage, as it's built to push the boundaries.
 
 It:
 
-* lets you handle flags, flag+value, and positional arguments simply and
+* Lets you handle flags, flag+value, and positional arguments simply and
   elegently, with the full help of static typechecking.
-* allows you to use your own types in a pretty simple way.
-* lets you use count flags, and lists of all argument-accepting types.
+* Allows you to use your own types in a pretty simple way.
+* Lets you use count flags, and lists of all argument-accepting types.
 * Allows full validation of groups of required arguments, though output isn't
   pretty when something fails group validation.  User validation functions are
   accepted.  Groups are fully nestable.
@@ -56,12 +56,11 @@ It:
 * Lets you decide not to allow separate-argument value flags or joined ones
   (like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
   same for short options).
-* Allows you to create subparsers somewhat like argparse, through the use of
-  kick-out arguments (check the gitlike.cxx example program for a simple sample
-  of this)
-* Allow one value flag to take a specific number of values (like `--foo first
+* Allows you to create subparsers, reusing arguments for multiple commands and
+  refactoring your command logic to function or lambda
+* Allows one value flag to take a specific number of values (like `--foo first
   second`, where --foo slurps both arguments).
-* Allow you to have value flags only optionally accept values
+* Allows you to have value flags only optionally accept values
 
 # What does it not do?
 
@@ -375,6 +374,170 @@ Argument 'numbers' received invalid value type 'a'
 
     This is a test program. 
 ...
+```
+
+## Commands
+
+```cpp
+#include <iostream>
+#include <args.hxx>
+int main(int argc, char **argv)
+{
+    args::ArgumentParser p("git-like parser");
+    args::Group commands(p, "commands");
+    args::Command add(commands, "add", "add file contents to the index");
+    args::Command commit(commands, "commit", "record changes to the repository");
+    args::Group arguments(p, "arguments", args::Group::Validators::DontCare, args::Options::Global);
+    args::ValueFlag<std::string> gitdir(arguments, "path", "", {"git-dir"});
+    args::HelpFlag h(arguments, "help", "help", {'h', "help"});
+    args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
+
+    try
+    {
+        p.ParseCLI(argc, argv);
+        if (add)
+        {
+            std::cout << "Add";
+        }
+        else
+        {
+            std::cout << "Commit";
+        }
+
+        for (auto &&path : pathsList)
+        {
+            std::cout << ' ' << path;
+        }
+
+        std::cout << std::endl;
+    }
+    catch (args::Help)
+    {
+        std::cout << p;
+    }
+    catch (args::Error& e)
+    {
+        std::cerr << e.what() << std::endl << p;
+        return 1;
+    }
+    return 0;
+}
+```
+
+```shell
+% ./test -h
+  ./test COMMAND [paths...] {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      commands
+        add                               add file contents to the index
+        commit                            record changes to the repository
+      arguments
+        --git-dir=[path]
+        -h, --help                        help
+        paths...                          files
+      "--" can be used to terminate flag options and force all following
+      arguments to be treated as positional options
+
+% ./test add 1 2
+Add 1 2
+```
+
+## Refactoring commands
+
+```cpp
+#include <iostream>
+#include "args.hxx"
+
+args::Group arguments("arguments");
+args::ValueFlag<std::string> gitdir(arguments, "path", "", {"git-dir"});
+args::HelpFlag h(arguments, "help", "help", {'h', "help"});
+args::PositionalList<std::string> pathsList(arguments, "paths", "files to commit");
+
+void CommitCommand(args::Subparser &parser)
+{
+    args::ValueFlag<std::string> message(parser, "MESSAGE", "commit message", {'m'});
+    parser.Parse();
+
+    std::cout << "Commit";
+
+    for (auto &&path : pathsList)
+    {
+        std::cout << ' ' << path;
+    }
+
+    std::cout << std::endl;
+
+    if (message)
+    {
+        std::cout << "message: " << args::get(message) << std::endl;
+    }
+}
+
+int main(int argc, const char **argv)
+{
+    args::ArgumentParser p("git-like parser");
+    args::Group commands(p, "commands");
+    args::Command add(commands, "add", "add file contents to the index", [&](args::Subparser &parser)
+    {
+        parser.Parse();
+        std::cout << "Add";
+
+        for (auto &&path : pathsList)
+        {
+            std::cout << ' ' << path;
+        }
+
+        std::cout << std::endl;
+    });
+
+    args::Command commit(commands, "commit", "record changes to the repository", &CommitCommand);
+    args::GlobalOptions globals(p, arguments);
+
+    try
+    {
+        p.ParseCLI(argc, argv);
+    }
+    catch (args::Help)
+    {
+        std::cout << p;
+    }
+    catch (args::Error& e)
+    {
+        std::cerr << e.what() << std::endl << p;
+        return 1;
+    }
+    return 0;
+}
+```
+
+```shell
+% ./test -h
+  ./test COMMAND [paths...] {OPTIONS}
+
+    git-like parser
+
+  OPTIONS:
+
+      commands
+        add                               add file contents to the index
+        commit                            record changes to the repository
+      arguments
+        --git-dir=[path]
+        -h, --help                        help
+        paths...                          files
+      "--" can be used to terminate flag options and force all following
+      arguments to be treated as positional options
+
+% ./test add 1 2
+Add 1 2
+
+% ./test commit -m "my commit message" 1 2
+Commit 1 2
+message: my commit message
 ```
 
 # Custom type parsers (here we use std::tuple)
