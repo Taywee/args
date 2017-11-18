@@ -575,6 +575,30 @@ namespace args
          */
         std::string proglineCommand = "COMMAND";
 
+        /** The prefix for progline value
+         */
+        std::string proglineValueOpen = " <";
+
+        /** The postfix for progline value
+         */
+        std::string proglineValueClose = ">";
+
+        /** The prefix for progline required argument
+         */
+        std::string proglineRequiredOpen = "";
+
+        /** The postfix for progline required argument
+         */
+        std::string proglineRequiredClose = "";
+
+        /** The prefix for progline non-required argument
+         */
+        std::string proglineNonrequiredOpen = "[";
+
+        /** The postfix for progline non-required argument
+         */
+        std::string proglineNonrequiredClose = "]";
+
         /** Show flags in program line
          */
         bool proglineShowFlags = false;
@@ -602,6 +626,15 @@ namespace args
         /** Add newline before flag description
          */
         bool addNewlineBeforeDescription = false;
+
+        /** The prefix for option value
+         */
+        std::string valueOpen = "[";
+
+        /** The postfix for option value
+         */
+        std::string valueClose = "]";
+
     };
 
     /** Base class for all match types
@@ -854,10 +887,11 @@ namespace args
                 std::string res = flag.str(params.shortPrefix, params.longPrefix);
                 if (!postfix.empty())
                 {
-                    res += " <" + postfix + ">";
+                    res += params.proglineValueOpen + postfix + params.proglineValueClose;
                 }
 
-                return { IsRequired() ? res : "[" + res + "]" };
+                return { IsRequired() ? params.proglineRequiredOpen + res + params.proglineRequiredClose
+                                      : params.proglineNonrequiredOpen + res + params.proglineNonrequiredClose };
             }
 
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
@@ -881,7 +915,7 @@ namespace args
                     if (!postfix.empty() && (!useValueNameOnce || it + 1 == flagStrings.end()))
                     {
                         flags += flag.isShort ? params.shortSeparator : params.longSeparator;
-                        flags += "[" + postfix + "]";
+                        flags += params.valueOpen + postfix + params.valueClose;
                     }
                 }
 
@@ -981,9 +1015,10 @@ namespace args
                 return true;
             }
 
-            virtual std::vector<std::string> GetProgramLine(const HelpParams &) const override
+            virtual std::vector<std::string> GetProgramLine(const HelpParams &params) const override
             {
-                return { IsRequired() ? Name() : "[" + Name() + ']' };
+                return { IsRequired() ? params.proglineRequiredOpen + Name() + params.proglineRequiredClose
+                                      : params.proglineNonrequiredOpen + Name() + params.proglineNonrequiredClose };
             }
 
             virtual void Validate(const std::string &, const std::string &) const override
