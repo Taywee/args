@@ -2579,16 +2579,18 @@ namespace args
 
     /** A default Reader class for argument classes
      *
-     * Simply uses a std::istringstream to read into the destination type, and
+     * If destination type is assignable to std::string it uses an assignment to std::string.
+     * Otherwise ValueReader simply uses a std::istringstream to read into the destination type, and
      * raises a ParseError if there are any characters left.
      */
-    template <typename T>
     struct ValueReader
     {
-        bool operator ()(const std::string &name, const std::string &value, T &destination)
+        template <typename T>
+        typename std::enable_if<!std::is_assignable<T, std::string>::value, bool>::type
+        operator ()(const std::string &name, const std::string &value, T &destination)
         {
             std::istringstream ss(value);
-            ss >> destination;
+            ss >> destination >> std::ws;
 
             if (ss.rdbuf()->in_avail() > 0)
             {
@@ -2603,19 +2605,12 @@ namespace args
             }
             return true;
         }
-    };
 
-    /** std::string specialization for ValueReader
-     *
-     * By default, stream extraction into a string splits on white spaces, and
-     * it is more efficient to ust copy a string into the destination.
-     */
-    template <>
-    struct ValueReader<std::string>
-    {
-        bool operator()(const std::string &, const std::string &value, std::string &destination)
+        template <typename T>
+        typename std::enable_if<std::is_assignable<T, std::string>::value, bool>::type
+        operator()(const std::string &, const std::string &value, T &destination)
         {
-            destination.assign(value);
+            destination = value;
             return true;
         }
     };
@@ -2627,7 +2622,7 @@ namespace args
      */
     template <
         typename T,
-        typename Reader = ValueReader<T>>
+        typename Reader = ValueReader>
     class ValueFlag : public ValueFlagBase
     {
         protected:
@@ -2682,7 +2677,7 @@ namespace args
      */
     template <
         typename T,
-        typename Reader = ValueReader<T>>
+        typename Reader = ValueReader>
     class ImplicitValueFlag : public ValueFlag<T, Reader>
     {
         protected:
@@ -2741,7 +2736,7 @@ namespace args
     template <
         typename T,
         template <typename...> class List = std::vector,
-        typename Reader = ValueReader<T>>
+        typename Reader = ValueReader>
     class NargsValueFlag : public FlagBase
     {
         protected:
@@ -2843,7 +2838,7 @@ namespace args
     template <
         typename T,
         template <typename...> class List = std::vector,
-        typename Reader = ValueReader<T>>
+        typename Reader = ValueReader>
     class ValueFlagList : public ValueFlagBase
     {
         private:
@@ -2948,7 +2943,7 @@ namespace args
     template <
         typename K,
         typename T,
-        typename Reader = ValueReader<K>,
+        typename Reader = ValueReader,
         template <typename...> class Map = std::unordered_map>
     class MapFlag : public ValueFlagBase
     {
@@ -3023,7 +3018,7 @@ namespace args
         typename K,
         typename T,
         template <typename...> class List = std::vector,
-        typename Reader = ValueReader<K>,
+        typename Reader = ValueReader,
         template <typename...> class Map = std::unordered_map>
     class MapFlagList : public ValueFlagBase
     {
@@ -3139,7 +3134,7 @@ namespace args
      */
     template <
         typename T,
-        typename Reader = ValueReader<T>>
+        typename Reader = ValueReader>
     class Positional : public PositionalBase
     {
         private:
@@ -3188,7 +3183,7 @@ namespace args
     template <
         typename T,
         template <typename...> class List = std::vector,
-        typename Reader = ValueReader<T>>
+        typename Reader = ValueReader>
     class PositionalList : public PositionalBase
     {
         private:
@@ -3295,7 +3290,7 @@ namespace args
     template <
         typename K,
         typename T,
-        typename Reader = ValueReader<K>,
+        typename Reader = ValueReader,
         template <typename...> class Map = std::unordered_map>
     class MapPositional : public PositionalBase
     {
@@ -3362,7 +3357,7 @@ namespace args
         typename K,
         typename T,
         template <typename...> class List = std::vector,
-        typename Reader = ValueReader<K>,
+        typename Reader = ValueReader,
         template <typename...> class Map = std::unordered_map>
     class MapPositionalList : public PositionalBase
     {
