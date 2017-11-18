@@ -58,8 +58,8 @@ It:
 * Lets you decide not to allow separate-argument value flags or joined ones
   (like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
   same for short options).
-* Allows you to create subparsers, reusing arguments for multiple commands and
-  refactoring your command logic to function or lambda
+* Allows you to create subparsers, to reuse arguments for multiple commands and
+  to refactor your command's logic to a function or lambda
 * Allows one value flag to take a specific number of values (like `--foo first
   second`, where --foo slurps both arguments).
 * Allows you to have value flags only optionally accept values
