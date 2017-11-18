@@ -2,7 +2,7 @@
 
 #### Note that this library is essentially in maintenance mode.  I haven't had the time to work on it or give it the love that it deserves.  I'm not adding new features, but I will fix bugs.  I will also very gladly accept pull requests.
 
-[![Cpp Standard](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://img.shields.io/badge/C%2B%2B-11-blue.svg)
+[![Cpp Standard](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B11)
 [![Travis status](https://travis-ci.org/Taywee/args.svg?branch=master)](https://travis-ci.org/Taywee/args)
 [![AppVeyor status](https://ci.appveyor.com/api/projects/status/nlnlmpttdjlndyc2?svg=true)](https://ci.appveyor.com/project/Taywee/args)
 [![Coverage Status](https://coveralls.io/repos/github/Taywee/args/badge.svg?branch=master)](https://coveralls.io/github/Taywee/args?branch=master)
