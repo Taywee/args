@@ -30,7 +30,7 @@ target_link_libraries(argstest args)
 set_property(TARGET argstest PROPERTY CXX_STANDARD 11)
 
 if (MSVC)
-    target_compile_options(argstest PRIVATE /W4 /WX)
+    target_compile_options(argstest PRIVATE /W4 /WX /bigobj)
 else ()
     target_compile_options(argstest PRIVATE -Wall -Wextra -Werror -pedantic -Wshadow -Wunused-parameter)
 endif ()
