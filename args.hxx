@@ -2786,7 +2786,7 @@ namespace args
             T value;
             T defaultValue;
 
-            virtual std::string GetDefaultString(const HelpParams&) const
+            virtual std::string GetDefaultString(const HelpParams&) const override
             {
                 return detail::ToString(defaultValue);
             }
