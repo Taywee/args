@@ -2577,6 +2577,42 @@ namespace args
             }
     };
 
+    /** A flag class that calls a function when it's matched
+     */
+    class ActionFlag : public FlagBase
+    {
+        private:
+            std::function<void(const std::vector<std::string> &)> action;
+            Nargs nargs;
+
+        public:
+            ActionFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Nargs nargs_, std::function<void(const std::vector<std::string> &)> action_, Options options_ = {}):
+                FlagBase(name_, help_, std::move(matcher_), options_), action(std::move(action_)), nargs(nargs_)
+            {
+                group_.Add(*this);
+            }
+
+            ActionFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, std::function<void(const std::string &)> action_, Options options_ = {}):
+                FlagBase(name_, help_, std::move(matcher_), options_), nargs(1)
+            {
+                group_.Add(*this);
+                action = [action_](const std::vector<std::string> &a) { return action_(a.at(0)); };
+            }
+
+            ActionFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, std::function<void()> action_, Options options_ = {}):
+                FlagBase(name_, help_, std::move(matcher_), options_), nargs(0)
+            {
+                group_.Add(*this);
+                action = [action_](const std::vector<std::string> &) { return action_(); };
+            }
+
+            virtual Nargs NumberOfArguments() const noexcept override
+            { return nargs; }
+
+            virtual void ParseValue(const std::vector<std::string> &value) override
+            { action(value); }
+    };
+
     /** A default Reader class for argument classes
      *
      * Simply uses a std::istringstream to read into the destination type, and

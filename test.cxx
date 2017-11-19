@@ -1066,6 +1066,28 @@ TEST_CASE("HelpParams work as expected", "[args]")
 
 }
 
+TEST_CASE("ActionFlag works as expected", "[args]")
+{
+    args::ArgumentParser p("parser");
+    std::string s;
+
+    args::ActionFlag action0(p, "name", "description", {'x'}, [&]() { s = "flag"; });
+    args::ActionFlag action1(p, "name", "description", {'y'}, [&](const std::string &arg) { s = arg; });
+    args::ActionFlag actionN(p, "name", "description", {'z'}, 2, [&](const std::vector<std::string> &arg) { s = arg[0] + arg[1]; });
+    args::ActionFlag actionThrow(p, "name", "description", {'v'}, [&]() { throw std::runtime_error(""); });
+
+    p.ParseArgs(std::vector<std::string>{"-x"});
+    REQUIRE(s == "flag");
+
+    p.ParseArgs(std::vector<std::string>{"-y", "a"});
+    REQUIRE(s == "a");
+
+    p.ParseArgs(std::vector<std::string>{"-z", "a", "b"});
+    REQUIRE(s == "ab");
+
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"-v"}), std::runtime_error);
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
