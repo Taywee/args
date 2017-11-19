@@ -1097,6 +1097,7 @@ TEST_CASE("ValueParser works as expected", "[args]")
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-i", " 12"}));
     REQUIRE(args::get(i) == 12);
+}
 
 TEST_CASE("ActionFlag works as expected", "[args]")
 {
