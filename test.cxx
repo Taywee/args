@@ -1066,6 +1066,39 @@ TEST_CASE("HelpParams work as expected", "[args]")
 
 }
 
+struct StringAssignable
+{
+public:
+    StringAssignable() = default;
+    StringAssignable(const std::string &p) : path(p) {}
+    std::string path;
+
+    friend std::istream &operator >> (std::istream &s, StringAssignable &a)
+    { return s >> a.path; }
+};
+
+TEST_CASE("ValueParser works as expected", "[args]")
+{
+    static_assert(std::is_assignable<StringAssignable, std::string>::value, "StringAssignable must be assignable to std::string");
+
+    args::ArgumentParser p("parser");
+    args::ValueFlag<std::string> f(p, "name", "description", {'f'});
+    args::ValueFlag<StringAssignable> b(p, "name", "description", {'b'});
+    args::ValueFlag<int> i(p, "name", "description", {'i'});
+
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-f", "a b"}));
+    REQUIRE(args::get(f) == "a b");
+
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-b", "a b"}));
+    REQUIRE(args::get(b).path == "a b");
+
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-i", "42 "}));
+    REQUIRE(args::get(i) == 42);
+
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-i", " 12"}));
+    REQUIRE(args::get(i) == 12);
+}
+
 TEST_CASE("ActionFlag works as expected", "[args]")
 {
     args::ArgumentParser p("parser");
