@@ -575,6 +575,30 @@ namespace args
          */
         std::string proglineCommand = "COMMAND";
 
+        /** The prefix for progline value
+         */
+        std::string proglineValueOpen = " <";
+
+        /** The postfix for progline value
+         */
+        std::string proglineValueClose = ">";
+
+        /** The prefix for progline required argument
+         */
+        std::string proglineRequiredOpen = "";
+
+        /** The postfix for progline required argument
+         */
+        std::string proglineRequiredClose = "";
+
+        /** The prefix for progline non-required argument
+         */
+        std::string proglineNonrequiredOpen = "[";
+
+        /** The postfix for progline non-required argument
+         */
+        std::string proglineNonrequiredClose = "]";
+
         /** Show flags in program line
          */
         bool proglineShowFlags = false;
@@ -602,6 +626,30 @@ namespace args
         /** Add newline before flag description
          */
         bool addNewlineBeforeDescription = false;
+
+        /** The prefix for option value
+         */
+        std::string valueOpen = "[";
+
+        /** The postfix for option value
+         */
+        std::string valueClose = "]";
+
+        /** Add choices to argument description
+         */
+        bool addChoices = false;
+
+        /** The prefix for choices
+         */
+        std::string choiceString = "\nOne of: ";
+
+        /** Add default values to argument description
+         */
+        bool addDefault = false;
+
+        /** The prefix for default values
+         */
+        std::string defaultString = "\nDefault: ";
     };
 
     /** Base class for all match types
@@ -738,17 +786,63 @@ namespace args
         protected:
             const std::string name;
             bool kickout = false;
+            std::string defaultString;
+            bool defaultStringManual = false;
+            std::string choicesString;
+            bool choicesStringManual = false;
+
+            virtual std::string GetDefaultString(const HelpParams&) const { return {}; }
+
+            virtual std::string GetChoicesString(const HelpParams&) const { return {}; }
+
+            virtual std::string GetNameString(const HelpParams&) const { return Name(); }
+
+            void AddDescriptionPostfix(std::string &dest, const bool isManual, const std::string &manual, bool isGenerated, const std::string &generated, const std::string &str) const
+            {
+                if (isManual && !manual.empty())
+                {
+                    dest += str;
+                    dest += manual;
+                }
+                else if (!isManual && isGenerated && !generated.empty())
+                {
+                    dest += str;
+                    dest += generated;
+                }
+            }
 
         public:
             NamedBase(const std::string &name_, const std::string &help_, Options options_ = {}) : Base(help_, options_), name(name_) {}
             virtual ~NamedBase() {}
 
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &, const unsigned indentLevel) const override
+            /** Sets default value string that will be added to argument description.
+             *  Use empty string to disable it for this argument.
+             */
+            void HelpDefault(const std::string &str)
+            {
+                defaultStringManual = true;
+                defaultString = str;
+            }
+
+            /** Sets choices string that will be added to argument description.
+             *  Use empty string to disable it for this argument.
+             */
+            void HelpChoices(const std::string &str)
+            {
+                choicesStringManual = true;
+                choicesString = str;
+            }
+
+            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
             {
                 std::tuple<std::string, std::string, unsigned> description;
-                std::get<0>(description) = Name();
+                std::get<0>(description) = GetNameString(params);
                 std::get<1>(description) = help;
                 std::get<2>(description) = indentLevel;
+
+                AddDescriptionPostfix(std::get<1>(description), choicesStringManual, choicesString, params.addChoices, GetChoicesString(params), params.choiceString);
+                AddDescriptionPostfix(std::get<1>(description), defaultStringManual, defaultString, params.addDefault, GetDefaultString(params), params.defaultString);
+
                 return { std::move(description) };
             }
 
@@ -792,12 +886,63 @@ namespace args
         }
     };
 
+    namespace detail
+    {
+        template <typename T, typename = int>
+        struct IsConvertableToString : std::false_type {};
+
+        template <typename T>
+        struct IsConvertableToString<T, decltype(std::declval<std::ostringstream&>() << std::declval<T>(), int())> : std::true_type {};
+
+        template <typename T>
+        typename std::enable_if<IsConvertableToString<T>::value, std::string>::type
+        ToString(const T &value)
+        {
+            std::ostringstream s;
+            s << value;
+            return s.str();
+        }
+        template <typename T>
+        typename std::enable_if<!IsConvertableToString<T>::value, std::string>::type
+        ToString(const T &)
+        {
+            return {};
+        }
+    }
+
     /** Base class for all flag options
      */
     class FlagBase : public NamedBase
     {
         protected:
             const Matcher matcher;
+
+            virtual std::string GetNameString(const HelpParams &params) const override
+            {
+                const std::string postfix = !params.showValueName || NumberOfArguments() == 0 ? std::string() : Name();
+                std::string flags;
+                const auto flagStrings = matcher.GetFlagStrings();
+                const bool useValueNameOnce = flagStrings.size() == 1 ? false : params.useValueNameOnce;
+                for (auto it = flagStrings.begin(); it != flagStrings.end(); ++it)
+                {
+                    auto &flag = *it;
+                    if (it != flagStrings.begin())
+                    {
+                        flags += ", ";
+                    }
+
+                    flags += flag.isShort ? params.shortPrefix : params.longPrefix;
+                    flags += flag.str();
+
+                    if (!postfix.empty() && (!useValueNameOnce || it + 1 == flagStrings.end()))
+                    {
+                        flags += flag.isShort ? params.shortSeparator : params.longSeparator;
+                        flags += params.valueOpen + postfix + params.valueClose;
+                    }
+                }
+
+                return flags;
+            }
 
         public:
             FlagBase(const std::string &name_, const std::string &help_, Matcher &&matcher_, const bool extraError_ = false) : NamedBase(name_, help_, extraError_ ? Options::Single : Options()), matcher(std::move(matcher_)) {}
@@ -854,41 +999,11 @@ namespace args
                 std::string res = flag.str(params.shortPrefix, params.longPrefix);
                 if (!postfix.empty())
                 {
-                    res += " <" + postfix + ">";
+                    res += params.proglineValueOpen + postfix + params.proglineValueClose;
                 }
 
-                return { IsRequired() ? res : "[" + res + "]" };
-            }
-
-            virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
-            {
-                std::tuple<std::string, std::string, unsigned> description;
-                const std::string postfix = !params.showValueName || NumberOfArguments() == 0 ? std::string() : Name();
-                std::string flags;
-                const auto flagStrings = matcher.GetFlagStrings();
-                const bool useValueNameOnce = flagStrings.size() == 1 ? false : params.useValueNameOnce;
-                for (auto it = flagStrings.begin(); it != flagStrings.end(); ++it)
-                {
-                    auto &flag = *it;
-                    if (it != flagStrings.begin())
-                    {
-                        flags += ", ";
-                    }
-
-                    flags += flag.isShort ? params.shortPrefix : params.longPrefix;
-                    flags += flag.str();
-
-                    if (!postfix.empty() && (!useValueNameOnce || it + 1 == flagStrings.end()))
-                    {
-                        flags += flag.isShort ? params.shortSeparator : params.longSeparator;
-                        flags += "[" + postfix + "]";
-                    }
-                }
-
-                std::get<0>(description) = std::move(flags);
-                std::get<1>(description) = help;
-                std::get<2>(description) = indentLevel;
-                return { std::move(description) };
+                return { IsRequired() ? params.proglineRequiredOpen + res + params.proglineRequiredClose
+                                      : params.proglineNonrequiredOpen + res + params.proglineNonrequiredClose };
             }
 
             virtual bool HasFlag() const override
@@ -981,9 +1096,10 @@ namespace args
                 return true;
             }
 
-            virtual std::vector<std::string> GetProgramLine(const HelpParams &) const override
+            virtual std::vector<std::string> GetProgramLine(const HelpParams &params) const override
             {
-                return { IsRequired() ? Name() : "[" + Name() + ']' };
+                return { IsRequired() ? params.proglineRequiredOpen + Name() + params.proglineRequiredClose
+                                      : params.proglineNonrequiredOpen + Name() + params.proglineNonrequiredClose };
             }
 
             virtual void Validate(const std::string &, const std::string &) const override
@@ -2668,13 +2784,19 @@ namespace args
     {
         protected:
             T value;
+            T defaultValue;
+
+            virtual std::string GetDefaultString(const HelpParams&) const override
+            {
+                return detail::ToString(defaultValue);
+            }
 
         private:
             Reader reader;
 
         public:
 
-            ValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &defaultValue_, Options options_): ValueFlagBase(name_, help_, std::move(matcher_), options_), value(defaultValue_)
+            ValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &defaultValue_, Options options_): ValueFlagBase(name_, help_, std::move(matcher_), options_), value(defaultValue_), defaultValue(defaultValue_)
             {
                 group_.Add(*this);
             }
@@ -2703,11 +2825,24 @@ namespace args
 #endif
             }
 
+            virtual void Reset() noexcept override
+            {
+                ValueFlagBase::Reset();
+                value = defaultValue;
+            }
+
             /** Get the value
              */
             T &Get() noexcept
             {
                 return value;
+            }
+
+            /** Get the default value
+             */
+            const T &GetDefault() noexcept
+            {
+                return defaultValue;
             }
     };
 
@@ -2722,24 +2857,22 @@ namespace args
     class ImplicitValueFlag : public ValueFlag<T, Reader>
     {
         protected:
-
             T implicitValue;
-            T defaultValue;
 
         public:
 
             ImplicitValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &implicitValue_, const T &defaultValue_ = T(), Options options_ = {})
-                : ValueFlag<T, Reader>(group_, name_, help_, std::move(matcher_), defaultValue_, options_), implicitValue(implicitValue_), defaultValue(defaultValue_)
+                : ValueFlag<T, Reader>(group_, name_, help_, std::move(matcher_), defaultValue_, options_), implicitValue(implicitValue_)
             {
             }
 
             ImplicitValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T &defaultValue_ = T(), Options options_ = {})
-                : ValueFlag<T, Reader>(group_, name_, help_, std::move(matcher_), defaultValue_, options_), implicitValue(defaultValue_), defaultValue(defaultValue_)
+                : ValueFlag<T, Reader>(group_, name_, help_, std::move(matcher_), defaultValue_, options_), implicitValue(defaultValue_)
             {
             }
 
             ImplicitValueFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_)
-                : ValueFlag<T, Reader>(group_, name_, help_, std::move(matcher_), {}, options_), implicitValue(), defaultValue()
+                : ValueFlag<T, Reader>(group_, name_, help_, std::move(matcher_), {}, options_), implicitValue()
             {
             }
 
@@ -2759,12 +2892,6 @@ namespace args
                 {
                     ValueFlag<T, Reader>::ParseValue(value_);
                 }
-            }
-
-            virtual void Reset() noexcept override
-            {
-                this->value = defaultValue;
-                ValueFlag<T, Reader>::Reset();
             }
     };
 
@@ -2992,6 +3119,31 @@ namespace args
             const Map<K, T> map;
             T value;
             Reader reader;
+
+        protected:
+            virtual std::string GetChoicesString(const HelpParams &) const override
+            {
+                std::string res;
+                if (detail::IsConvertableToString<K>::value)
+                {
+                    std::vector<std::string> values;
+                    for (const auto &p : map)
+                    {
+                        values.push_back(detail::ToString(p.first));
+                    }
+
+                    std::sort(values.begin(), values.end());
+                    for (const auto &s : values)
+                    {
+                        if (!res.empty())
+                        {
+                            res += ", ";
+                        }
+                        res += s;
+                    }
+                }
+                return res;
+            }
 
         public:
 

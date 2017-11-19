@@ -1088,6 +1088,68 @@ TEST_CASE("ActionFlag works as expected", "[args]")
     REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"-v"}), std::runtime_error);
 }
 
+TEST_CASE("Default values work as expected", "[args]")
+{
+    args::ArgumentParser p("parser");
+    args::ValueFlag<std::string> f(p, "name", "description", {'f', "foo"}, "abc");
+    args::MapFlag<std::string, int> b(p, "name", "description", {'b', "bar"}, {{"a", 1}, {"b", 2}, {"c", 3}});
+    p.Prog("prog");
+    REQUIRE(p.Help() == R"(  prog {OPTIONS}
+
+    parser
+
+  OPTIONS:
+
+      -f[name], --foo=[name]            description
+      -b[name], --bar=[name]            description
+
+)");
+
+    p.helpParams.addDefault = true;
+    p.helpParams.addChoices = true;
+
+    REQUIRE(p.Help() == R"(  prog {OPTIONS}
+
+    parser
+
+  OPTIONS:
+
+      -f[name], --foo=[name]            description
+                                        Default: abc
+      -b[name], --bar=[name]            description
+                                        One of: a, b, c
+
+)");
+
+    f.HelpDefault("123");
+    b.HelpChoices("1, 2, 3");
+    REQUIRE(p.Help() == R"(  prog {OPTIONS}
+
+    parser
+
+  OPTIONS:
+
+      -f[name], --foo=[name]            description
+                                        Default: 123
+      -b[name], --bar=[name]            description
+                                        One of: 1, 2, 3
+
+)");
+
+    f.HelpDefault({});
+    b.HelpChoices({});
+    REQUIRE(p.Help() == R"(  prog {OPTIONS}
+
+    parser
+
+  OPTIONS:
+
+      -f[name], --foo=[name]            description
+      -b[name], --bar=[name]            description
+
+)");
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
