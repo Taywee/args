@@ -145,6 +145,6 @@ before_install:
   - pip install --user cpp-coveralls
 
 after_success:
-  - if [ "${COVERAGE}" = 1 ]; then coveralls --root .. -E ".*catch.*" -E ".*CMakeFiles.*" -E ".*gitlike.cxx.*" -E ".*test.cxx.*"; fi
+  - if [ "${COVERAGE}" = 1 ]; then coveralls --root .. -E ".*catch.*" -E ".*CMakeFiles.*" -E ".*gitlike.cxx.*" -E ".*test.*"; fi
 
 
