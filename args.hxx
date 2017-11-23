@@ -2545,18 +2545,18 @@ namespace args
             }
     };
 
-    Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_)
+    inline Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_)
         : command(parser_.SelectedCommand()), parser(std::move(args_), parser_, command, parser_.helpParams), oldSubparser(command.subparser)
     {
         command.subparser = &parser;
     }
 
-    Command::RaiiSubparser::RaiiSubparser(const Command &command_, const HelpParams &params_): command(command_), parser(command, params_), oldSubparser(command.subparser)
+    inline Command::RaiiSubparser::RaiiSubparser(const Command &command_, const HelpParams &params_): command(command_), parser(command, params_), oldSubparser(command.subparser)
     {
         command.subparser = &parser;
     }
 
-    void Subparser::Parse()
+    inline void Subparser::Parse()
     {
         isParsed = true;
         Reset();
