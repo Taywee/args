@@ -35,5 +35,10 @@ else ()
     target_compile_options(argstest PRIVATE -Wall -Wextra -Werror -pedantic -Wshadow -Wunused-parameter)
 endif ()
 
+add_executable(argstest-multiple-inclusion test/multiple_inclusion_1.cxx test/multiple_inclusion_2.cxx)
+target_link_libraries(argstest-multiple-inclusion args)
+set_property(TARGET argstest-multiple-inclusion PROPERTY CXX_STANDARD 11)
+
 enable_testing()
 add_test(NAME "test" COMMAND argstest)
+add_test(NAME "test-multiple-inclusion" COMMAND argstest-multiple-inclusion)

@@ -29,8 +29,6 @@
 /userdoc.*
 
 # test and temp files
-test*
-!test.cxx
 *.pyc
 *.swp
 *.swo
@@ -38,6 +36,7 @@ test*
 /ld
 
 # Executable
+argstest
 /build/
 CMakeCache.txt
 CMakeFiles

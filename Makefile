@@ -17,7 +17,7 @@ LDFLAGS		+=	$(FLAGS)
 SOURCES		= 	test.cxx
 OBJECTS		= 	$(SOURCES:.cxx=.o)
 DEPENDENCIES=	$(SOURCES:.cxx=.d)
-EXECUTABLE	=	test
+EXECUTABLE	=	argstest
 
 .PHONY: all clean pages runtests uninstall install installman
 
