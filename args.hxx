@@ -30,6 +30,7 @@
 #define ARGS_HXX
 
 #include <algorithm>
+#include <iterator>
 #include <exception>
 #include <functional>
 #include <sstream>
@@ -83,13 +84,94 @@ namespace args
         return length;
     }
 
+    /** (INTERNAL) Wrap a vector of words into a vector of lines
+     *
+     * Empty words are skipped. Word "\n" forces wrapping.
+     *
+     * \param begin The begin iterator
+     * \param end The end iterator
+     * \param width The width of the body
+     * \param firstlinewidth the width of the first line, defaults to the width of the body
+     * \param firstlineindent the indent of the first line, defaults to 0
+     * \return the vector of lines
+     */
+    template <typename It>
+    inline std::vector<std::string> Wrap(It begin,
+                                         It end,
+                                         const std::string::size_type width,
+                                         std::string::size_type firstlinewidth = 0,
+                                         std::string::size_type firstlineindent = 0)
+    {
+        std::vector<std::string> output;
+        std::string line(firstlineindent, ' ');
+        bool empty = true;
+
+        if (firstlinewidth == 0)
+        {
+            firstlinewidth = width;
+        }
+
+        auto currentwidth = firstlinewidth;
+
+        for (auto it = begin; it != end; ++it)
+        {
+            if (it->empty())
+            {
+                continue;
+            }
+
+            if (*it == "\n")
+            {
+                if (!empty)
+                {
+                    output.push_back(line);
+                    line.clear();
+                    empty = true;
+                    currentwidth = width;
+                }
+
+                continue;
+            }
+
+            auto itemsize = Glyphs(*it);
+            if ((line.length() + 1 + itemsize) > currentwidth)
+            {
+                if (!empty)
+                {
+                    output.push_back(line);
+                    line.clear();
+                    empty = true;
+                    currentwidth = width;
+                }
+            }
+
+            if (itemsize > 0)
+            {
+                if (!empty)
+                {
+                    line += ' ';
+                }
+
+                line += *it;
+                empty = false;
+            }
+        }
+
+        if (!empty)
+        {
+            output.push_back(line);
+        }
+
+        return output;
+    }
+
     /** (INTERNAL) Wrap a string into a vector of lines
      *
      * This is quick and hacky, but works well enough.  You can specify a
      * different width for the first line
      *
      * \param width The width of the body
-     * \param the width of the first line, defaults to the width of the body
+     * \param firstlinewid the width of the first line, defaults to the width of the body
      * \return the vector of lines
      */
     inline std::vector<std::string> Wrap(const std::string &in, const std::string::size_type width, std::string::size_type firstlinewidth = 0)
@@ -106,16 +188,9 @@ namespace args
                 std::make_move_iterator(std::end(second)));
             return first;
         }
-        if (firstlinewidth == 0)
-        {
-            firstlinewidth = width;
-        }
-        auto currentwidth = firstlinewidth;
 
         std::istringstream stream(in);
-        std::vector<std::string> output;
-        std::string line;
-        bool empty = true;
+        std::string::size_type indent = 0;
 
         for (char c : in)
         {
@@ -123,41 +198,11 @@ namespace args
             {
                 break;
             }
-            line += c;
+            ++indent;
         }
 
-        while (stream)
-        {
-            std::string item;
-            stream >> item;
-            auto itemsize = Glyphs(item);
-            if ((line.length() + 1 + itemsize) > currentwidth)
-            {
-                if (!empty)
-                {
-                    output.push_back(line);
-                    line.clear();
-                    empty = true;
-                    currentwidth = width;
-                }
-            }
-            if (itemsize > 0)
-            {
-                if (!empty)
-                {
-                    line += ' ';
-                }
-
-                line += item;
-                empty = false;
-            }
-        }
-
-        if (!empty)
-        {
-            output.push_back(line);
-        }
-        return output;
+        return Wrap(std::istream_iterator<std::string>(stream), std::istream_iterator<std::string>(),
+                    width, firstlinewidth, indent);
     }
 
 #ifdef ARGS_NOEXCEPT
@@ -1748,7 +1793,32 @@ namespace args
 
                 if (!ProglinePostfix().empty())
                 {
-                    res.push_back(ProglinePostfix());
+                    std::string line;
+                    for (char c : ProglinePostfix())
+                    {
+                        if (isspace(c))
+                        {
+                            if (!line.empty())
+                            {
+                                res.push_back(line);
+                                line.clear();
+                            }
+
+                            if (c == '\n')
+                            {
+                                res.push_back("\n");
+                            }
+                        }
+                        else
+                        {
+                            line += c;
+                        }
+                    }
+
+                    if (!line.empty())
+                    {
+                        res.push_back(line);
+                    }
                 }
 
                 return res;
@@ -2387,15 +2457,15 @@ namespace args
                 const bool hasoptions = command.HasFlag();
                 const bool hasarguments = command.HasPositional();
 
-                std::ostringstream prognameline;
-                prognameline << helpParams.usageString << Prog();
+                std::vector<std::string> prognameline;
+                prognameline.push_back(helpParams.usageString);
+                prognameline.push_back(Prog());
+                auto commandProgLine = command.GetProgramLine(helpParams);
+                prognameline.insert(prognameline.end(), commandProgLine.begin(), commandProgLine.end());
 
-                for (const std::string &posname: command.GetProgramLine(helpParams))
-                {
-                    prognameline << ' ' << posname;
-                }
-
-                const auto proglines = Wrap(prognameline.str(), helpParams.width - (helpParams.progindent + 4), helpParams.width - helpParams.progindent);
+                const auto proglines = Wrap(prognameline.begin(), prognameline.end(),
+                                            helpParams.width - (helpParams.progindent + helpParams.progtailindent),
+                                            helpParams.width - helpParams.progindent);
                 auto progit = std::begin(proglines);
                 if (progit != std::end(proglines))
                 {
