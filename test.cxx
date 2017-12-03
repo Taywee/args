@@ -958,6 +958,50 @@ TEST_CASE("GetProgramLine works as expected", "[args]")
     REQUIRE(line(b) == "b -f <STRING> [positional]");
 }
 
+TEST_CASE("Program line wrapping works as expected", "[args]")
+{
+    args::ArgumentParser p("parser");
+    args::ValueFlag<std::string> f(p, "foo_name", "f", {"foo"});
+    args::ValueFlag<std::string> g(p, "bar_name", "b", {"bar"});
+    args::ValueFlag<std::string> z(p, "baz_name", "z", {"baz"});
+
+    p.helpParams.proglineShowFlags = true;
+    p.helpParams.width = 42;
+    p.Prog("parser");
+    p.ProglinePostfix("\na\nliiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiine line2 line2tail");
+
+    REQUIRE((p.GetProgramLine(p.helpParams) == std::vector<std::string>{
+             "[--foo <foo_name>]",
+             "[--bar <bar_name>]",
+             "[--baz <baz_name>]",
+             "\n",
+             "a",
+             "\n",
+             "liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiine",
+             "line2",
+             "line2tail",
+             }));
+
+    std::ostringstream s;
+    s << p;
+    REQUIRE(s.str() == R"(  parser [--foo <foo_name>]
+    [--bar <bar_name>]
+    [--baz <baz_name>]
+    a
+    liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiine
+    line2 line2tail
+
+    parser
+
+  OPTIONS:
+
+      --foo=[foo_name]                  f
+      --bar=[bar_name]                  b
+      --baz=[baz_name]                  z
+
+)");
+}
+
 TEST_CASE("Matcher validation works as expected", "[args]")
 {
     args::ArgumentParser parser("Test command");
@@ -984,7 +1028,7 @@ TEST_CASE("HelpParams work as expected", "[args]")
 
 )");
 
-    p.helpParams.usageString = "usage: ";
+    p.helpParams.usageString = "usage:";
     p.helpParams.optionsString = "Options";
     p.helpParams.useValueNameOnce = true;
     REQUIRE(p.Help() == R"(  usage: prog {OPTIONS}

@@ -54,8 +54,8 @@ doc/man:
 	doxygen Doxyfile
 	bzip2 doc/man/man3/*.3
 
-runtests: test
-	./test
+runtests: ${EXECUTABLE}
+	./${EXECUTABLE}
 
 %.o: %.cxx
 	$(CXX) $< -o $@ $(CFLAGS)
