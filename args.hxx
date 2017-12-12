@@ -869,6 +869,13 @@ namespace args
                 defaultString = str;
             }
 
+            /** Gets default value string that will be added to argument description.
+             */
+            std::string HelpDefault(const HelpParams &params) const
+            {
+                return GetDefaultString(params);
+            }
+
             /** Sets choices string that will be added to argument description.
              *  Use empty string to disable it for this argument.
              */
@@ -876,6 +883,13 @@ namespace args
             {
                 choicesStringManual = true;
                 choicesString = str;
+            }
+
+            /** Gets choices string that will be added to argument description.
+             */
+            std::string HelpChoices(const HelpParams &params) const
+            {
+                return GetChoicesString(params);
             }
 
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
@@ -947,11 +961,38 @@ namespace args
             s << value;
             return s.str();
         }
+
         template <typename T>
         typename std::enable_if<!IsConvertableToString<T>::value, std::string>::type
         ToString(const T &)
         {
             return {};
+        }
+
+        template <typename T>
+        std::string MapKeysToString(const T &map)
+        {
+            std::string res;
+            using K = typename std::decay<decltype(std::begin(map)->first)>::type;
+            if (IsConvertableToString<K>::value)
+            {
+                std::vector<std::string> values;
+                for (const auto &p : map)
+                {
+                    values.push_back(detail::ToString(p.first));
+                }
+
+                std::sort(values.begin(), values.end());
+                for (const auto &s : values)
+                {
+                    if (!res.empty())
+                    {
+                        res += ", ";
+                    }
+                    res += s;
+                }
+            }
+            return res;
         }
     }
 
@@ -3188,26 +3229,7 @@ namespace args
         protected:
             virtual std::string GetChoicesString(const HelpParams &) const override
             {
-                std::string res;
-                if (detail::IsConvertableToString<K>::value)
-                {
-                    std::vector<std::string> values;
-                    for (const auto &p : map)
-                    {
-                        values.push_back(detail::ToString(p.first));
-                    }
-
-                    std::sort(values.begin(), values.end());
-                    for (const auto &s : values)
-                    {
-                        if (!res.empty())
-                        {
-                            res += ", ";
-                        }
-                        res += s;
-                    }
-                }
-                return res;
+                return detail::MapKeysToString(map);
             }
 
         public:
@@ -3285,6 +3307,12 @@ namespace args
             const Map<K, T> map;
             Container values;
             Reader reader;
+
+        protected:
+            virtual std::string GetChoicesString(const HelpParams &) const override
+            {
+                return detail::MapKeysToString(map);
+            }
 
         public:
             typedef T value_type;
@@ -3557,6 +3585,12 @@ namespace args
             T value;
             Reader reader;
 
+        protected:
+            virtual std::string GetChoicesString(const HelpParams &) const override
+            {
+                return detail::MapKeysToString(map);
+            }
+
         public:
 
             MapPositional(Group &group_, const std::string &name_, const std::string &help_, const Map<K, T> &map_, const T &defaultValue_ = T()): PositionalBase(name_, help_), map(map_), value(defaultValue_)
@@ -3625,6 +3659,12 @@ namespace args
             const Map<K, T> map;
             Container values;
             Reader reader;
+
+        protected:
+            virtual std::string GetChoicesString(const HelpParams &) const override
+            {
+                return detail::MapKeysToString(map);
+            }
 
         public:
             typedef T value_type;

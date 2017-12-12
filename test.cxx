@@ -1227,6 +1227,20 @@ TEST_CASE("Default values work as expected", "[args]")
 )");
 }
 
+TEST_CASE("Choices description works as expected", "[args]")
+{
+    args::ArgumentParser p("parser");
+    args::MapFlag<int, int> map(p, "map", "map", {"map"}, {{1,1}, {2, 2}});
+    args::MapFlagList<char, int> maplist(p, "maplist", "maplist", {"maplist"}, {{'1',1}, {'2', 2}});
+    args::MapPositional<std::string, int, args::ValueReader, std::map> mappos(p, "mappos", "mappos", {{"1",1}, {"2", 2}});
+    args::MapPositionalList<char, int, std::vector, args::ValueReader, std::map> mapposlist(p, "mapposlist", "mapposlist", {{'1',1}, {'2', 2}});
+
+    REQUIRE(map.HelpChoices(p.helpParams) == "1, 2");
+    REQUIRE(maplist.HelpChoices(p.helpParams) == "1, 2");
+    REQUIRE(mappos.HelpChoices(p.helpParams) == "1, 2");
+    REQUIRE(mapposlist.HelpChoices(p.helpParams) == "1, 2");
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
