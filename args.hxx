@@ -2614,7 +2614,7 @@ namespace args
                 return ParseArgs(args) == std::end(args);
             }
             
-            bool ParseCLI(const std::vector<std::string> args)
+            bool ParseCLI(const std::vector<std::string> &args)
             {
                 return ParseArgs(args) == std::end(args);
             }
