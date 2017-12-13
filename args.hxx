@@ -2662,6 +2662,11 @@ namespace args
                 const std::vector<std::string> args(argv + 1, argv + argc);
                 return ParseArgs(args) == std::end(args);
             }
+            
+            bool ParseCLI(const std::vector<std::string> &args)
+            {
+                return ParseArgs(args) == std::end(args);
+            }
     };
 
     inline Command::RaiiSubparser::RaiiSubparser(ArgumentParser &parser_, std::vector<std::string> args_)
