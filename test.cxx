@@ -593,8 +593,8 @@ TEST_CASE("Required flags work as expected", "[args]")
 TEST_CASE("Hidden options are excluded from help", "[args]")
 {
     args::ArgumentParser parser1("");
-    args::ValueFlag<int> foo(parser1, "foo", "foo", {'f', "foo"}, args::Options::Hidden);
-    args::ValueFlag<int> bar(parser1, "bar", "bar", {'b'});
+    args::ValueFlag<int> foo(parser1, "foo", "foo", {'f', "foo"}, args::Options::HiddenFromDescription);
+    args::ValueFlag<int> bar(parser1, "bar", "bar", {'b'}, args::Options::HiddenFromUsage);
     args::Group group(parser1, "group");
     args::ValueFlag<int> foo1(group, "foo", "foo", {'f', "foo"}, args::Options::Hidden);
     args::ValueFlag<int> bar2(group, "bar", "bar", {'b'});
@@ -604,6 +604,10 @@ TEST_CASE("Hidden options are excluded from help", "[args]")
     REQUIRE(std::get<0>(desc[0]) == "-b[bar]");
     REQUIRE(std::get<0>(desc[1]) == "group");
     REQUIRE(std::get<0>(desc[2]) == "-b[bar]");
+
+    parser1.helpParams.proglineShowFlags = true;
+    parser1.helpParams.proglinePreferShortFlags = true;
+    REQUIRE((parser1.GetProgramLine(parser1.helpParams) == std::vector<std::string>{"[-f <foo>]", "[-b <bar>]"}));
 }
 
 TEST_CASE("Implicit values work as expected", "[args]")

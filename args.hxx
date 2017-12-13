@@ -514,17 +514,25 @@ namespace args
          */
         Required = 0x02,
 
-        /** Flag is excluded from help output.
+        /** Flag is excluded from usage line.
          */
-        Hidden = 0x04,
+        HiddenFromUsage = 0x04,
+
+        /** Flag is excluded from options help.
+         */
+        HiddenFromDescription = 0x08,
 
         /** Flag is global and can be used in any subcommand.
          */
-        Global = 0x08,
+        Global = 0x10,
 
         /** Flag stops a parser.
          */
-        KickOut = 0x10,
+        KickOut = 0x20,
+
+        /** Flag is excluded from options help and usage line
+         */
+        Hidden = HiddenFromUsage | HiddenFromDescription,
     };
 
     inline Options operator | (Options lhs, Options rhs)
@@ -1391,7 +1399,7 @@ namespace args
 
                 for (Base *child: Children())
                 {
-                    if ((child->GetOptions() & Options::Hidden) != Options::None)
+                    if ((child->GetOptions() & Options::HiddenFromDescription) != Options::None)
                     {
                         continue;
                     }
@@ -1412,7 +1420,7 @@ namespace args
                 std::vector <std::string> names;
                 for (Base *child: Children())
                 {
-                    if ((child->GetOptions() & Options::Hidden) != Options::None)
+                    if ((child->GetOptions() & Options::HiddenFromUsage) != Options::None)
                     {
                         continue;
                     }
@@ -1941,7 +1949,7 @@ namespace args
 
                 for (Base *child: Children())
                 {
-                    if ((child->GetOptions() & Options::Hidden) != Options::None)
+                    if ((child->GetOptions() & Options::HiddenFromDescription) != Options::None)
                     {
                         continue;
                     }
