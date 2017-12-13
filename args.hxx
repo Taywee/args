@@ -2663,7 +2663,8 @@ namespace args
                 return ParseArgs(args) == std::end(args);
             }
             
-            bool ParseCLI(const std::vector<std::string> &args)
+            template <typename T>
+            bool ParseCLI(const T &args)
             {
                 return ParseArgs(args) == std::end(args);
             }
