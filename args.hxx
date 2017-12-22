@@ -1161,7 +1161,7 @@ namespace args
             bool ready;
 
         public:
-            PositionalBase(const std::string &name_, const std::string &help_, Options options_ = Options::None) : NamedBase(name_, help_, options_), ready(true) {}
+            PositionalBase(const std::string &name_, const std::string &help_, Options options_ = {}) : NamedBase(name_, help_, options_), ready(true) {}
             virtual ~PositionalBase() {}
 
             bool Ready()
@@ -2790,7 +2790,8 @@ namespace args
             int count;
 
         public:
-            CounterFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const int startcount_ = 0): Flag(group_, name_, help_, std::move(matcher_)), startcount(startcount_), count(startcount_) {}
+            CounterFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const int startcount_ = 0, Options options_ = {}):
+                Flag(group_, name_, help_, std::move(matcher_), options_), startcount(startcount_), count(startcount_) {}
 
             virtual ~CounterFlag() {}
 
@@ -3149,7 +3150,8 @@ namespace args
             typedef std::reverse_iterator<iterator> reverse_iterator;
             typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-            ValueFlagList(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Container &defaultValues_ = Container()): ValueFlagBase(name_, help_, std::move(matcher_)), values(defaultValues_)
+            ValueFlagList(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Container &defaultValues_ = Container(), Options options_ = {}):
+                ValueFlagBase(name_, help_, std::move(matcher_), options_), values(defaultValues_)
             {
                 group_.Add(*this);
             }
@@ -3441,7 +3443,7 @@ namespace args
             T value;
             Reader reader;
         public:
-            Positional(Group &group_, const std::string &name_, const std::string &help_, const T &defaultValue_ = T(), Options options_ = Options::None): PositionalBase(name_, help_, options_), value(defaultValue_)
+            Positional(Group &group_, const std::string &name_, const std::string &help_, const T &defaultValue_ = T(), Options options_ = {}): PositionalBase(name_, help_, options_), value(defaultValue_)
             {
                 group_.Add(*this);
             }
@@ -3607,7 +3609,8 @@ namespace args
 
         public:
 
-            MapPositional(Group &group_, const std::string &name_, const std::string &help_, const Map<K, T> &map_, const T &defaultValue_ = T()): PositionalBase(name_, help_), map(map_), value(defaultValue_)
+            MapPositional(Group &group_, const std::string &name_, const std::string &help_, const Map<K, T> &map_, const T &defaultValue_ = T(), Options options_ = {}):
+                PositionalBase(name_, help_, options_), map(map_), value(defaultValue_)
             {
                 group_.Add(*this);
             }
@@ -3694,7 +3697,8 @@ namespace args
             typedef std::reverse_iterator<iterator> reverse_iterator;
             typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-            MapPositionalList(Group &group_, const std::string &name_, const std::string &help_, const Map<K, T> &map_, const Container &defaultValues_ = Container()): PositionalBase(name_, help_), map(map_), values(defaultValues_)
+            MapPositionalList(Group &group_, const std::string &name_, const std::string &help_, const Map<K, T> &map_, const Container &defaultValues_ = Container(), Options options_ = {}):
+                PositionalBase(name_, help_, options_), map(map_), values(defaultValues_)
             {
                 group_.Add(*this);
             }
