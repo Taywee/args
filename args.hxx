@@ -2516,9 +2516,9 @@ namespace args
                             auto &matcher = flag->GetMatcher();
                             if (!AddCompletionReply(chunk, matcher.GetShortOrAny().str(shortprefix, longprefix)))
                             {
-                                for (auto &name : matcher.GetFlagStrings())
+                                for (auto &flagName : matcher.GetFlagStrings())
                                 {
-                                    if (AddCompletionReply(chunk, name.str(shortprefix, longprefix)))
+                                    if (AddCompletionReply(chunk, flagName.str(shortprefix, longprefix)))
                                     {
                                         break;
                                     }
@@ -2544,13 +2544,13 @@ namespace args
                         {
                             if (chunk.size() > shortprefix.size() + 1)
                             {
-                                auto name = chunk.at(shortprefix.size());
+                                auto arg = chunk.at(shortprefix.size());
                                 //TODO: support -abcVALUE where a and b take no value
-                                if (auto flag = this->Match(name))
+                                if (auto flag = this->Match(arg))
                                 {
                                     for (auto &choice : flag->HelpChoices(helpParams))
                                     {
-                                        AddCompletionReply(chunk, shortprefix + name + choice);
+                                        AddCompletionReply(chunk, shortprefix + arg + choice);
                                     }
                                 }
                             }
@@ -2708,7 +2708,7 @@ namespace args
                             Parse(curArgs.begin(), curArgs.end());
                             throw Completion("");
                         }
-                        catch (Completion &e)
+                        catch (Completion &)
                         {
                             throw;
                         }
