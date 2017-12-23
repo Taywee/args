@@ -2209,14 +2209,14 @@ namespace args
                 Positional
             };
 
-            OptionType ParseOption(const std::string &s)
+            OptionType ParseOption(const std::string &s, bool allowEmpty = false)
             {
-                if (s.find(longprefix) == 0 && s.length() > longprefix.length())
+                if (s.find(longprefix) == 0 && (allowEmpty || s.length() > longprefix.length()))
                 {
                     return OptionType::LongFlag;
                 }
 
-                if (s.find(shortprefix) == 0 && s.length() > shortprefix.length())
+                if (s.find(shortprefix) == 0 && (allowEmpty || s.length() > shortprefix.length()))
                 {
                     return OptionType::ShortFlag;
                 }
@@ -2435,7 +2435,13 @@ namespace args
             {
                 if (cur.empty() || choice.find(cur) == 0)
                 {
-                    completion->reply.push_back(choice);
+                    if (completion->syntax == "bash" && ParseOption(choice) == OptionType::LongFlag && choice.find(longseparator) != std::string::npos)
+                    {
+                        completion->reply.push_back(choice.substr(choice.find(longseparator) + 1));
+                    } else
+                    {
+                        completion->reply.push_back(choice);
+                    }
                     return true;
                 }
 
@@ -2454,8 +2460,9 @@ namespace args
                 const auto &chunk = *it;
                 auto pos = GetNextPositional();
                 std::vector<Command *> commands = GetCommands();
+                const auto optionType = ParseOption(chunk, true);
 
-                if (!commands.empty() && (chunk.empty() || ParseOption(chunk) == OptionType::Positional))
+                if (!commands.empty() && (chunk.empty() || optionType == OptionType::Positional))
                 {
                     for (auto &cmd : commands)
                     {
@@ -2482,7 +2489,7 @@ namespace args
                         if ((pos->GetOptions() & Options::HiddenFromCompletion) == Options::None)
                         {
                             auto choices = pos->HelpChoices(helpParams);
-                            hasPositionalCompletion = !choices.empty();
+                            hasPositionalCompletion = !choices.empty() || optionType != OptionType::Positional;
                             for (auto &choice : choices)
                             {
                                 AddCompletionReply(chunk, choice);
@@ -2513,7 +2520,7 @@ namespace args
                             }
                         }
 
-                        if (ParseOption(chunk) == OptionType::LongFlag && allowJoinedLongValue)
+                        if (optionType == OptionType::LongFlag && allowJoinedLongValue)
                         {
                             const auto separator = longseparator.empty() ? chunk.npos : chunk.find(longseparator);
                             if (separator != chunk.npos)
@@ -2527,7 +2534,7 @@ namespace args
                                     }
                                 }
                             }
-                        } else if (ParseOption(chunk) == OptionType::ShortFlag && allowJoinedShortValue)
+                        } else if (optionType == OptionType::ShortFlag && allowJoinedShortValue)
                         {
                             if (chunk.size() > shortprefix.size() + 1)
                             {
@@ -2665,6 +2672,30 @@ namespace args
 
                         std::vector<std::string> curArgs(++it, end);
                         curArgs.resize(completion->cword);
+
+                        if (completion->syntax == "bash")
+                        {
+                            // bash tokenizes --flag=value as --flag=value
+                            for (size_t idx = 0; idx < curArgs.size(); )
+                            {
+                                if (idx > 0 && curArgs[idx] == "=")
+                                {
+                                    curArgs[idx - 1] += "=";
+                                    if (idx + 1 < curArgs.size())
+                                    {
+                                        curArgs[idx - 1] += curArgs[idx + 1];
+                                        curArgs.erase(curArgs.begin() + idx, curArgs.begin() + idx + 2);
+                                    } else
+                                    {
+                                        curArgs.erase(curArgs.begin() + idx);
+                                    }
+                                } else
+                                {
+                                    ++idx;
+                                }
+                            }
+
+                        }
 #ifndef ARGS_NOEXCEPT
                         try
                         {
