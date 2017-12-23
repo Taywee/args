@@ -2358,7 +2358,10 @@ namespace args
 #endif
                     }
 
-                    flag->ParseValue(values);
+                    if (!readCompletion)
+                    {
+                        flag->ParseValue(values);
+                    }
 
                     if (flag->KickOut())
                     {
@@ -2405,7 +2408,10 @@ namespace args
 #endif
                         }
 
-                        flag->ParseValue(values);
+                        if (!readCompletion)
+                        {
+                            flag->ParseValue(values);
+                        }
 
                         if (flag->KickOut())
                         {
@@ -3109,18 +3115,13 @@ namespace args
 
             virtual ~HelpFlag() {}
 
-            virtual FlagBase *Match(const EitherFlag &arg) override
+            virtual void ParseValue(const std::vector<std::string> &)
             {
-                if (FlagBase::Match(arg))
-                {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Help;
-                    return this;
 #else
-                    throw Help(arg.str());
+                    throw Help(Name());
 #endif
-                }
-                return nullptr;
             }
 
             /** Get whether this was matched
