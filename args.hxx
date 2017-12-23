@@ -2224,6 +2224,28 @@ namespace args
                 return OptionType::Positional;
             }
 
+            template <typename It>
+            bool Complete(FlagBase &flag, It it, It end)
+            {
+                auto nextIt = it;
+                if (!readCompletion || (++nextIt != end))
+                {
+                    return false;
+                }
+
+                const auto &chunk = *it;
+                for (auto &choice : flag.HelpChoices(helpParams))
+                {
+                    AddCompletionReply(chunk, choice);
+                }
+
+#ifndef ARGS_NOEXCEPT
+                throw Completion(completion->Get());
+#else
+                return true;
+#endif
+            }
+
             /** (INTERNAL) Parse flag's values
              *
              * \param arg The string to display in error message as a flag name
@@ -2269,6 +2291,11 @@ namespace args
                            values.size() < nargs.max &&
                            (nargs.min == nargs.max || ParseOption(*valueIt) == OptionType::Positional))
                     {
+                        if (Complete(flag, valueIt, end))
+                        {
+                            it = end;
+                            return "";
+                        }
 
                         values.push_back(*valueIt);
                         ++it;
@@ -2476,7 +2503,43 @@ namespace args
                             auto &matcher = flag->GetMatcher();
                             if (!AddCompletionReply(chunk, matcher.GetShortOrAny().str(shortprefix, longprefix)))
                             {
-                                AddCompletionReply(chunk, matcher.GetLongOrAny().str(shortprefix, longprefix));
+                                for (auto &name : matcher.GetFlagStrings())
+                                {
+                                    if (AddCompletionReply(chunk, name.str(shortprefix, longprefix)))
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (ParseOption(chunk) == OptionType::LongFlag && allowJoinedLongValue)
+                        {
+                            const auto separator = longseparator.empty() ? chunk.npos : chunk.find(longseparator);
+                            if (separator != chunk.npos)
+                            {
+                                std::string arg(chunk, 0, separator);
+                                if (auto flag = this->Match(arg.substr(longprefix.size())))
+                                {
+                                    for (auto &choice : flag->HelpChoices(helpParams))
+                                    {
+                                        AddCompletionReply(chunk, arg + longseparator + choice);
+                                    }
+                                }
+                            }
+                        } else if (ParseOption(chunk) == OptionType::ShortFlag && allowJoinedShortValue)
+                        {
+                            if (chunk.size() > shortprefix.size() + 1)
+                            {
+                                auto name = chunk.at(shortprefix.size());
+                                //TODO: support -abcVALUE where a and b take no value
+                                if (auto flag = this->Match(name))
+                                {
+                                    for (auto &choice : flag->HelpChoices(helpParams))
+                                    {
+                                        AddCompletionReply(chunk, shortprefix + name + choice);
+                                    }
+                                }
                             }
                         }
                     }

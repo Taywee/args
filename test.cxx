@@ -1257,6 +1257,11 @@ TEST_CASE("Completion works as expected", "[args]")
     REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-"}), Equals("-f\n-b"));
     REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-f"}), Equals("-f"));
     REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "--"}), Equals("--foo\n--bar"));
+
+    args::MapFlag<std::string, int> m(p, "mappos", "mappos", {'m', "map"}, {{"1",1}, {"2", 2}});
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "-m", ""}), Equals("1\n2"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "--map="}), Equals("--map=1\n--map=2"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-m1"}), Equals("-m1"));
 }
 
 #undef ARGS_HXX
