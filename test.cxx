@@ -1276,6 +1276,7 @@ TEST_CASE("Completion works as expected", "[args]")
     args::Command c1(p2, "command1", "desc", [](args::Subparser &sp)
     {
         args::ValueFlag<std::string> f1(sp, "name", "description", {'f', "foo"}, "abc");
+        f1.KickOut();
         sp.Parse();
     });
 
@@ -1289,6 +1290,8 @@ TEST_CASE("Completion works as expected", "[args]")
     REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", ""}), Equals("command1\ncommand2"));
     REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "command1", ""}), Equals("-f"));
     REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "command2", ""}), Equals("-b"));
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "command3", ""}), Equals(""));
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "3", "test", "command1", "-f", "-"}), Equals(""));
 }
 
 #undef ARGS_HXX
