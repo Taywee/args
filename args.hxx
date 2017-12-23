@@ -1884,6 +1884,12 @@ namespace args
                     }
                 }
 
+                if (selectedCommand != nullptr)
+                {
+                    auto childFlags = selectedCommand->GetAllFlags();
+                    res.insert(res.end(), childFlags.begin(), childFlags.end());
+                }
+
                 if (subparser != nullptr)
                 {
                     auto childFlags = subparser->GetAllFlags();
