@@ -1203,7 +1203,7 @@ TEST_CASE("Default values work as expected", "[args]")
 )");
 
     f.HelpDefault("123");
-    b.HelpChoices("1, 2, 3");
+    b.HelpChoices({"1", "2", "3"});
     REQUIRE(p.Help() == R"(  prog {OPTIONS}
 
     parser
@@ -1239,10 +1239,10 @@ TEST_CASE("Choices description works as expected", "[args]")
     args::MapPositional<std::string, int, args::ValueReader, std::map> mappos(p, "mappos", "mappos", {{"1",1}, {"2", 2}});
     args::MapPositionalList<char, int, std::vector, args::ValueReader, std::map> mapposlist(p, "mapposlist", "mapposlist", {{'1',1}, {'2', 2}});
 
-    REQUIRE(map.HelpChoices(p.helpParams) == "1, 2");
-    REQUIRE(maplist.HelpChoices(p.helpParams) == "1, 2");
-    REQUIRE(mappos.HelpChoices(p.helpParams) == "1, 2");
-    REQUIRE(mapposlist.HelpChoices(p.helpParams) == "1, 2");
+    REQUIRE(map.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
+    REQUIRE(maplist.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
+    REQUIRE(mappos.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
+    REQUIRE(mapposlist.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
 }
 
 #undef ARGS_HXX

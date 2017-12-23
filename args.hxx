@@ -705,6 +705,40 @@ namespace args
         std::string defaultString = "\nDefault: ";
     };
 
+    /** A number of arguments which can be consumed by an option.
+     *
+     * Represents a closed interval [min, max].
+     */
+    struct Nargs
+    {
+        const size_t min;
+        const size_t max;
+
+        Nargs(size_t min_, size_t max_) : min(min_), max(max_)
+        {
+#ifndef ARGS_NOEXCEPT
+            if (max < min)
+            {
+                throw UsageError("Nargs: max > min");
+            }
+#endif
+        }
+
+        Nargs(size_t num_) : min(num_), max(num_)
+        {
+        }
+
+        friend bool operator == (const Nargs &lhs, const Nargs &rhs)
+        {
+            return lhs.min == rhs.min && lhs.max == rhs.max;
+        }
+
+        friend bool operator != (const Nargs &lhs, const Nargs &rhs)
+        {
+            return !(lhs == rhs);
+        }
+    };
+
     /** Base class for all match types
      */
     class Base
@@ -841,12 +875,12 @@ namespace args
             bool kickout = false;
             std::string defaultString;
             bool defaultStringManual = false;
-            std::string choicesString;
+            std::vector<std::string> choicesStrings;
             bool choicesStringManual = false;
 
             virtual std::string GetDefaultString(const HelpParams&) const { return {}; }
 
-            virtual std::string GetChoicesString(const HelpParams&) const { return {}; }
+            virtual std::vector<std::string> GetChoicesStrings(const HelpParams&) const { return {}; }
 
             virtual std::string GetNameString(const HelpParams&) const { return Name(); }
 
@@ -884,20 +918,20 @@ namespace args
                 return GetDefaultString(params);
             }
 
-            /** Sets choices string that will be added to argument description.
-             *  Use empty string to disable it for this argument.
+            /** Sets choices strings that will be added to argument description.
+             *  Use empty vector to disable it for this argument.
              */
-            void HelpChoices(const std::string &str)
+            void HelpChoices(const std::vector<std::string> &array)
             {
                 choicesStringManual = true;
-                choicesString = str;
+                choicesStrings = array;
             }
 
-            /** Gets choices string that will be added to argument description.
+            /** Gets choices strings that will be added to argument description.
              */
-            std::string HelpChoices(const HelpParams &params) const
+            std::vector<std::string> HelpChoices(const HelpParams &params) const
             {
-                return GetChoicesString(params);
+                return GetChoicesStrings(params);
             }
 
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
@@ -907,7 +941,23 @@ namespace args
                 std::get<1>(description) = help;
                 std::get<2>(description) = indentLevel;
 
-                AddDescriptionPostfix(std::get<1>(description), choicesStringManual, choicesString, params.addChoices, GetChoicesString(params), params.choiceString);
+                auto join = [](const std::vector<std::string> &array) -> std::string
+                {
+                    std::string res;
+
+                    for (auto &str : array)
+                    {
+                        if (!res.empty())
+                        {
+                            res += ", ";
+                        }
+                        res += str;
+                    }
+
+                    return res;
+                };
+
+                AddDescriptionPostfix(std::get<1>(description), choicesStringManual, join(choicesStrings), params.addChoices, join(GetChoicesStrings(params)), params.choiceString);
                 AddDescriptionPostfix(std::get<1>(description), defaultStringManual, defaultString, params.addDefault, GetDefaultString(params), params.defaultString);
 
                 return { std::move(description) };
@@ -917,40 +967,6 @@ namespace args
             {
                 return name;
             }
-    };
-
-    /** A number of arguments which can be consumed by an option.
-     *
-     * Represents a closed interval [min, max].
-     */
-    struct Nargs
-    {
-        const size_t min;
-        const size_t max;
-
-        Nargs(size_t min_, size_t max_) : min(min_), max(max_)
-        {
-#ifndef ARGS_NOEXCEPT
-            if (max < min)
-            {
-                throw UsageError("Nargs: max > min");
-            }
-#endif
-        }
-
-        Nargs(size_t num_) : min(num_), max(num_)
-        {
-        }
-
-        friend bool operator == (const Nargs &lhs, const Nargs &rhs)
-        {
-            return lhs.min == rhs.min && lhs.max == rhs.max;
-        }
-
-        friend bool operator != (const Nargs &lhs, const Nargs &rhs)
-        {
-            return !(lhs == rhs);
-        }
     };
 
     namespace detail
@@ -978,27 +994,18 @@ namespace args
         }
 
         template <typename T>
-        std::string MapKeysToString(const T &map)
+        std::vector<std::string> MapKeysToStrings(const T &map)
         {
-            std::string res;
+            std::vector<std::string> res;
             using K = typename std::decay<decltype(std::begin(map)->first)>::type;
             if (IsConvertableToString<K>::value)
             {
-                std::vector<std::string> values;
                 for (const auto &p : map)
                 {
-                    values.push_back(detail::ToString(p.first));
+                    res.push_back(detail::ToString(p.first));
                 }
 
-                std::sort(values.begin(), values.end());
-                for (const auto &s : values)
-                {
-                    if (!res.empty())
-                    {
-                        res += ", ";
-                    }
-                    res += s;
-                }
+                std::sort(res.begin(), res.end());
             }
             return res;
         }
@@ -3241,9 +3248,9 @@ namespace args
             Reader reader;
 
         protected:
-            virtual std::string GetChoicesString(const HelpParams &) const override
+            virtual std::vector<std::string> GetChoicesStrings(const HelpParams &) const override
             {
-                return detail::MapKeysToString(map);
+                return detail::MapKeysToStrings(map);
             }
 
         public:
@@ -3323,9 +3330,9 @@ namespace args
             Reader reader;
 
         protected:
-            virtual std::string GetChoicesString(const HelpParams &) const override
+            virtual std::vector<std::string> GetChoicesStrings(const HelpParams &) const override
             {
-                return detail::MapKeysToString(map);
+                return detail::MapKeysToStrings(map);
             }
 
         public:
@@ -3600,9 +3607,9 @@ namespace args
             Reader reader;
 
         protected:
-            virtual std::string GetChoicesString(const HelpParams &) const override
+            virtual std::vector<std::string> GetChoicesStrings(const HelpParams &) const override
             {
-                return detail::MapKeysToString(map);
+                return detail::MapKeysToStrings(map);
             }
 
         public:
@@ -3675,9 +3682,9 @@ namespace args
             Reader reader;
 
         protected:
-            virtual std::string GetChoicesString(const HelpParams &) const override
+            virtual std::vector<std::string> GetChoicesStrings(const HelpParams &) const override
             {
-                return detail::MapKeysToString(map);
+                return detail::MapKeysToStrings(map);
             }
 
         public:
