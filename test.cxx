@@ -1245,6 +1245,20 @@ TEST_CASE("Choices description works as expected", "[args]")
     REQUIRE(mapposlist.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
 }
 
+TEST_CASE("Completion works as expected", "[args]")
+{
+    using namespace Catch::Matchers;
+
+    args::ArgumentParser p("parser");
+    args::CompletionFlag c(p, {"completion"});
+    args::ValueFlag<std::string> f(p, "name", "description", {'f', "foo"}, "abc");
+    args::ValueFlag<std::string> b(p, "name", "description", {'b', "bar"}, "abc");
+
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-"}), Equals("-f\n-b"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-f"}), Equals("-f"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "--"}), Equals("--foo\n--bar"));
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT

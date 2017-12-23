@@ -165,6 +165,26 @@ namespace args
         return output;
     }
 
+    namespace detail
+    {
+        template <typename T>
+        std::string Join(const T& array, const std::string &delimiter)
+        {
+            std::string res;
+            for (auto &element : array)
+            {
+                if (!res.empty())
+                {
+                    res += delimiter;
+                }
+
+                res += element;
+            }
+
+            return res;
+        }
+    }
+
     /** (INTERNAL) Wrap a string into a vector of lines
      *
      * This is quick and hacky, but works well enough.  You can specify a
@@ -218,6 +238,7 @@ namespace args
         Extra,
         Help,
         Subparser,
+        Completion,
     };
 #else
     /** Base error class
@@ -226,7 +247,7 @@ namespace args
     {
         public:
             Error(const std::string &problem) : std::runtime_error(problem) {}
-            virtual ~Error() {};
+            virtual ~Error() {}
     };
 
     /** Errors that occur during usage
@@ -235,7 +256,7 @@ namespace args
     {
         public:
             UsageError(const std::string &problem) : Error(problem) {}
-            virtual ~UsageError() {};
+            virtual ~UsageError() {}
     };
 
     /** Errors that occur during regular parsing
@@ -244,7 +265,7 @@ namespace args
     {
         public:
             ParseError(const std::string &problem) : Error(problem) {}
-            virtual ~ParseError() {};
+            virtual ~ParseError() {}
     };
 
     /** Errors that are detected from group validation after parsing finishes
@@ -253,7 +274,7 @@ namespace args
     {
         public:
             ValidationError(const std::string &problem) : Error(problem) {}
-            virtual ~ValidationError() {};
+            virtual ~ValidationError() {}
     };
 
     /** Errors that when a required flag is omitted
@@ -262,7 +283,7 @@ namespace args
     {
         public:
             RequiredError(const std::string &problem) : ValidationError(problem) {}
-            virtual ~RequiredError() {};
+            virtual ~RequiredError() {}
     };
 
     /** Errors in map lookups
@@ -271,7 +292,7 @@ namespace args
     {
         public:
             MapError(const std::string &problem) : ParseError(problem) {}
-            virtual ~MapError() {};
+            virtual ~MapError() {}
     };
 
     /** Error that occurs when a singular flag is specified multiple times
@@ -280,7 +301,7 @@ namespace args
     {
         public:
             ExtraError(const std::string &problem) : ParseError(problem) {}
-            virtual ~ExtraError() {};
+            virtual ~ExtraError() {}
     };
 
     /** An exception that indicates that the user has requested help
@@ -289,7 +310,7 @@ namespace args
     {
         public:
             Help(const std::string &flag) : Error(flag) {}
-            virtual ~Help() {};
+            virtual ~Help() {}
     };
 
     /** (INTERNAL) An exception that emulates coroutine-like control flow for subparsers.
@@ -298,7 +319,16 @@ namespace args
     {
         public:
             SubparserError() : Error("") {}
-            virtual ~SubparserError() {};
+            virtual ~SubparserError() {}
+    };
+
+    /** An exception that contains autocompletion reply
+     */
+    class Completion : public Error
+    {
+        public:
+            Completion(const std::string &flag) : Error(flag) {}
+            virtual ~Completion() {}
     };
 #endif
 
@@ -530,9 +560,13 @@ namespace args
          */
         KickOut = 0x20,
 
+        /** Flag is excluded from auto completion.
+         */
+        HiddenFromCompletion = 0x40,
+
         /** Flag is excluded from options help and usage line
          */
-        Hidden = HiddenFromUsage | HiddenFromDescription,
+        Hidden = HiddenFromUsage | HiddenFromDescription | HiddenFromCompletion,
     };
 
     inline Options operator | (Options lhs, Options rhs)
@@ -810,6 +844,11 @@ namespace args
                 return nullptr;
             }
 
+            virtual std::vector<FlagBase*> GetAllFlags()
+            {
+                return {};
+            }
+
             virtual bool HasFlag() const
             {
                 return false;
@@ -915,7 +954,7 @@ namespace args
              */
             std::string HelpDefault(const HelpParams &params) const
             {
-                return GetDefaultString(params);
+                return defaultStringManual ? defaultString : GetDefaultString(params);
             }
 
             /** Sets choices strings that will be added to argument description.
@@ -931,7 +970,7 @@ namespace args
              */
             std::vector<std::string> HelpChoices(const HelpParams &params) const
             {
-                return GetChoicesStrings(params);
+                return choicesStringManual ? choicesStrings : GetChoicesStrings(params);
             }
 
             virtual std::vector<std::tuple<std::string, std::string, unsigned>> GetDescription(const HelpParams &params, const unsigned indentLevel) const override
@@ -941,23 +980,7 @@ namespace args
                 std::get<1>(description) = help;
                 std::get<2>(description) = indentLevel;
 
-                auto join = [](const std::vector<std::string> &array) -> std::string
-                {
-                    std::string res;
-
-                    for (auto &str : array)
-                    {
-                        if (!res.empty())
-                        {
-                            res += ", ";
-                        }
-                        res += str;
-                    }
-
-                    return res;
-                };
-
-                AddDescriptionPostfix(std::get<1>(description), choicesStringManual, join(choicesStrings), params.addChoices, join(GetChoicesStrings(params)), params.choiceString);
+                AddDescriptionPostfix(std::get<1>(description), choicesStringManual, detail::Join(choicesStrings, ", "), params.addChoices, detail::Join(GetChoicesStrings(params), ", "), params.choiceString);
                 AddDescriptionPostfix(std::get<1>(description), defaultStringManual, defaultString, params.addDefault, GetDefaultString(params), params.defaultString);
 
                 return { std::move(description) };
@@ -1072,6 +1095,16 @@ namespace args
                 return nullptr;
             }
 
+            virtual std::vector<FlagBase*> GetAllFlags() override
+            {
+                return { this };
+            }
+
+            const Matcher &GetMatcher() const
+            {
+                return matcher;
+            }
+
             virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) const override
             {
                 if (!Matched() && IsRequired())
@@ -1159,6 +1192,49 @@ namespace args
                 return 1;
             }
     };
+
+    class CompletionFlag : public ValueFlagBase
+    {
+        public:
+            std::vector<std::string> reply;
+            size_t cword = 0;
+            std::string syntax;
+
+            template <typename GroupClass>
+            CompletionFlag(GroupClass &group_, Matcher &&matcher_): ValueFlagBase("completion", "completion flag", std::move(matcher_), Options::Hidden)
+            {
+                group_.AddCompletion(*this);
+            }
+
+            virtual ~CompletionFlag() {}
+
+            virtual Nargs NumberOfArguments() const noexcept override
+            {
+                return 2;
+            }
+
+            virtual void ParseValue(const std::vector<std::string> &value_) override
+            {
+                syntax = value_.at(0);
+                std::istringstream(value_.at(1)) >> cword;
+            }
+
+            /** Get the completion reply
+             */
+            std::string Get() noexcept
+            {
+                return detail::Join(reply, "\n");
+            }
+
+            virtual void Reset() noexcept override
+            {
+                ValueFlagBase::Reset();
+                cword = 0;
+                syntax.clear();
+                reply.clear();
+            }
+    };
+
 
     /** Base class for positional options
      */
@@ -1316,6 +1392,17 @@ namespace args
                     }
                 }
                 return nullptr;
+            }
+
+            virtual std::vector<FlagBase*> GetAllFlags() override
+            {
+                std::vector<FlagBase*> res;
+                for (Base *child: Children())
+                {
+                    auto childRes = child->GetAllFlags();
+                    res.insert(res.end(), childRes.begin(), childRes.end());
+                }
+                return res;
             }
 
             virtual void Validate(const std::string &shortPrefix, const std::string &longPrefix) const override
@@ -1779,6 +1866,33 @@ namespace args
                 return Matched() ? Group::Match(flag) : nullptr;
             }
 
+            virtual std::vector<FlagBase*> GetAllFlags() override
+            {
+                std::vector<FlagBase*> res;
+
+                if (!Matched())
+                {
+                    return res;
+                }
+
+                for (auto *child: Children())
+                {
+                    if (selectedCommand == nullptr || (child->GetOptions() & Options::Global) != Options::None)
+                    {
+                        auto childFlags = child->GetAllFlags();
+                        res.insert(res.end(), childFlags.begin(), childFlags.end());
+                    }
+                }
+
+                if (subparser != nullptr)
+                {
+                    auto childFlags = subparser->GetAllFlags();
+                    res.insert(res.end(), childFlags.begin(), childFlags.end());
+                }
+
+                return res;
+            }
+
             virtual PositionalBase *GetNextPositional() override
             {
                 if (selectedCommand != nullptr)
@@ -2084,6 +2198,9 @@ namespace args
             bool allowSeparateShortValue = true;
             bool allowSeparateLongValue = true;
 
+            CompletionFlag *completion = nullptr;
+            bool readCompletion = false;
+
         protected:
             enum class OptionType
             {
@@ -2287,16 +2404,105 @@ namespace args
                 return true;
             }
 
+            bool AddCompletionReply(const std::string &cur, const std::string &choice)
+            {
+                if (cur.empty() || choice.find(cur) == 0)
+                {
+                    completion->reply.push_back(choice);
+                    return true;
+                }
+
+                return false;
+            }
+
+            template <typename It>
+            bool Complete(It it, It end)
+            {
+                auto nextIt = it;
+                if (!readCompletion || (++nextIt != end))
+                {
+                    return false;
+                }
+
+                const auto &chunk = *it;
+                auto pos = GetNextPositional();
+                std::vector<Command *> commands = GetCommands();
+
+                if (!commands.empty() && (chunk.empty() || ParseOption(chunk) == OptionType::Positional))
+                {
+                    for (auto &cmd : commands)
+                    {
+                        if ((cmd->GetOptions() & Options::HiddenFromCompletion) == Options::None)
+                        {
+                            AddCompletionReply(chunk, cmd->Name());
+                        }
+                    }
+                } else
+                {
+                    bool hasPositionalCompletion = true;
+
+                    if (!commands.empty())
+                    {
+                        for (auto &cmd : commands)
+                        {
+                            if ((cmd->GetOptions() & Options::HiddenFromCompletion) == Options::None)
+                            {
+                                AddCompletionReply(chunk, cmd->Name());
+                            }
+                        }
+                    } else if (pos)
+                    {
+                        if ((pos->GetOptions() & Options::HiddenFromCompletion) == Options::None)
+                        {
+                            auto choices = pos->HelpChoices(helpParams);
+                            hasPositionalCompletion = !choices.empty();
+                            for (auto &choice : choices)
+                            {
+                                AddCompletionReply(chunk, choice);
+                            }
+                        }
+                    }
+
+                    if (hasPositionalCompletion)
+                    {
+                        auto flags = GetAllFlags();
+                        for (auto flag : flags)
+                        {
+                            if ((flag->GetOptions() & Options::HiddenFromCompletion) != Options::None)
+                            {
+                                continue;
+                            }
+
+                            auto &matcher = flag->GetMatcher();
+                            if (!AddCompletionReply(chunk, matcher.GetShortOrAny().str(shortprefix, longprefix)))
+                            {
+                                AddCompletionReply(chunk, matcher.GetLongOrAny().str(shortprefix, longprefix));
+                            }
+                        }
+                    }
+                }
+
+#ifndef ARGS_NOEXCEPT
+                throw Completion(completion->Get());
+#else
+                return true;
+#endif
+            }
+
             template <typename It>
             It Parse(It begin, It end)
             {
                 bool terminated = false;
-
                 std::vector<Command *> commands = GetCommands();
 
                 // Check all arg chunks
                 for (auto it = begin; it != end; ++it)
                 {
+                    if (Complete(it, end))
+                    {
+                        return end;
+                    }
+
                     const auto &chunk = *it;
 
                     if (!terminated && chunk == terminator)
@@ -2378,6 +2584,42 @@ namespace args
 #endif
                         }
                     }
+
+                    if (!readCompletion && completion != nullptr && completion->Matched())
+                    {
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Completion;
+#endif
+                        readCompletion = true;
+                        ++it;
+                        size_t argsLeft = std::distance(it, end);
+                        if (completion->cword == 0 || argsLeft <= 1 || completion->cword >= argsLeft)
+                        {
+#ifndef ARGS_NOEXCEPT
+                            throw Completion("");
+#endif
+                        }
+
+                        std::vector<std::string> curArgs(++it, end);
+                        curArgs.resize(completion->cword);
+#ifndef ARGS_NOEXCEPT
+                        try
+                        {
+                            Parse(curArgs.begin(), curArgs.end());
+                            throw Completion("");
+                        }
+                        catch (Completion &e)
+                        {
+                            throw;
+                        }
+                        catch (args::Error&)
+                        {
+                            throw Completion("");
+                        }
+#else
+                        return Parse(curArgs.begin(), curArgs.end());
+#endif
+                    }
                 }
 
                 Validate(shortprefix, longprefix);
@@ -2397,6 +2639,12 @@ namespace args
                 Terminator("--");
                 SetArgumentSeparations(true, true, true, true);
                 matched = true;
+            }
+
+            void AddCompletion(CompletionFlag &completionFlag)
+            {
+                completion = &completionFlag;
+                Add(completionFlag);
             }
 
             /** The program name for help generation
@@ -2620,6 +2868,7 @@ namespace args
             {
                 Command::Reset();
                 matched = true;
+                readCompletion = false;
             }
 
             /** Parse all arguments.
