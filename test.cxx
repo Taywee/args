@@ -1203,7 +1203,7 @@ TEST_CASE("Default values work as expected", "[args]")
 )");
 
     f.HelpDefault("123");
-    b.HelpChoices("1, 2, 3");
+    b.HelpChoices({"1", "2", "3"});
     REQUIRE(p.Help() == R"(  prog {OPTIONS}
 
     parser
@@ -1239,10 +1239,59 @@ TEST_CASE("Choices description works as expected", "[args]")
     args::MapPositional<std::string, int, args::ValueReader, std::map> mappos(p, "mappos", "mappos", {{"1",1}, {"2", 2}});
     args::MapPositionalList<char, int, std::vector, args::ValueReader, std::map> mapposlist(p, "mapposlist", "mapposlist", {{'1',1}, {'2', 2}});
 
-    REQUIRE(map.HelpChoices(p.helpParams) == "1, 2");
-    REQUIRE(maplist.HelpChoices(p.helpParams) == "1, 2");
-    REQUIRE(mappos.HelpChoices(p.helpParams) == "1, 2");
-    REQUIRE(mapposlist.HelpChoices(p.helpParams) == "1, 2");
+    REQUIRE(map.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
+    REQUIRE(maplist.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
+    REQUIRE(mappos.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
+    REQUIRE(mapposlist.HelpChoices(p.helpParams) == std::vector<std::string>{"1", "2"});
+}
+
+TEST_CASE("Completion works as expected", "[args]")
+{
+    using namespace Catch::Matchers;
+
+    args::ArgumentParser p("parser");
+    args::CompletionFlag c(p, {"completion"});
+    args::Group g(p);
+    args::ValueFlag<std::string> f(g, "name", "description", {'f', "foo"}, "abc");
+    args::ValueFlag<std::string> b(g, "name", "description", {'b', "bar"}, "abc");
+
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-"}), Equals("-f\n-b"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-f"}), Equals("-f"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "--"}), Equals("--foo\n--bar"));
+
+    args::MapFlag<std::string, int> m(p, "mappos", "mappos", {'m', "map"}, {{"1",1}, {"2", 2}});
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "-m", ""}), Equals("1\n2"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "--map="}), Equals("1\n2"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "--map", "="}), Equals("1\n2"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-m1"}), Equals("-m1"));
+
+    args::Positional<std::string> pos(p, "name", "desc");
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", ""}), Equals(""));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-"}), Equals("-f\n-b\n-m"));
+    REQUIRE_THROWS_WITH(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "--"}), Equals("--foo\n--bar\n--map"));
+
+    args::ArgumentParser p2("parser");
+    args::CompletionFlag complete2(p2, {"completion"});
+
+    args::Command c1(p2, "command1", "desc", [](args::Subparser &sp)
+    {
+        args::ValueFlag<std::string> f1(sp, "name", "description", {'f', "foo"}, "abc");
+        f1.KickOut();
+        sp.Parse();
+    });
+
+    args::Command c2(p2, "command2", "desc", [](args::Subparser &sp)
+    {
+        args::ValueFlag<std::string> f1(sp, "name", "description", {'b', "bar"}, "abc");
+        sp.Parse();
+    });
+
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-"}), Equals(""));
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", ""}), Equals("command1\ncommand2"));
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "command1", ""}), Equals("-f"));
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "command2", ""}), Equals("-b"));
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "command3", ""}), Equals(""));
+    REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "3", "test", "command1", "-f", "-"}), Equals(""));
 }
 
 #undef ARGS_HXX
@@ -1390,3 +1439,17 @@ TEST_CASE("Matcher validation works as expected in noexcept mode", "[args]")
     REQUIRE(parser.GetError() == argstest::Error::Usage);
 }
 
+TEST_CASE("Completion works as expected in noexcept mode", "[args]")
+{
+    using namespace Catch::Matchers;
+
+    argstest::ArgumentParser p("parser");
+    argstest::CompletionFlag c(p, {"completion"});
+    argstest::Group g(p);
+    argstest::ValueFlag<std::string> f(g, "name", "description", {'f', "foo"}, "abc");
+    argstest::ValueFlag<std::string> b(g, "name", "description", {'b', "bar"}, "abc");
+
+    p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-"});
+    REQUIRE(p.GetError() == argstest::Error::Completion);
+    REQUIRE(argstest::get(c) == "-f\n-b");
+}

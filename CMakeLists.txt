@@ -39,6 +39,14 @@ add_executable(argstest-multiple-inclusion test/multiple_inclusion_1.cxx test/mu
 target_link_libraries(argstest-multiple-inclusion args)
 set_property(TARGET argstest-multiple-inclusion PROPERTY CXX_STANDARD 11)
 
+add_executable(gitlike examples/gitlike.cxx)
+target_link_libraries(gitlike args)
+set_property(TARGET gitlike PROPERTY CXX_STANDARD 11)
+
+add_executable(completion examples/completion.cxx)
+target_link_libraries(completion args)
+set_property(TARGET completion PROPERTY CXX_STANDARD 11)
+
 enable_testing()
 add_test(NAME "test" COMMAND argstest)
 add_test(NAME "test-multiple-inclusion" COMMAND argstest-multiple-inclusion)
