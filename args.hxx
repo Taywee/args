@@ -786,6 +786,7 @@ namespace args
 #ifdef ARGS_NOEXCEPT
             /// Only for ARGS_NOEXCEPT
             mutable Error error = Error::None;
+            mutable std::string errorMsg;
 #endif
 
         public:
@@ -893,6 +894,7 @@ namespace args
                 matched = false;
 #ifdef ARGS_NOEXCEPT
                 error = Error::None;
+                errorMsg.clear();
 #endif
             }
 
@@ -901,6 +903,12 @@ namespace args
             virtual Error GetError() const
             {
                 return error;
+            }
+
+            /// Only for ARGS_NOEXCEPT
+            std::string GetErrorMsg() const
+            {
+                return errorMsg;
             }
 #endif
     };
@@ -1081,11 +1089,12 @@ namespace args
                 {
                     if ((GetOptions() & Options::Single) != Options::None && matched)
                     {
-#ifdef ARGS_NOEXCEPT
-                        error = Error::Extra;
-#else
                         std::ostringstream problem;
                         problem << "Flag '" << flag.str() << "' was passed multiple times, but is only allowed to be passed once";
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Extra;
+                        errorMsg = problem.str();
+#else
                         throw ExtraError(problem.str());
 #endif
                     }
@@ -1109,13 +1118,12 @@ namespace args
             {
                 if (!Matched() && IsRequired())
                 {
-#ifdef ARGS_NOEXCEPT
-                        (void)shortPrefix;
-                        (void)longPrefix;
-                        error = Error::Required;
-#else
                         std::ostringstream problem;
                         problem << "Flag '" << matcher.GetLongOrAny().str(shortPrefix, longPrefix) << "' is required";
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Required;
+                        errorMsg = problem.str();
+#else
                         throw RequiredError(problem.str());
 #endif
                 }
@@ -1260,6 +1268,7 @@ namespace args
                 ready = true;
 #ifdef ARGS_NOEXCEPT
                 error = Error::None;
+                errorMsg.clear();
 #endif
             }
 
@@ -1283,11 +1292,12 @@ namespace args
             {
                 if (IsRequired() && !Matched())
                 {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Required;
-#else
                     std::ostringstream problem;
                     problem << "Option '" << Name() << "' is required";
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Required;
+                    errorMsg = problem.str();
+#else
                     throw RequiredError(problem.str());
 #endif
                 }
@@ -1554,6 +1564,7 @@ namespace args
                 }
 #ifdef ARGS_NOEXCEPT
                 error = Error::None;
+                errorMsg.clear();
 #endif
             }
 
@@ -2118,11 +2129,12 @@ namespace args
                 {
                     if (child->IsGroup() && !child->Matched())
                     {
-#ifdef ARGS_NOEXCEPT
-                        error = Error::Validation;
-#else
                         std::ostringstream problem;
                         problem << "Group validation failed somewhere!";
+#ifdef ARGS_NOEXCEPT
+                        error = Error::Validation;
+                        errorMsg = problem.str();
+#else
                         throw ValidationError(problem.str());
 #endif
                     }
@@ -2137,11 +2149,12 @@ namespace args
 
                 if (selectedCommand == nullptr && commandIsRequired && (Group::HasCommand() || subparserHasCommand))
                 {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Validation;
-#else
                     std::ostringstream problem;
                     problem << "Command is required";
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Validation;
+                    errorMsg = problem.str();
+#else
                     throw ValidationError(problem.str());
 #endif
                 }
@@ -2360,6 +2373,7 @@ namespace args
                         throw ParseError(errorMessage);
 #else
                         error = Error::Parse;
+                        errorMsg = errorMessage;
                         return false;
 #endif
                     }
@@ -2376,10 +2390,12 @@ namespace args
                     }
                 } else
                 {
+                    const std::string errorMessage("Flag could not be matched: " + arg);
 #ifndef ARGS_NOEXCEPT
-                    throw ParseError("Flag could not be matched: " + arg);
+                    throw ParseError(errorMessage);
 #else
                     error = Error::Parse;
+                    errorMsg = errorMessage;
                     return false;
 #endif
                 }
@@ -2410,6 +2426,7 @@ namespace args
                             throw ParseError(errorMessage);
 #else
                             error = Error::Parse;
+                            errorMsg = errorMessage;
                             return false;
 #endif
                         }
@@ -2431,10 +2448,12 @@ namespace args
                         }
                     } else
                     {
+                        const std::string errorMessage("Flag could not be matched: '" + std::string(1, arg) + "'");
 #ifndef ARGS_NOEXCEPT
-                        throw ParseError("Flag could not be matched: '" + std::string(1, arg) + "'");
+                        throw ParseError(errorMessage);
 #else
                         error = Error::Parse;
+                        errorMsg = errorMessage;
                         return false;
 #endif
                     }
@@ -2607,10 +2626,12 @@ namespace args
                         auto itCommand = std::find_if(commands.begin(), commands.end(), [&chunk](Command *c) { return c->Name() == chunk; });
                         if (itCommand == commands.end())
                         {
+                            const std::string errorMessage("Unknown command: " + chunk);
 #ifndef ARGS_NOEXCEPT
-                            throw ParseError("Unknown command: " + chunk);
+                            throw ParseError(errorMessage);
 #else
                             error = Error::Parse;
+                            errorMsg = errorMessage;
                             return it;
 #endif
                         }
@@ -2658,10 +2679,12 @@ namespace args
                             }
                         } else
                         {
+                            const std::string errorMessage("Passed in argument, but no positional arguments were ready to receive it: " + chunk);
 #ifndef ARGS_NOEXCEPT
-                            throw ParseError("Passed in argument, but no positional arguments were ready to receive it: " + chunk);
+                            throw ParseError(errorMessage);
 #else
                             error = Error::Parse;
+                            errorMsg = errorMessage;
                             return it;
 #endif
                         }
@@ -2796,10 +2819,12 @@ namespace args
             {
                 if (longseparator_.empty())
                 {
+                    const std::string errorMessage("longseparator can not be set to empty");
 #ifdef ARGS_NOEXCEPT
                     error = Error::Usage;
+                    errorMsg = errorMessage;
 #else
-                    throw UsageError("longseparator can not be set to empty");
+                    throw UsageError(errorMessage);
 #endif
                 } else
                 {
@@ -3125,6 +3150,7 @@ namespace args
             {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Help;
+                    errorMsg = Name();
 #else
                     throw Help(Name());
 #endif
@@ -3638,11 +3664,12 @@ namespace args
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Map;
-#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+                    errorMsg = problem.str();
+#else
                     throw MapError(problem.str());
 #endif
                 } else
@@ -3724,11 +3751,12 @@ namespace args
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Map;
-#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+                    errorMsg = problem.str();
+#else
                     throw MapError(problem.str());
 #endif
                 } else
@@ -3988,11 +4016,12 @@ namespace args
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Map;
-#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+                    errorMsg = problem.str();
+#else
                     throw MapError(problem.str());
 #endif
                 } else
@@ -4076,11 +4105,12 @@ namespace args
                 auto it = map.find(key);
                 if (it == std::end(map))
                 {
-#ifdef ARGS_NOEXCEPT
-                    error = Error::Map;
-#else
                     std::ostringstream problem;
                     problem << "Could not find key '" << key << "' in map for arg '" << name << "'";
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Map;
+                    errorMsg = problem.str();
+#else
                     throw MapError(problem.str());
 #endif
                 } else
