@@ -1,8 +1,14 @@
+#ifdef _WIN32
 #include "windows.h"
+#else
+#define min(a,b) ((a)<(b)?(a):(b))
+#define max(a,b) ((a)>(b)?(a):(b))
+#endif
+
 #include <iostream>
 #include <args.hxx>
 
-int main()
+int main(int argc, char** argv)
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
