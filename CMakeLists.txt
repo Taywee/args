@@ -36,12 +36,19 @@ else ()
 endif ()
 
 add_executable(argstest-multiple-inclusion test/multiple_inclusion_1.cxx test/multiple_inclusion_2.cxx)
+
 target_link_libraries(argstest-multiple-inclusion args)
 set_property(TARGET argstest-multiple-inclusion PROPERTY CXX_STANDARD 11)
 
 add_executable(gitlike examples/gitlike.cxx)
 target_link_libraries(gitlike args)
 set_property(TARGET gitlike PROPERTY CXX_STANDARD 11)
+
+if (WIN32)
+    add_executable(argstest-windows-h test/windows_h.cxx)
+    target_link_libraries(argstest-windows-h args)
+    set_property(TARGET argstest-windows-h PROPERTY CXX_STANDARD 11)
+endif ()
 
 add_executable(completion examples/completion.cxx)
 target_link_libraries(completion args)
