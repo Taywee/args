@@ -47,6 +47,36 @@ matrix:
         - os: linux
           addons:
               apt:
+                  sources: ['ubuntu-toolchain-r-test']
+                  packages: ['g++-7']
+          env: COMPILER=g++-7 CONFIG=Release
+
+        - os: linux
+          addons:
+              apt:
+                  sources: ['ubuntu-toolchain-r-test']
+                  packages: ['g++-7']
+          sudo: required
+          env: COMPILER=g++-7 CONFIG=Debug FLAGS='-fsanitize=address,undefined -fno-sanitize-recover=all -fuse-ld=gold'
+
+        - os: linux
+          addons:
+              apt:
+                  sources: ['ubuntu-toolchain-r-test']
+                  packages: ['g++-8']
+          env: COMPILER=g++-8 CONFIG=Release
+
+        - os: linux
+          addons:
+              apt:
+                  sources: ['ubuntu-toolchain-r-test']
+                  packages: ['g++-8']
+          sudo: required
+          env: COMPILER=g++-8 CONFIG=Debug FLAGS='-fsanitize=address,undefined -fno-sanitize-recover=all -fuse-ld=gold'
+
+        - os: linux
+          addons:
+              apt:
                   sources: ['llvm-toolchain-precise-3.5', 'ubuntu-toolchain-r-test']
                   packages: ['clang++-3.5']
           env: COMPILER=clang++-3.5 CONFIG=Release
