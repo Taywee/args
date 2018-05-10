@@ -748,7 +748,7 @@ namespace args
         const size_t min;
         const size_t max;
 
-        Nargs(size_t min_, size_t max_) : min(min_), max(max_)
+        Nargs(size_t min_, size_t max_) : min{min_}, max{max_}
         {
 #ifndef ARGS_NOEXCEPT
             if (max < min)
@@ -758,7 +758,7 @@ namespace args
 #endif
         }
 
-        Nargs(size_t num_) : min(num_), max(num_)
+        Nargs(size_t num_) : min{num_}, max{num_}
         {
         }
 
