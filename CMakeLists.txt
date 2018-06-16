@@ -22,16 +22,20 @@
 cmake_minimum_required(VERSION 3.2)
 project(args CXX)
 
+option(ARGS_BUILD_EXAMPLE "Build example" ON)
+
 add_library(args INTERFACE)
 target_include_directories(args INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_executable(gitlike examples/gitlike.cxx)
-target_link_libraries(gitlike args)
-set_property(TARGET gitlike PROPERTY CXX_STANDARD 11)
+if (ARGS_BUILD_EXAMPLE)
+    add_executable(gitlike examples/gitlike.cxx)
+    target_link_libraries(gitlike args)
+    set_property(TARGET gitlike PROPERTY CXX_STANDARD 11)
 
-add_executable(completion examples/completion.cxx)
-target_link_libraries(completion args)
-set_property(TARGET completion PROPERTY CXX_STANDARD 11)
+    add_executable(completion examples/completion.cxx)
+    target_link_libraries(completion args)
+    set_property(TARGET completion PROPERTY CXX_STANDARD 11)
+endif()
 
 add_executable(argstest test.cxx)
 target_link_libraries(argstest args)
