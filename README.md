@@ -185,17 +185,17 @@ int main(int argc, char **argv)
     {
         parser.ParseCLI(argc, argv);
     }
-    catch (args::Completion e)
+    catch (const args::Completion& e)
     {
         std::cout << e.what();
         return 0;
     }
-    catch (args::Help)
+    catch (const args::Help&)
     {
         std::cout << parser;
         return 0;
     }
-    catch (args::ParseError e)
+    catch (const args::ParseError& e)
     {
         std::cerr << e.what() << std::endl;
         std::cerr << parser;
