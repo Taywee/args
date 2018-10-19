@@ -20,16 +20,6 @@ cxx_binary(
     'test.cxx', 
   ], 
   deps = [
-    ':args', 
-  ], 
-)
-
-cxx_binary(
-  name = 'gitlike', 
-  srcs = [
-    'gitlike.cxx', 
-  ], 
-  deps = [
-    ':args', 
+    '//:args', 
   ], 
 )
