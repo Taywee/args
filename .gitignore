@@ -47,3 +47,8 @@ Makefile
 *-prefix
 gitlike
 /pages/
+
+# Buck
+/buck-out/
+/.buckd/
+.buckconfig.local
