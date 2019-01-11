@@ -137,6 +137,46 @@ TEST_CASE("Argument flag lists work as expected", "[args]")
     REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
 }
 
+TEST_CASE("Argument flag lists use default values", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::ValueFlagList<int> foo(parser, "FOO", "test flag", {'f', "foo"}, {9, 7, 5});
+    parser.ParseArgs(std::vector<std::string>());
+    REQUIRE((args::get(foo) == std::vector<int>{9, 7, 5}));
+}
+
+TEST_CASE("Argument flag lists replace default values", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::ValueFlagList<int> foo(parser, "FOO", "test flag", {'f', "foo"}, {9, 7, 5});
+    parser.ParseArgs(std::vector<std::string>{"--foo=7", "-f2", "-f", "9", "--foo", "42"});
+    REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
+}
+
+TEST_CASE("Positional lists work as expected", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::PositionalList<int> foo(parser, "FOO", "test flag");
+    parser.ParseArgs(std::vector<std::string>{"7", "2", "9", "42"});
+    REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
+}
+
+TEST_CASE("Positional lists use default values", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::PositionalList<int> foo(parser, "FOO", "test flag", {9, 7, 5});
+    parser.ParseArgs(std::vector<std::string>());
+    REQUIRE((args::get(foo) == std::vector<int>{9, 7, 5}));
+}
+
+TEST_CASE("Positional lists replace default values", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::PositionalList<int> foo(parser, "FOO", "test flag", {9, 7, 5});
+    parser.ParseArgs(std::vector<std::string>{"7", "2", "9", "42"});
+    REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
+}
+
 #include <unordered_set>
 
 TEST_CASE("Argument flag lists work with sets", "[args]")

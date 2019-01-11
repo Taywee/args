@@ -3506,6 +3506,17 @@ namespace args
                 FlagBase::Reset();
                 values = defaultValues;
             }
+
+            virtual FlagBase *Match(const EitherFlag &arg) override
+            {
+                const bool wasMatched = Matched();
+                auto me = FlagBase::Match(arg);
+                if (me && !wasMatched)
+                {
+                    values.clear();
+                }
+                return me;
+            }
     };
 
     /** An argument-accepting flag class that pushes the found values into a list
@@ -3581,6 +3592,17 @@ namespace args
             {
                 ValueFlagBase::Reset();
                 values = defaultValues;
+            }
+
+            virtual FlagBase *Match(const EitherFlag &arg) override
+            {
+                const bool wasMatched = Matched();
+                auto me = FlagBase::Match(arg);
+                if (me && !wasMatched)
+                {
+                    values.clear();
+                }
+                return me;
             }
 
             iterator begin() noexcept
@@ -3799,6 +3821,17 @@ namespace args
                 values = defaultValues;
             }
 
+            virtual FlagBase *Match(const EitherFlag &arg) override
+            {
+                const bool wasMatched = Matched();
+                auto me = FlagBase::Match(arg);
+                if (me && !wasMatched)
+                {
+                    values.clear();
+                }
+                return me;
+            }
+
             iterator begin() noexcept
             {
                 return values.begin();
@@ -3958,6 +3991,17 @@ namespace args
             {
                 PositionalBase::Reset();
                 values = defaultValues;
+            }
+
+            virtual PositionalBase *GetNextPositional() override
+            {
+                const bool wasMatched = Matched();
+                auto me = PositionalBase::GetNextPositional();
+                if (me && !wasMatched)
+                {
+                    values.clear();
+                }
+                return me;
             }
 
             iterator begin() noexcept
@@ -4168,6 +4212,17 @@ namespace args
             {
                 PositionalBase::Reset();
                 values = defaultValues;
+            }
+
+            virtual PositionalBase *GetNextPositional() override
+            {
+                const bool wasMatched = Matched();
+                auto me = PositionalBase::GetNextPositional();
+                if (me && !wasMatched)
+                {
+                    values.clear();
+                }
+                return me;
             }
 
             iterator begin() noexcept
