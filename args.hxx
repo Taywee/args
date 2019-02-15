@@ -1470,7 +1470,9 @@ namespace args
              */
             std::vector<Base *>::size_type MatchedChildren() const
             {
-                return std::count_if(std::begin(Children()), std::end(Children()), [](const Base *child){return child->Matched();});
+                // Cast to avoid warnings from -Wsign-conversion
+                return static_cast<std::vector<Base *>::size_type>(
+                        std::count_if(std::begin(Children()), std::end(Children()), [](const Base *child){return child->Matched();}));
             }
 
             /** Whether or not this group matches validation
@@ -2697,7 +2699,7 @@ namespace args
 #endif
                         readCompletion = true;
                         ++it;
-                        size_t argsLeft = std::distance(it, end);
+                        const auto argsLeft = static_cast<size_t>(std::distance(it, end));
                         if (completion->cword == 0 || argsLeft <= 1 || completion->cword >= argsLeft)
                         {
 #ifndef ARGS_NOEXCEPT
@@ -2716,13 +2718,15 @@ namespace args
                                 if (idx > 0 && curArgs[idx] == "=")
                                 {
                                     curArgs[idx - 1] += "=";
+                                    // Avoid warnings from -Wsign-conversion
+                                    const auto signedIdx = static_cast<ptrdiff_t>(idx);
                                     if (idx + 1 < curArgs.size())
                                     {
                                         curArgs[idx - 1] += curArgs[idx + 1];
-                                        curArgs.erase(curArgs.begin() + idx, curArgs.begin() + idx + 2);
+                                        curArgs.erase(curArgs.begin() + signedIdx, curArgs.begin() + signedIdx + 2);
                                     } else
                                     {
-                                        curArgs.erase(curArgs.begin() + idx);
+                                        curArgs.erase(curArgs.begin() + signedIdx);
                                     }
                                 } else
                                 {
