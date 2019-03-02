@@ -40,6 +40,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <type_traits>
+#include <cstddef>
 
 #ifdef ARGS_TESTNAMESPACE
 namespace argstest
@@ -2719,7 +2720,7 @@ namespace args
                                 {
                                     curArgs[idx - 1] += "=";
                                     // Avoid warnings from -Wsign-conversion
-                                    const auto signedIdx = static_cast<ptrdiff_t>(idx);
+                                    const auto signedIdx = static_cast<std::ptrdiff_t>(idx);
                                     if (idx + 1 < curArgs.size())
                                     {
                                         curArgs[idx - 1] += curArgs[idx + 1];
