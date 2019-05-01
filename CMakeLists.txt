@@ -26,7 +26,16 @@ option(ARGS_BUILD_EXAMPLE "Build example" ON)
 option(ARGS_BUILD_UNITTESTS "Build unittests" ON)
 
 add_library(args INTERFACE)
-target_include_directories(args INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(args INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+	$<INSTALL_INTERFACE:include>)
+
+install(FILES args.hxx DESTINATION include)
+install(TARGETS args EXPORT args-targets)
+install(EXPORT args-targets
+  FILE args-config.cmake
+  NAMESPACE taywee::
+  DESTINATION lib/cmake/args)
 
 if (ARGS_BUILD_EXAMPLE)
     add_executable(gitlike examples/gitlike.cxx)
