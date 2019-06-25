@@ -1173,6 +1173,8 @@ TEST_CASE("ValueParser works as expected", "[args]")
     args::ValueFlag<std::string> f(p, "name", "description", {'f'});
     args::ValueFlag<StringAssignable> b(p, "name", "description", {'b'});
     args::ValueFlag<int> i(p, "name", "description", {'i'});
+    args::ValueFlag<int> d(p, "name", "description", {'d'});
+    args::PositionalList<double> ds(p, "name", "description");
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-f", "a b"}));
     REQUIRE(args::get(f) == "a b");
@@ -1185,6 +1187,11 @@ TEST_CASE("ValueParser works as expected", "[args]")
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-i", " 12"}));
     REQUIRE(args::get(i) == 12);
+
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"-i", "a"}), args::ParseError);
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"-d", "b"}), args::ParseError);
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"c"}), args::ParseError);
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"s"}), args::ParseError);
 }
 
 TEST_CASE("ActionFlag works as expected", "[args]")

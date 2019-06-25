@@ -3256,9 +3256,14 @@ namespace args
         operator ()(const std::string &name, const std::string &value, T &destination)
         {
             std::istringstream ss(value);
-            ss >> destination >> std::ws;
+            bool failed = !(ss >> destination);
 
-            if (ss.rdbuf()->in_avail() > 0)
+            if (!failed)
+            {
+                ss >> std::ws;
+            }
+
+            if (ss.rdbuf()->in_avail() > 0 || failed)
             {
 #ifdef ARGS_NOEXCEPT
                 (void)name;
