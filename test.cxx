@@ -936,6 +936,25 @@ TEST_CASE("Subparser validation works as expected", "[args]")
     REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"unknown-command"}), args::ParseError);
 }
 
+TEST_CASE("Subparser group validation works as expected", "[args]")
+{
+    int x = 0;
+    args::ArgumentParser p("parser");
+    args::Command a(p, "a", "command a", [&](args::Subparser &s)
+    {
+        args::Group required(s, "", args::Group::Validators::All);
+        args::ValueFlag<std::string> f(required, "", "", {'f'});
+        s.Parse();
+        ++x;
+    });
+
+    p.RequireCommand(false);
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{}));
+    REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"a", "-f", "F"}));
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"a"}), args::ValidationError);
+    REQUIRE(x == 1);
+}
+
 TEST_CASE("Global options work as expected", "[args]")
 {
     args::Group globals;
