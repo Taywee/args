@@ -46,6 +46,10 @@
 #include <type_traits>
 #include <cstddef>
 
+#if defined(_MSC_VER) && _MSC_VER <= 1800
+#define noexcept
+#endif
+
 #ifdef ARGS_TESTNAMESPACE
 namespace argstest
 {
@@ -1007,11 +1011,29 @@ namespace args
 
     namespace detail
     {
-        template <typename T, typename = int>
-        struct IsConvertableToString : std::false_type {};
+        template<typename T>
+        using vector = std::vector<T, std::allocator<T>>;
+        
+        template<typename K, typename T>
+        using unordered_map = std::unordered_map<K, T, std::hash<K>, 
+            std::equal_to<K>, std::allocator<std::pair<const K, T> > >;
+
+        template<typename S, typename T>
+        class is_streamable
+        {
+            template<typename SS, typename TT>
+            static auto test(int)
+            -> decltype( std::declval<SS&>() << std::declval<TT>(), std::true_type() );
+
+            template<typename, typename>
+            static auto test(...) -> std::false_type;
+
+        public:
+            using type = decltype(test<S,T>(0));
+        };
 
         template <typename T>
-        struct IsConvertableToString<T, decltype(std::declval<std::ostringstream&>() << std::declval<T>(), int())> : std::true_type {};
+        using IsConvertableToString = typename is_streamable<std::ostringstream, T>::type;
 
         template <typename T>
         typename std::enable_if<IsConvertableToString<T>::value, std::string>::type
@@ -3430,7 +3452,7 @@ namespace args
      */
     template <
         typename T,
-        template <typename...> class List = std::vector,
+        template <typename...> class List = detail::vector,
         typename Reader = ValueReader>
     class NargsValueFlag : public FlagBase
     {
@@ -3550,7 +3572,7 @@ namespace args
      */
     template <
         typename T,
-        template <typename...> class List = std::vector,
+        template <typename...> class List = detail::vector,
         typename Reader = ValueReader>
     class ValueFlagList : public ValueFlagBase
     {
@@ -3670,7 +3692,7 @@ namespace args
         typename K,
         typename T,
         typename Reader = ValueReader,
-        template <typename...> class Map = std::unordered_map>
+        template <typename...> class Map = detail::unordered_map>
     class MapFlag : public ValueFlagBase
     {
         private:
@@ -3757,9 +3779,9 @@ namespace args
     template <
         typename K,
         typename T,
-        template <typename...> class List = std::vector,
+        template <typename...> class List = detail::vector,
         typename Reader = ValueReader,
-        template <typename...> class Map = std::unordered_map>
+        template <typename...> class Map = detail::unordered_map>
     class MapFlagList : public ValueFlagBase
     {
         private:
@@ -3948,7 +3970,7 @@ namespace args
      */
     template <
         typename T,
-        template <typename...> class List = std::vector,
+        template <typename...> class List = detail::vector,
         typename Reader = ValueReader>
     class PositionalList : public PositionalBase
     {
@@ -4069,7 +4091,7 @@ namespace args
         typename K,
         typename T,
         typename Reader = ValueReader,
-        template <typename...> class Map = std::unordered_map>
+        template <typename...> class Map = detail::unordered_map>
     class MapPositional : public PositionalBase
     {
         private:
@@ -4149,9 +4171,9 @@ namespace args
     template <
         typename K,
         typename T,
-        template <typename...> class List = std::vector,
+        template <typename...> class List = detail::vector,
         typename Reader = ValueReader,
-        template <typename...> class Map = std::unordered_map>
+        template <typename...> class Map = detail::unordered_map>
     class MapPositionalList : public PositionalBase
     {
         private:
