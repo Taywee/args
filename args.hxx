@@ -2,7 +2,7 @@
  *
  * https://github.com/Taywee/args
  *
- * Copyright (c) 2016-2019 Taylor C. Richberger <taywee@gmx.com> and Pavel
+ * Copyright (c) 2016-2020 Taylor C. Richberger <taywee@gmx.com> and Pavel
  * Belikov
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,11 @@
 
 #ifndef ARGS_HXX
 #define ARGS_HXX
+
+#define ARGS_VERSION "6.2.3"
+#define ARGS_VERSION_MAJOR 6
+#define ARGS_VERSION_MINOR 2
+#define ARGS_VERSION_PATCH 3
 
 #include <algorithm>
 #include <iterator>
