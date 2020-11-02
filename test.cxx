@@ -695,8 +695,8 @@ TEST_CASE("Nargs work as expected", "[args]")
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a1"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a1", "2"}), args::ParseError);
 
-    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "1", "2", "-f"}));
-    REQUIRE((args::get(b) == std::vector<int>{1, 2}));
+    REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "1", "-2", "-f"}));
+    REQUIRE((args::get(b) == std::vector<int>{1, -2}));
     REQUIRE(args::get(f) == true);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "1", "2", "3"}));

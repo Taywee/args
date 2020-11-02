@@ -50,6 +50,7 @@
 #include <unordered_set>
 #include <type_traits>
 #include <cstddef>
+#include <iostream>
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
 #define noexcept
@@ -2351,7 +2352,7 @@ namespace args
 
                     while (valueIt != end &&
                            values.size() < nargs.max &&
-                           (nargs.min == nargs.max || ParseOption(*valueIt) == OptionType::Positional))
+                           (values.size() < nargs.min || ParseOption(*valueIt) == OptionType::Positional))
                     {
                         if (Complete(flag, valueIt, end))
                         {
