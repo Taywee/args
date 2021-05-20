@@ -1,9 +1,5 @@
 var searchData=
 [
-  ['maperror',['MapError',['../classargs_1_1MapError.html',1,'args']]],
-  ['mapflag',['MapFlag',['../classargs_1_1MapFlag.html',1,'args']]],
-  ['mapflaglist',['MapFlagList',['../classargs_1_1MapFlagList.html',1,'args']]],
-  ['mappositional',['MapPositional',['../classargs_1_1MapPositional.html',1,'args']]],
-  ['mappositionallist',['MapPositionalList',['../classargs_1_1MapPositionalList.html',1,'args']]],
-  ['matcher',['Matcher',['../classargs_1_1Matcher.html',1,'args']]]
+  ['implicitvalueflag_160',['ImplicitValueFlag',['../classargs_1_1ImplicitValueFlag.html',1,'args']]],
+  ['is_5fstreamable_161',['is_streamable',['../classargs_1_1detail_1_1is__streamable.html',1,'args::detail']]]
 ];

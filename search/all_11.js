@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['width',['width',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a311fcfa4f8636e304238357cc0d1547d',1,'args::ArgumentParser::HelpParams']]],
-  ['wrap',['Wrap',['../namespaceargs.html#aea5e48b66d8f87aaa5aafd1243f616f4',1,'args']]]
+  ['terminator_125',['Terminator',['../classargs_1_1ArgumentParser.html#ae864b7e947bba6c168780b82ebacdb5e',1,'args::ArgumentParser::Terminator() const'],['../classargs_1_1ArgumentParser.html#aac85423bb4103a71893bc0e0247c1acd',1,'args::ArgumentParser::Terminator(const std::string &amp;terminator_)']]],
+  ['tolowerreader_126',['ToLowerReader',['../structToLowerReader.html',1,'']]]
 ];

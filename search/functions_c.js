@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wrap',['Wrap',['../namespaceargs.html#aea5e48b66d8f87aaa5aafd1243f616f4',1,'args']]]
+  ['requirecommand_232',['RequireCommand',['../classargs_1_1Command.html#afbbca5178a6c712f9ad0777b7bef08bd',1,'args::Command']]]
 ];

@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['eachgroupindent',['eachgroupindent',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a39e31bcfc82a687ed8290783546ffd05',1,'args::ArgumentParser::HelpParams']]],
-  ['eitherflag',['EitherFlag',['../structargs_1_1EitherFlag.html',1,'args']]],
-  ['epilog',['Epilog',['../classargs_1_1ArgumentParser.html#a1ff0ec0f671be914bf2dd058b163f8e1',1,'args::ArgumentParser::Epilog() const '],['../classargs_1_1ArgumentParser.html#a1c5a20190c639224dbf32585435b589c',1,'args::ArgumentParser::Epilog(const std::string &amp;epilog_)']]],
-  ['error',['Error',['../classargs_1_1Error.html',1,'args']]],
-  ['extraerror',['ExtraError',['../classargs_1_1ExtraError.html',1,'args']]]
+  ['eachgroupindent_21',['eachgroupindent',['../structargs_1_1HelpParams.html#adfe0f14d1df726f8bbc21c080019c8ac',1,'args::HelpParams']]],
+  ['eitherflag_22',['EitherFlag',['../structargs_1_1EitherFlag.html',1,'args']]],
+  ['epilog_23',['Epilog',['../classargs_1_1Command.html#a874b615da38bb03c42a5fdf281ca9e32',1,'args::Command::Epilog() const'],['../classargs_1_1Command.html#a7364bfcd513d8f345e1bab5f3371d02d',1,'args::Command::Epilog(const std::string &amp;epilog_)']]],
+  ['error_24',['Error',['../classargs_1_1Error.html',1,'args']]],
+  ['extraerror_25',['ExtraError',['../classargs_1_1ExtraError.html',1,'args']]]
 ];

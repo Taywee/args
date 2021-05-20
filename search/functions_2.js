@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['description',['Description',['../classargs_1_1ArgumentParser.html#a421a87c3431f1a2f98b85acd93bd476e',1,'args::ArgumentParser::Description() const '],['../classargs_1_1ArgumentParser.html#ae4579e79fac038e7a4180e9b3215c90f',1,'args::ArgumentParser::Description(const std::string &amp;description_)']]]
+  ['description_191',['Description',['../classargs_1_1Command.html#a01d237dc3c13323c143073dd2a1a2cb4',1,'args::Command::Description() const'],['../classargs_1_1Command.html#a4ee8820d1d6d17b10a01a5cbccce1df8',1,'args::Command::Description(const std::string &amp;description_)']]]
 ];

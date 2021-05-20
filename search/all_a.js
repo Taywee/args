@@ -1,13 +1,7 @@
 var searchData=
 [
-  ['maperror',['MapError',['../classargs_1_1MapError.html',1,'args']]],
-  ['mapflag',['MapFlag',['../classargs_1_1MapFlag.html',1,'args']]],
-  ['mapflaglist',['MapFlagList',['../classargs_1_1MapFlagList.html',1,'args']]],
-  ['mappositional',['MapPositional',['../classargs_1_1MapPositional.html',1,'args']]],
-  ['mappositionallist',['MapPositionalList',['../classargs_1_1MapPositionalList.html',1,'args']]],
-  ['match',['Match',['../classargs_1_1Matcher.html#a7768277ed9ab02ba5afaa74ad6db0c5a',1,'args::Matcher::Match(const char flag) const '],['../classargs_1_1Matcher.html#a1f82c4cd0ec6dc72ccdb84358baa7f56',1,'args::Matcher::Match(const std::string &amp;flag) const '],['../classargs_1_1Group.html#ab131dbcce67ec225c47b9087d333eff1',1,'args::Group::Match()']]],
-  ['matched',['Matched',['../classargs_1_1Group.html#a27007b59c7ada6de8288cfdd59a271cf',1,'args::Group']]],
-  ['matchedchildren',['MatchedChildren',['../classargs_1_1Group.html#a6572479f27701d4717bdf1a11d46f9c3',1,'args::Group']]],
-  ['matcher',['Matcher',['../classargs_1_1Matcher.html',1,'args']]],
-  ['matcher',['Matcher',['../classargs_1_1Matcher.html#a87fc200d9a51b3be654e0ec551304ec5',1,'args::Matcher::Matcher(ShortIt shortFlagsStart, ShortIt shortFlagsEnd, LongIt longFlagsStart, LongIt longFlagsEnd)'],['../classargs_1_1Matcher.html#a62cfbb3db70f623153f8317abb5421dc',1,'args::Matcher::Matcher(Short &amp;&amp;shortIn, Long &amp;&amp;longIn)'],['../classargs_1_1Matcher.html#ad70f96e5475d9020773b429e9f79cb2d',1,'args::Matcher::Matcher(std::initializer_list&lt; EitherFlag &gt; in)']]]
+  ['longprefix_64',['LongPrefix',['../classargs_1_1ArgumentParser.html#a35f97d0a1219e2a01e10a697b7a24d21',1,'args::ArgumentParser::LongPrefix() const'],['../classargs_1_1ArgumentParser.html#a6a03dcc56b439d54b85e704be5d2f9d5',1,'args::ArgumentParser::LongPrefix(const std::string &amp;longprefix_)']]],
+  ['longprefix_65',['longPrefix',['../structargs_1_1HelpParams.html#a65562e96ae0b37cf9aa35c0e5edcec3c',1,'args::HelpParams']]],
+  ['longseparator_66',['LongSeparator',['../classargs_1_1ArgumentParser.html#a7bb74e0a1bcac7f390f5bf5a5fef44e6',1,'args::ArgumentParser::LongSeparator() const'],['../classargs_1_1ArgumentParser.html#a748cd901c687da9110b52eae1bc1ff74',1,'args::ArgumentParser::LongSeparator(const std::string &amp;longseparator_)']]],
+  ['longseparator_67',['longSeparator',['../structargs_1_1HelpParams.html#a2beb4a512d8df8075ade0633f4b4ef29',1,'args::HelpParams']]]
 ];

@@ -1,13 +1,9 @@
 var searchData=
 [
-  ['parseargs',['ParseArgs',['../classargs_1_1ArgumentParser.html#a4bc1f3f3d000f11715fa66ade894bd9b',1,'args::ArgumentParser::ParseArgs(It begin, It end)'],['../classargs_1_1ArgumentParser.html#abc88273e1c57f994a17ba8ddb646d6d3',1,'args::ArgumentParser::ParseArgs(const T &amp;args) -&gt; decltype(std::begin(args))                                        ']]],
-  ['parsecli',['ParseCLI',['../classargs_1_1ArgumentParser.html#a8e79c5bd015bad9648b9c98eecc63fc9',1,'args::ArgumentParser']]],
-  ['parseerror',['ParseError',['../classargs_1_1ParseError.html',1,'args']]],
-  ['positional',['Positional',['../classargs_1_1Positional.html',1,'args']]],
-  ['positionalbase',['PositionalBase',['../classargs_1_1PositionalBase.html',1,'args']]],
-  ['positionallist',['PositionalList',['../classargs_1_1PositionalList.html',1,'args']]],
-  ['prog',['Prog',['../classargs_1_1ArgumentParser.html#a422f77bb16552118d6fb7fdeff16feb4',1,'args::ArgumentParser::Prog() const '],['../classargs_1_1ArgumentParser.html#a33356eb1ebe72f6f59829237027b17fa',1,'args::ArgumentParser::Prog(const std::string &amp;prog_)']]],
-  ['progindent',['progindent',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a6dfc48648b7d49f9d68d480e9e3f48f6',1,'args::ArgumentParser::HelpParams']]],
-  ['proglinepostfix',['ProglinePostfix',['../classargs_1_1ArgumentParser.html#a817bfd65f387861769e8c69d3583d865',1,'args::ArgumentParser::ProglinePostfix() const '],['../classargs_1_1ArgumentParser.html#a45d56e361cfc08a0e4a60858c967f482',1,'args::ArgumentParser::ProglinePostfix(const std::string &amp;proglinePostfix_)']]],
-  ['progtailindent',['progtailindent',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a6cea5f210029567e8fce559136550b10',1,'args::ArgumentParser::HelpParams']]]
+  ['name_77',['Name',['../classargs_1_1Command.html#a98724f5317b07197721807ab40ca8eae',1,'args::Command']]],
+  ['namedbase_78',['NamedBase',['../classargs_1_1NamedBase.html',1,'args']]],
+  ['nargs_79',['Nargs',['../structargs_1_1Nargs.html',1,'args']]],
+  ['nargsvalueflag_80',['NargsValueFlag',['../classargs_1_1NargsValueFlag.html',1,'args']]],
+  ['none_81',['None',['../namespaceargs.html#aa530c0f95194aa275f49a5f299ac9e77a6adf97f83acf6453d4a6a4b1070f3754',1,'args']]],
+  ['numberofarguments_82',['NumberOfArguments',['../classargs_1_1FlagBase.html#a6007ffeaa767893cb8eff5333d61673b',1,'args::FlagBase::NumberOfArguments()'],['../classargs_1_1ValueFlagBase.html#a96a10bfb949ad175dcf2ffba6a6ec3b6',1,'args::ValueFlagBase::NumberOfArguments()'],['../classargs_1_1CompletionFlag.html#a4d38cb56de13b2db9528ade2df5711b1',1,'args::CompletionFlag::NumberOfArguments()'],['../classargs_1_1Flag.html#a1bd707628d2987d3ccf2dbdb810302e4',1,'args::Flag::NumberOfArguments()'],['../classargs_1_1ActionFlag.html#aa341976acd895df15fb2bfe7182c48eb',1,'args::ActionFlag::NumberOfArguments()'],['../classargs_1_1ImplicitValueFlag.html#a7cfc67aca2b32921e722f51d349df2c5',1,'args::ImplicitValueFlag::NumberOfArguments()'],['../classargs_1_1NargsValueFlag.html#a8db7ce6ec0d27f649dbfb1bba908078a',1,'args::NargsValueFlag::NumberOfArguments()']]]
 ];

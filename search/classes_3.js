@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['doublesreader',['DoublesReader',['../structDoublesReader.html',1,'']]]
+  ['doublesreader_149',['DoublesReader',['../structDoublesReader.html',1,'']]]
 ];

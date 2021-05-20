@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['width',['width',['../structargs_1_1ArgumentParser_1_1HelpParams.html#a311fcfa4f8636e304238357cc0d1547d',1,'args::ArgumentParser::HelpParams']]]
+  ['optionsstring_249',['optionsString',['../structargs_1_1HelpParams.html#a73a6302232629d1de99b468be7b5a21a',1,'args::HelpParams']]]
 ];

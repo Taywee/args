@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['usageerror',['UsageError',['../classargs_1_1UsageError.html',1,'args']]]
+  ['requirederror_175',['RequiredError',['../classargs_1_1RequiredError.html',1,'args']]]
 ];
