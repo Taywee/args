@@ -50,6 +50,7 @@
 #include <unordered_set>
 #include <type_traits>
 #include <cstddef>
+#include <cctype>
 #include <iostream>
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
@@ -227,9 +228,9 @@ namespace args
         std::istringstream stream(in);
         std::string::size_type indent = 0;
 
-        for (unsigned char c : in)
+        for (auto c : in)
         {
-            if (!isspace(c))
+            if (!std::isspace(static_cast<unsigned char>(c)))
             {
                 break;
             }
@@ -2016,9 +2017,9 @@ namespace args
                 if (!ProglinePostfix().empty())
                 {
                     std::string line;
-                    for (unsigned char c : ProglinePostfix())
+                    for (auto c : ProglinePostfix())
                     {
-                        if (isspace(c))
+                        if (std::isspace(static_cast<unsigned char>(c)))
                         {
                             if (!line.empty())
                             {
