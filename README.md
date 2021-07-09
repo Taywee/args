@@ -8,8 +8,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Taywee/args/badge.svg?branch=master)](https://coveralls.io/github/Taywee/args?branch=master)
 [![Read the Docs](https://img.shields.io/readthedocs/pip.svg)](https://taywee.github.io/args)
 
-A simple, small, flexible, single-header C++11 argument parsing library, in
-fewer than 2K lines of code.
+A simple, small, flexible, single-header C++11 argument parsing library.
 
 This is designed to appear somewhat similar to Python's argparse, but in C++,
 with static type checking, and hopefully a lot faster (also allowing fully
