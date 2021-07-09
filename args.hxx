@@ -227,7 +227,7 @@ namespace args
         std::istringstream stream(in);
         std::string::size_type indent = 0;
 
-        for (char c : in)
+        for (unsigned char c : in)
         {
             if (!isspace(c))
             {
@@ -463,7 +463,7 @@ namespace args
             Matcher(std::initializer_list<EitherFlag> in) :
                 Matcher(EitherFlag::GetShort(in), EitherFlag::GetLong(in)) {}
 
-            Matcher(Matcher &&other) : shortFlags(std::move(other.shortFlags)), longFlags(std::move(other.longFlags))
+            Matcher(Matcher &&other) noexcept : shortFlags(std::move(other.shortFlags)), longFlags(std::move(other.longFlags))
             {}
 
             ~Matcher() {}
@@ -2016,7 +2016,7 @@ namespace args
                 if (!ProglinePostfix().empty())
                 {
                     std::string line;
-                    for (char c : ProglinePostfix())
+                    for (unsigned char c : ProglinePostfix())
                     {
                         if (isspace(c))
                         {
