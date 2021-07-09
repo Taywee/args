@@ -20,6 +20,10 @@
 # IN THE SOFTWARE.
 
 cmake_minimum_required(VERSION 3.2)
+set(ARGS_MAIN_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(ARGS_MAIN_PROJECT ON)
+endif()
 project(args CXX)
 
 option(ARGS_BUILD_EXAMPLE "Build example" ON)
@@ -30,12 +34,14 @@ target_include_directories(args INTERFACE
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
 	$<INSTALL_INTERFACE:include>)
 
-install(FILES args.hxx DESTINATION include)
-install(TARGETS args EXPORT args-targets)
-install(EXPORT args-targets
-  FILE args-config.cmake
-  NAMESPACE taywee::
-  DESTINATION lib/cmake/args)
+if(ARGS_MAIN_PROJECT)
+    install(FILES args.hxx DESTINATION include)
+    install(TARGETS args EXPORT args-targets)
+    install(EXPORT args-targets
+        FILE args-config.cmake
+        NAMESPACE taywee::
+        DESTINATION lib/cmake/args)
+endif()
 
 if (ARGS_BUILD_EXAMPLE)
     add_executable(gitlike examples/gitlike.cxx)
