@@ -42,27 +42,27 @@ describe the usage, as it's built to push the boundaries.
 It:
 
 * Lets you handle flags, flag+value, and positional arguments simply and
-  elegently, with the full help of static typechecking.
+  elegantly, with the full help of static typechecking.
 * Allows you to use your own types in a pretty simple way.
 * Lets you use count flags, and lists of all argument-accepting types.
 * Allows full validation of groups of required arguments, though output isn't
-  pretty when something fails group validation.  User validation functions are
-  accepted.  Groups are fully nestable.
+  pretty when something fails group validation. User validation functions are
+  accepted. Groups are fully nestable.
 * Generates pretty help for you, with some good tweakable parameters.
 * Lets you customize all prefixes and most separators, allowing you to create
-  an infinite number of different argument syntaxes
+  an infinite number of different argument syntaxes.
 * Lets you parse, by default, any type that has a stream extractor operator for
-  it.  If this doesn't work for your uses, you can supply a function and parse
+  it. If this doesn't work for your uses, you can supply a function and parse
   the string yourself if you like.
 * Lets you decide not to allow separate-argument value flags or joined ones
   (like disallowing `--foo bar`, requiring `--foo=bar`, or the inverse, or the
   same for short options).
 * Allows you to create subparsers, to reuse arguments for multiple commands and
-  to refactor your command's logic to a function or lambda
+  to refactor your command's logic to a function or lambda.
 * Allows one value flag to take a specific number of values (like `--foo first
   second`, where --foo slurps both arguments).
-* Allows you to have value flags only optionally accept values
-* Provides autocompletion for bash
+* Allows you to have value flags only optionally accept values.
+* Provides autocompletion for bash.
 
 # What does it not do?
 
