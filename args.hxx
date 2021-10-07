@@ -33,10 +33,10 @@
 #ifndef ARGS_HXX
 #define ARGS_HXX
 
-#define ARGS_VERSION "6.2.6"
+#define ARGS_VERSION "6.2.7"
 #define ARGS_VERSION_MAJOR 6
 #define ARGS_VERSION_MINOR 2
-#define ARGS_VERSION_PATCH 6
+#define ARGS_VERSION_PATCH 7
 
 #include <algorithm>
 #include <iterator>

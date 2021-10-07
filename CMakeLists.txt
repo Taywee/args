@@ -32,7 +32,7 @@ endif()
 project(args CXX)
 set(PROJECT_DESCRIPTION "A simple, small, flexible, single-header C++11 argument parsing library. that is designed to appear somewhat similar to Python's argparse.")
 set(PROJECT_HOMEPAGE_URL "https://github.com/Taywee/args")
-set(PROJECT_VERSION 6.2.2)
+set(PROJECT_VERSION 6.2.7)
 
 option(ARGS_BUILD_EXAMPLE "Build example" ON)
 option(ARGS_BUILD_UNITTESTS "Build unittests" ON)
