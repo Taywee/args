@@ -59,9 +59,9 @@ TEST_CASE("Count flag works as expected", "[args]")
     REQUIRE(foo);
     REQUIRE(bar);
     REQUIRE_FALSE(baz);
-    REQUIRE(args::get(foo) == 4);
-    REQUIRE(args::get(bar) == 10);
-    REQUIRE(args::get(baz) == 7);
+    REQUIRE(*foo == 4);
+    REQUIRE(*bar == 10);
+    REQUIRE(*baz == 7);
 }
 
 TEST_CASE("Argument flags work as expected, with clustering", "[args]")
@@ -74,12 +74,12 @@ TEST_CASE("Argument flags work as expected, with clustering", "[args]")
     args::Flag bix(parser, "BAZ", "test flag", {'x', "bix"});
     parser.ParseArgs(std::vector<std::string>{"-bftest", "--baz=7.555e2", "--bim", "c"});
     REQUIRE(foo);
-    REQUIRE(args::get(foo) == "test");
+    REQUIRE(*foo == "test");
     REQUIRE(bar);
     REQUIRE(baz);
-    REQUIRE((args::get(baz) > 755.49 && args::get(baz) < 755.51));
+    REQUIRE((*baz > 755.49 && *baz < 755.51));
     REQUIRE(bim);
-    REQUIRE(args::get(bim) == 'c');
+    REQUIRE(*bim == 'c');
     REQUIRE_FALSE(bix);
 }
 
@@ -100,12 +100,12 @@ TEST_CASE("Unified argument lists for match work", "[args]")
     args::Flag bix(parser, "BAZ", "test flag", {"bix"});
     parser.ParseArgs(std::vector<std::string>{"-bftest", "--baz=7.555e2", "--bim", "c"});
     REQUIRE(foo);
-    REQUIRE(args::get(foo) == "test");
+    REQUIRE(*foo == "test");
     REQUIRE(bar);
     REQUIRE(baz);
-    REQUIRE((args::get(baz) > 755.49 && args::get(baz) < 755.51));
+    REQUIRE((*baz > 755.49 && *baz < 755.51));
     REQUIRE(bim);
-    REQUIRE(args::get(bim) == 'c');
+    REQUIRE(*bim == 'c');
     REQUIRE_FALSE(bix);
 }
 
@@ -115,9 +115,9 @@ TEST_CASE("Get can be assigned to for non-reference types", "[args]")
     args::ValueFlag<std::string> foo(parser, "FOO", "test flag", {'f', "foo"});
     parser.ParseArgs(std::vector<std::string>{"--foo=test"});
     REQUIRE(foo);
-    REQUIRE(args::get(foo) == "test");
-    args::get(foo) = "bar";
-    REQUIRE(args::get(foo) == "bar");
+    REQUIRE(*foo == "test");
+    *foo = "bar";
+    REQUIRE(*foo == "bar");
 }
 
 TEST_CASE("Invalid argument parsing throws parsing exceptions", "[args]")
@@ -134,7 +134,7 @@ TEST_CASE("Argument flag lists work as expected", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::ValueFlagList<int> foo(parser, "FOO", "test flag", {'f', "foo"});
     parser.ParseArgs(std::vector<std::string>{"--foo=7", "-f2", "-f", "9", "--foo", "42"});
-    REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
+    REQUIRE((*foo == std::vector<int>{7, 2, 9, 42}));
 }
 
 TEST_CASE("Argument flag lists use default values", "[args]")
@@ -142,7 +142,7 @@ TEST_CASE("Argument flag lists use default values", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::ValueFlagList<int> foo(parser, "FOO", "test flag", {'f', "foo"}, {9, 7, 5});
     parser.ParseArgs(std::vector<std::string>());
-    REQUIRE((args::get(foo) == std::vector<int>{9, 7, 5}));
+    REQUIRE((*foo == std::vector<int>{9, 7, 5}));
 }
 
 TEST_CASE("Argument flag lists replace default values", "[args]")
@@ -150,7 +150,7 @@ TEST_CASE("Argument flag lists replace default values", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::ValueFlagList<int> foo(parser, "FOO", "test flag", {'f', "foo"}, {9, 7, 5});
     parser.ParseArgs(std::vector<std::string>{"--foo=7", "-f2", "-f", "9", "--foo", "42"});
-    REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
+    REQUIRE((*foo == std::vector<int>{7, 2, 9, 42}));
 }
 
 TEST_CASE("Positional lists work as expected", "[args]")
@@ -158,7 +158,7 @@ TEST_CASE("Positional lists work as expected", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::PositionalList<int> foo(parser, "FOO", "test flag");
     parser.ParseArgs(std::vector<std::string>{"7", "2", "9", "42"});
-    REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
+    REQUIRE((*foo == std::vector<int>{7, 2, 9, 42}));
 }
 
 TEST_CASE("Positional lists use default values", "[args]")
@@ -166,7 +166,7 @@ TEST_CASE("Positional lists use default values", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::PositionalList<int> foo(parser, "FOO", "test flag", {9, 7, 5});
     parser.ParseArgs(std::vector<std::string>());
-    REQUIRE((args::get(foo) == std::vector<int>{9, 7, 5}));
+    REQUIRE((*foo == std::vector<int>{9, 7, 5}));
 }
 
 TEST_CASE("Positional lists replace default values", "[args]")
@@ -174,7 +174,7 @@ TEST_CASE("Positional lists replace default values", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::PositionalList<int> foo(parser, "FOO", "test flag", {9, 7, 5});
     parser.ParseArgs(std::vector<std::string>{"7", "2", "9", "42"});
-    REQUIRE((args::get(foo) == std::vector<int>{7, 2, 9, 42}));
+    REQUIRE((*foo == std::vector<int>{7, 2, 9, 42}));
 }
 
 #include <unordered_set>
@@ -184,7 +184,7 @@ TEST_CASE("Argument flag lists work with sets", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::ValueFlagList<std::string, std::unordered_set> foo(parser, "FOO", "test flag", {'f', "foo"});
     parser.ParseArgs(std::vector<std::string>{"--foo=7", "-fblah", "-f", "9", "--foo", "blah"});
-    REQUIRE((args::get(foo) == std::unordered_set<std::string>{"7", "9", "blah"}));
+    REQUIRE((*foo == std::unordered_set<std::string>{"7", "9", "blah"}));
 }
 
 TEST_CASE("Positional arguments and positional argument lists work as expected", "[args]")
@@ -195,11 +195,11 @@ TEST_CASE("Positional arguments and positional argument lists work as expected",
     args::PositionalList<char> baz(parser, "BAZ", "test flag");
     parser.ParseArgs(std::vector<std::string>{"this is a test flag", "0", "a", "b", "c", "x", "y", "z"});
     REQUIRE(foo);
-    REQUIRE((args::get(foo) == "this is a test flag"));
+    REQUIRE((*foo == "this is a test flag"));
     REQUIRE(bar);
-    REQUIRE(!args::get(bar));
+    REQUIRE(!*bar);
     REQUIRE(baz);
-    REQUIRE((args::get(baz) == std::vector<char>{'a', 'b', 'c', 'x', 'y', 'z'}));
+    REQUIRE((*baz == std::vector<char>{'a', 'b', 'c', 'x', 'y', 'z'}));
 }
 
 TEST_CASE("The option terminator works as expected", "[args]")
@@ -213,31 +213,31 @@ TEST_CASE("The option terminator works as expected", "[args]")
     args::ValueFlag<double> obaz(parser, "BAZ", "test flag", {'a', "baz"});
     parser.ParseArgs(std::vector<std::string>{"--foo", "this is a test flag", "0", "a", "b", "--baz", "7.0", "c", "x", "y", "z"});
     REQUIRE(foo);
-    REQUIRE((args::get(foo) == "this is a test flag"));
+    REQUIRE((*foo == "this is a test flag"));
     REQUIRE(bar);
-    REQUIRE(!args::get(bar));
+    REQUIRE(!*bar);
     REQUIRE(baz);
-    REQUIRE((args::get(baz) == std::vector<std::string>{"a", "b", "c", "x", "y", "z"}));
+    REQUIRE((*baz == std::vector<std::string>{"a", "b", "c", "x", "y", "z"}));
     REQUIRE(ofoo);
     REQUIRE(!obar);
     REQUIRE(obaz);
     parser.ParseArgs(std::vector<std::string>{"--foo", "this is a test flag", "0", "a", "--", "b", "--baz", "7.0", "c", "x", "y", "z"});
     REQUIRE(foo);
-    REQUIRE((args::get(foo) == "this is a test flag"));
+    REQUIRE((*foo == "this is a test flag"));
     REQUIRE(bar);
-    REQUIRE(!args::get(bar));
+    REQUIRE(!*bar);
     REQUIRE(baz);
-    REQUIRE((args::get(baz) == std::vector<std::string>{"a", "b", "--baz", "7.0", "c", "x", "y", "z"}));
+    REQUIRE((*baz == std::vector<std::string>{"a", "b", "--baz", "7.0", "c", "x", "y", "z"}));
     REQUIRE(ofoo);
     REQUIRE(!obar);
     REQUIRE(!obaz);
     parser.ParseArgs(std::vector<std::string>{"--foo", "--", "this is a test flag", "0", "a", "b", "--baz", "7.0", "c", "x", "y", "z"});
     REQUIRE(foo);
-    REQUIRE((args::get(foo) == "this is a test flag"));
+    REQUIRE((*foo == "this is a test flag"));
     REQUIRE(bar);
-    REQUIRE(!args::get(bar));
+    REQUIRE(!*bar);
     REQUIRE(baz);
-    REQUIRE((args::get(baz) == std::vector<std::string>{"a", "b", "--baz", "7.0", "c", "x", "y", "z"}));
+    REQUIRE((*baz == std::vector<std::string>{"a", "b", "--baz", "7.0", "c", "x", "y", "z"}));
     REQUIRE(ofoo);
     REQUIRE(!obar);
     REQUIRE(!obaz);
@@ -248,7 +248,7 @@ TEST_CASE("Positional lists work with sets", "[args]")
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
     args::PositionalList<std::string, std::unordered_set> foo(parser, "FOO", "test positional");
     parser.ParseArgs(std::vector<std::string>{"foo", "FoO", "bar", "baz", "foo", "9", "baz"});
-    REQUIRE((args::get(foo) == std::unordered_set<std::string>{"foo", "FoO", "bar", "baz", "9"}));
+    REQUIRE((*foo == std::unordered_set<std::string>{"foo", "FoO", "bar", "baz", "9"}));
 }
 
 
@@ -260,7 +260,7 @@ TEST_CASE("Positionals that are unspecified evaluate false", "[args]")
     args::PositionalList<char> baz(parser, "BAZ", "test flag");
     parser.ParseArgs(std::vector<std::string>{"this is a test flag again"});
     REQUIRE(foo);
-    REQUIRE((args::get(foo) == "this is a test flag again"));
+    REQUIRE((*foo == "this is a test flag again"));
     REQUIRE_FALSE(bar);
     REQUIRE_FALSE(baz);
 }
@@ -354,10 +354,10 @@ TEST_CASE("Custom types work", "[args]")
     args::Positional<std::tuple<int, int>> ints(parser, "INTS", "This takes a pair of integers.");
     args::Positional<std::tuple<double, double>, DoublesReader> doubles(parser, "DOUBLES", "This takes a pair of doubles.");
     parser.ParseArgs(std::vector<std::string>{"1,2", "3.8,4"});
-    REQUIRE(std::get<0>(args::get(ints)) == 1);
-    REQUIRE(std::get<1>(args::get(ints)) == 2);
-    REQUIRE((std::get<0>(args::get(doubles)) > 3.79 && std::get<0>(args::get(doubles)) < 3.81));
-    REQUIRE((std::get<1>(args::get(doubles)) > 3.99 && std::get<1>(args::get(doubles)) < 4.01));
+    REQUIRE(std::get<0>(*ints) == 1);
+    REQUIRE(std::get<1>(*ints) == 2);
+    REQUIRE((std::get<0>(*doubles) > 3.79 && std::get<0>(*doubles) < 3.81));
+    REQUIRE((std::get<1>(*doubles) > 3.99 && std::get<1>(*doubles) < 4.01));
 }
 
 TEST_CASE("Custom parser prefixes (dd-style)", "[args]")
@@ -372,11 +372,11 @@ TEST_CASE("Custom parser prefixes (dd-style)", "[args]")
     args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", {"of"});
     parser.ParseArgs(std::vector<std::string>{"skip=8", "if=/dev/null"});
     REQUIRE_FALSE(bs);
-    REQUIRE(args::get(bs) == 512);
+    REQUIRE(*bs == 512);
     REQUIRE(skip);
-    REQUIRE(args::get(skip) == 8);
+    REQUIRE(*skip == 8);
     REQUIRE(input);
-    REQUIRE(args::get(input) == "/dev/null");
+    REQUIRE(*input == "/dev/null");
     REQUIRE_FALSE(output);
 }
 
@@ -392,11 +392,11 @@ TEST_CASE("Custom parser prefixes (Some Windows styles)", "[args]")
     args::ValueFlag<std::string> output(parser, "BLOCK SIZE", "Block size", {"of"});
     parser.ParseArgs(std::vector<std::string>{"/skip:8", "/if:/dev/null"});
     REQUIRE_FALSE(bs);
-    REQUIRE(args::get(bs) == 512);
+    REQUIRE(*bs == 512);
     REQUIRE(skip);
-    REQUIRE(args::get(skip) == 8);
+    REQUIRE(*skip == 8);
     REQUIRE(input);
-    REQUIRE(args::get(input) == "/dev/null");
+    REQUIRE(*input == "/dev/null");
     REQUIRE_FALSE(output);
 }
 
@@ -486,17 +486,17 @@ TEST_CASE("Mapping types work as needed", "[args]")
     args::MapPositionalList<std::string, MappingEnum> mpl(parser, "MPL", "Maps string to an enum list", map);
     parser.ParseArgs(std::vector<std::string>{"--mf=red", "--cimf=YeLLoW", "--mfl=bar", "foo", "--mfl=green", "red", "--mfl", "bar", "default"});
     REQUIRE_FALSE(dmf);
-    REQUIRE(args::get(dmf) == MappingEnum::def);
+    REQUIRE(*dmf == MappingEnum::def);
     REQUIRE(mf);
-    REQUIRE(args::get(mf) == MappingEnum::red);
+    REQUIRE(*mf == MappingEnum::red);
     REQUIRE(cimf);
-    REQUIRE(args::get(cimf) == MappingEnum::yellow);
+    REQUIRE(*cimf == MappingEnum::yellow);
     REQUIRE(mfl);
-    REQUIRE((args::get(mfl) == std::vector<MappingEnum>{MappingEnum::bar, MappingEnum::green, MappingEnum::bar}));
+    REQUIRE((*mfl == std::vector<MappingEnum>{MappingEnum::bar, MappingEnum::green, MappingEnum::bar}));
     REQUIRE(mp);
-    REQUIRE((args::get(mp) == MappingEnum::foo));
+    REQUIRE((*mp == MappingEnum::foo));
     REQUIRE(mpl);
-    REQUIRE((args::get(mpl) == std::vector<MappingEnum>{MappingEnum::red, MappingEnum::def}));
+    REQUIRE((*mpl == std::vector<MappingEnum>{MappingEnum::red, MappingEnum::def}));
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--mf=YeLLoW"}), args::MapError);
 }
 
@@ -526,7 +526,7 @@ TEST_CASE("An exception should be thrown when a single-argument flag is matched 
     REQUIRE_FALSE(bar);
     REQUIRE_FALSE(bix);
     REQUIRE(baz);
-    REQUIRE(args::get(baz) == MappingEnum::green);
+    REQUIRE(*baz == MappingEnum::green);
 }
 
 TEST_CASE("Sub-parsers should work through kick-out", "[args]")
@@ -558,7 +558,7 @@ TEST_CASE("Sub-parsers should work through kick-out", "[args]")
     REQUIRE(foo1);
     REQUIRE_FALSE(bar1);
     REQUIRE(sub);
-    REQUIRE(args::get(sub) == MappingEnum::green);
+    REQUIRE(*sub == MappingEnum::green);
     REQUIRE_FALSE(foo2);
     REQUIRE(bar2);
 }
@@ -603,7 +603,7 @@ TEST_CASE("Kick-out should work via all flags and value flags", "[args]")
     REQUIRE(c2);
     REQUIRE_FALSE(d2);
     REQUIRE(bar);
-    REQUIRE(args::get(bar) == "barvalue");
+    REQUIRE(*bar == "barvalue");
     REQUIRE_FALSE(a3);
     REQUIRE(b3);
     REQUIRE_FALSE(c3);
@@ -617,7 +617,7 @@ TEST_CASE("Required flags work as expected", "[args]")
     args::ValueFlag<int> bar(parser1, "bar", "bar", {'b', "bar"});
 
     parser1.ParseArgs(std::vector<std::string>{"-f", "42"});
-    REQUIRE(foo.Get() == 42);
+    REQUIRE(*foo == 42);
 
     REQUIRE_THROWS_AS(parser1.ParseArgs(std::vector<std::string>{"-b4"}), args::RequiredError);
 
@@ -656,20 +656,20 @@ TEST_CASE("Implicit values work as expected", "[args]")
     args::ImplicitValueFlag<int> j(parser, "parallel", "parallel", {'j', "parallel"}, 0, 1);
     args::Flag foo(parser, "FOO", "test flag", {'f', "foo"});
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j"}));
-    REQUIRE(args::get(j) == 0);
+    REQUIRE(*j == 0);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j4"}));
-    REQUIRE(args::get(j) == 4);
+    REQUIRE(*j == 4);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j", "4"}));
-    REQUIRE(args::get(j) == 4);
+    REQUIRE(*j == 4);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-j", "-f"}));
-    REQUIRE(args::get(j) == 0);
+    REQUIRE(*j == 0);
     REQUIRE(foo);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-f"}));
-    REQUIRE(args::get(j) == 1);
+    REQUIRE(*j == 1);
     REQUIRE_FALSE(j);
 }
 
@@ -685,23 +685,23 @@ TEST_CASE("Nargs work as expected", "[args]")
     REQUIRE_THROWS_AS(args::Nargs(3, 2), args::UsageError);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"}));
-    REQUIRE((args::get(a) == std::vector<int>{1, 2}));
+    REQUIRE((*a == std::vector<int>{1, 2}));
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-a", "1", "2", "-f"}));
-    REQUIRE((args::get(a) == std::vector<int>{1, 2}));
-    REQUIRE(args::get(f) == true);
+    REQUIRE((*a == std::vector<int>{1, 2}));
+    REQUIRE(f);
 
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a", "1"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a1"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a1", "2"}), args::ParseError);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "1", "-2", "-f"}));
-    REQUIRE((args::get(b) == std::vector<int>{1, -2}));
-    REQUIRE(args::get(f) == true);
+    REQUIRE((*b == std::vector<int>{1, -2}));
+    REQUIRE(f);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-b", "1", "2", "3"}));
-    REQUIRE((args::get(b) == std::vector<int>{1, 2, 3}));
-    REQUIRE(args::get(f) == false);
+    REQUIRE((*b == std::vector<int>{1, 2, 3}));
+    REQUIRE(!f);
 
     std::vector<int> vec;
     for (int be : b)
@@ -717,12 +717,12 @@ TEST_CASE("Nargs work as expected", "[args]")
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"}), args::ParseError);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-c", "-f"}));
-    REQUIRE(args::get(c).empty());
-    REQUIRE(args::get(f) == true);
+    REQUIRE(c->empty());
+    REQUIRE(f);
 
     REQUIRE_NOTHROW(parser.ParseArgs(std::vector<std::string>{"-cf"}));
-    REQUIRE((args::get(c) == std::vector<std::string>{"f"}));
-    REQUIRE(args::get(f) == false);
+    REQUIRE((*c == std::vector<std::string>{"f"}));
+    REQUIRE(!f);
 
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-d"}), args::ParseError);
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"-b"}), args::ParseError);
@@ -741,8 +741,8 @@ TEST_CASE("Simple commands work as expected", "[args]")
     p.ParseArgs(std::vector<std::string>{"add", "--git-dir", "A", "B", "C", "D"});
     REQUIRE(add);
     REQUIRE(!commit);
-    REQUIRE((args::get(pathsList) == std::vector<std::string>{"B", "C", "D"}));
-    REQUIRE(args::get(gitdir) == "A");
+    REQUIRE((*pathsList == std::vector<std::string>{"B", "C", "D"}));
+    REQUIRE(*gitdir == "A");
 }
 
 TEST_CASE("Subparser commands work as expected", "[args]")
@@ -775,7 +775,7 @@ TEST_CASE("Subparser commands work as expected", "[args]")
     REQUIRE(add);
     REQUIRE(!commit);
     REQUIRE((paths == std::vector<std::string>{"B", "C", "D"}));
-    REQUIRE(args::get(gitdir) == "A");
+    REQUIRE(*gitdir == "A");
 }
 
 TEST_CASE("Subparser commands with kick-out flags work as expected", "[args]")
@@ -1196,16 +1196,16 @@ TEST_CASE("ValueParser works as expected", "[args]")
     args::PositionalList<double> ds(p, "name", "description");
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-f", "a b"}));
-    REQUIRE(args::get(f) == "a b");
+    REQUIRE(*f == "a b");
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-b", "a b"}));
-    REQUIRE(args::get(b).path == "a b");
+    REQUIRE(b->path == "a b");
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-i", "42 "}));
-    REQUIRE(args::get(i) == 42);
+    REQUIRE(*i == 42);
 
     REQUIRE_NOTHROW(p.ParseArgs(std::vector<std::string>{"-i", " 12"}));
-    REQUIRE(args::get(i) == 12);
+    REQUIRE(*i == 12);
 
     REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"-i", "a"}), args::ParseError);
     REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"-d", "b"}), args::ParseError);
@@ -1431,7 +1431,7 @@ TEST_CASE("Required flags work as expected in noexcept mode", "[args]")
     argstest::ValueFlag<int> bar(parser1, "bar", "bar", {'b', "bar"});
 
     parser1.ParseArgs(std::vector<std::string>{"-f", "42"});
-    REQUIRE(foo.Get() == 42);
+    REQUIRE(*foo == 42);
     REQUIRE(parser1.GetError() == argstest::Error::None);
 
     parser1.ParseArgs(std::vector<std::string>{"-b4"});

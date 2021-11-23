@@ -2,7 +2,7 @@
  *
  * https://github.com/Taywee/args
  *
- * Copyright (c) 2016-2020 Taylor C. Richberger <taywee@gmx.com> and Pavel
+ * Copyright (c) 2016-2021 Taylor C. Richberger <taywee@gmx.com> and Pavel
  * Belikov
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,10 +33,10 @@
 #ifndef ARGS_HXX
 #define ARGS_HXX
 
-#define ARGS_VERSION "6.2.7"
+#define ARGS_VERSION "6.3.0"
 #define ARGS_VERSION_MAJOR 6
-#define ARGS_VERSION_MINOR 2
-#define ARGS_VERSION_PATCH 7
+#define ARGS_VERSION_MINOR 3
+#define ARGS_VERSION_PATCH 0
 
 #include <algorithm>
 #include <iterator>
@@ -3242,6 +3242,14 @@ namespace args
                 return count;
             }
 
+            int &operator *() noexcept {
+                return count;
+            }
+            
+            const int &operator *() const noexcept {
+                return count;
+            }
+
             virtual void Reset() noexcept override
             {
                 FlagBase::Reset();
@@ -3394,6 +3402,34 @@ namespace args
                 return value;
             }
 
+            /** Get the value
+             */
+            T &operator *() noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            const T &operator *() const noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            T *operator ->() noexcept
+            {
+                return &value;
+            }
+
+            /** Get the value
+             */
+            const T *operator ->() const noexcept
+            {
+                return &value;
+            }
+
             /** Get the default value
              */
             const T &GetDefault() noexcept
@@ -3523,6 +3559,34 @@ namespace args
                 return values;
             }
 
+            /** Get the value
+             */
+            List<T> &operator *() noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            const List<T> &operator *() const noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            List<T> *operator ->() noexcept
+            {
+                return &values;
+            }
+
+            /** Get the values
+             */
+            const List<T> *operator ->() const noexcept
+            {
+                return &values;
+            }
+
             iterator begin() noexcept
             {
                 return values.begin();
@@ -3633,6 +3697,34 @@ namespace args
             Container &Get() noexcept
             {
                 return values;
+            }
+
+            /** Get the value
+             */
+            Container &operator *() noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            const Container &operator *() const noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            Container *operator ->() noexcept
+            {
+                return &values;
+            }
+
+            /** Get the values
+             */
+            const Container *operator ->() const noexcept
+            {
+                return &values;
             }
 
             virtual std::string Name() const override
@@ -3768,6 +3860,34 @@ namespace args
                 return value;
             }
 
+            /** Get the value
+             */
+            T &operator *() noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            const T &operator *() const noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            T *operator ->() noexcept
+            {
+                return &value;
+            }
+
+            /** Get the value
+             */
+            const T *operator ->() const noexcept
+            {
+                return &value;
+            }
+
             virtual void Reset() noexcept override
             {
                 ValueFlagBase::Reset();
@@ -3860,6 +3980,34 @@ namespace args
             Container &Get() noexcept
             {
                 return values;
+            }
+
+            /** Get the value
+             */
+            Container &operator *() noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            const Container &operator *() const noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            Container *operator ->() noexcept
+            {
+                return &values;
+            }
+
+            /** Get the values
+             */
+            const Container *operator ->() const noexcept
+            {
+                return &values;
             }
 
             virtual std::string Name() const override
@@ -3962,6 +4110,34 @@ namespace args
                 return value;
             }
 
+            /** Get the value
+             */
+            T &operator *() noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            const T &operator *() const noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            T *operator ->() noexcept
+            {
+                return &value;
+            }
+
+            /** Get the value
+             */
+            const T *operator ->() const noexcept
+            {
+                return &value;
+            }
+
             virtual void Reset() noexcept override
             {
                 PositionalBase::Reset();
@@ -4037,6 +4213,34 @@ namespace args
             Container &Get() noexcept
             {
                 return values;
+            }
+
+            /** Get the value
+             */
+            Container &operator *() noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            const Container &operator *() const noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            Container *operator ->() noexcept
+            {
+                return &values;
+            }
+
+            /** Get the values
+             */
+            const Container *operator ->() const noexcept
+            {
+                return &values;
             }
 
             virtual void Reset() noexcept override
@@ -4160,6 +4364,34 @@ namespace args
                 return value;
             }
 
+            /** Get the value
+             */
+            T &operator *() noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            const T &operator *() const noexcept
+            {
+                return value;
+            }
+
+            /** Get the value
+             */
+            T *operator ->() noexcept
+            {
+                return &value;
+            }
+
+            /** Get the value
+             */
+            const T *operator ->() const noexcept
+            {
+                return &value;
+            }
+
             virtual void Reset() noexcept override
             {
                 PositionalBase::Reset();
@@ -4253,6 +4485,34 @@ namespace args
             Container &Get() noexcept
             {
                 return values;
+            }
+
+            /** Get the value
+             */
+            Container &operator *() noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            const Container &operator *() const noexcept
+            {
+                return values;
+            }
+
+            /** Get the values
+             */
+            Container *operator ->() noexcept
+            {
+                return &values;
+            }
+
+            /** Get the values
+             */
+            const Container *operator ->() const noexcept
+            {
+                return &values;
             }
 
             virtual std::string Name() const override

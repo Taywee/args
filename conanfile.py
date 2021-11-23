@@ -2,7 +2,7 @@ from conans import ConanFile
 
 class ArgsConan(ConanFile):
     name = "args"
-    version = "6.2.7"
+    version = "6.3.0"
     url = "https://github.com/Taywee/args"
     description = "A simple header-only C++ argument parser library."
     license = "MIT"
