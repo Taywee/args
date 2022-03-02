@@ -119,7 +119,7 @@ doxygen Doxyfile
 
 Your docs are now in doc/html
 
-## How to depende on it using tipi.build?
+## How to depend on it using tipi.build?
 
 Simply add the following entry to your `./tipi/deps` file
 
@@ -129,15 +129,7 @@ Simply add the following entry to your `./tipi/deps` file
 }
 ```
 
-You can optionally remove the `@` section to *live at HEAD* easily.
- An example of this can be found in `/examples` an can be compile using (depending on your host OS):
-
-```shell
-$ tipi . -t linux
-$ tipi . -t macos
-$ tipi . -t windows
-$ tipi . -t vs-16-2019-win64-cxx17
-```
+You can optionally remove the `@` section to *target HEAD* easily.
 
 # How do I use it?
 
