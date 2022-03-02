@@ -83,7 +83,7 @@ There are tons of things this library does not do!
   allowing this would be a lot more code than I'd like, and would make static
   checking much more difficult, requiring us to sort std::string arguments and
   pair them to positional arguments before assigning them, rather than what we
-  currently do, which is assiging them as we go for better simplicity and
+  currently do, which is assigning them as we go for better simplicity and
   speed.  The library doesn't stop you from trying, but the first positional
   list will slurp in all following positionals
 
