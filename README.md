@@ -121,7 +121,7 @@ Your docs are now in doc/html
 
 ## How to depend on it using tipi.build?
 
-Simply add the following entry to your `./tipi/deps` file
+Simply add the following entry to your `.tipi/deps` file
 
 ```json
 {
