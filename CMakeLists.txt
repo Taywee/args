@@ -22,37 +22,53 @@
 cmake_minimum_required(VERSION 3.2)
 
 include(GNUInstallDirs)
-string(REPLACE "/${CMAKE_LIBRARY_ARCHITECTURE}" "" CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
 
-
-set(ARGS_MAIN_PROJECT OFF)
-if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    set(ARGS_MAIN_PROJECT ON)
-endif()
-project(args CXX)
+project(args VERSION 6.4.0 LANGUAGES CXX)
 set(PROJECT_DESCRIPTION "A simple, small, flexible, single-header C++11 argument parsing library. that is designed to appear somewhat similar to Python's argparse.")
 set(PROJECT_HOMEPAGE_URL "https://github.com/Taywee/args")
-set(PROJECT_VERSION 6.3.0)
+set(PROJECT_VERSION 6.4.0)
+
+set(MAIN_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(MAIN_PROJECT ON)
+endif()
+
+include(ExternalProject)
+
+set(TAYWEE_ARGS_TARGET_NAME               args)
+set(TAYWEE_ARGS_CONFIG_INSTALL_DIR        "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE INTERNAL "")
+set(TAYWEE_ARGS_INCLUDE_INSTALL_DIR       "${CMAKE_INSTALL_INCLUDEDIR}")
+set(TAYWEE_ARGS_TARGETS_EXPORT_NAME       "${PROJECT_NAME}Targets")
+set(TAYWEE_ARGS_CMAKE_CONFIG_TEMPLATE     "cmake/config.cmake.in")
+set(TAYWEE_ARGS_CMAKE_CONFIG_DIR          "${CMAKE_CURRENT_BINARY_DIR}")
+set(TAYWEE_ARGS_CMAKE_VERSION_CONFIG_FILE "${TAYWEE_ARGS_CMAKE_CONFIG_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+set(TAYWEE_ARGS_CMAKE_PROJECT_CONFIG_FILE "${TAYWEE_ARGS_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
+set(TAYWEE_ARGS_CMAKE_PROJECT_TARGETS_FILE "${TAYWEE_ARGS_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Targets.cmake")
+set(TAYWEE_ARGS_PKGCONFIG_INSTALL_DIR     "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+set(TAYWEE_ARGS_INCLUDE_BUILD_DIR "${PROJECT_SOURCE_DIR}")
+set(TAYWEE_ARGS_INCLUDE_FILE "${PROJECT_SOURCE_DIR}/args.hxx")
 
 option(ARGS_BUILD_EXAMPLE "Build example" ON)
 option(ARGS_BUILD_UNITTESTS "Build unittests" ON)
+option(ARGS_Install             "Install CMake targets during install step." ${MAIN_PROJECT})
+option(ARGS_SystemInclude       "Include as system headers (skip for clang-tidy)." OFF)
 
 set(CMAKE_CONFIG_DEST "${CMAKE_INSTALL_LIBDIR_ARCHIND}/cmake/${PROJECT_NAME}")
-set(PackagingTemplatesDir "${CMAKE_CURRENT_SOURCE_DIR}/packaging")
+set(PackagingTemplatesDir "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-add_library(args INTERFACE)
-target_include_directories(args INTERFACE
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-	$<INSTALL_INTERFACE:include>)
-
-if(ARGS_MAIN_PROJECT)
-    install(FILES args.hxx DESTINATION include)
-    install(TARGETS args EXPORT args-targets)
-    install(EXPORT args-targets
-        FILE args-config.cmake
-        NAMESPACE taywee::
-        DESTINATION lib/cmake/args)
+if (ARGS_SystemInclude)
+    set(TAYWEE_ARGS_SYSTEM_INCLUDE "SYSTEM")
 endif()
+
+add_library(${TAYWEE_ARGS_TARGET_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${TAYWEE_ARGS_TARGET_NAME} ALIAS ${TAYWEE_ARGS_TARGET_NAME})
+
+target_include_directories(
+    ${TAYWEE_ARGS_TARGET_NAME}
+    ${TAYWEE_ARGS_SYSTEM_INCLUDE} INTERFACE
+    $<BUILD_INTERFACE:${TAYWEE_ARGS_INCLUDE_BUILD_DIR}>
+    $<INSTALL_INTERFACE:include>
+    )
 
 if (ARGS_BUILD_EXAMPLE)
     add_executable(gitlike examples/gitlike.cxx)
@@ -113,10 +129,57 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 set(CPACK_NSIS_COMPONENT_INSTALL ON)
 set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 
-set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
-configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
-install(FILES "${PKG_CONFIG_FILE_NAME}"
-	DESTINATION "${CMAKE_INSTALL_LIBDIR_ARCHIND}/pkgconfig"
+include(CPack)
+
+include(CMakePackageConfigHelpers)
+configure_file(
+    "cmake/argsConfigVersion.cmake.in"
+    ${TAYWEE_ARGS_CMAKE_VERSION_CONFIG_FILE}
+    @ONLY
+)
+configure_file(
+    ${TAYWEE_ARGS_CMAKE_CONFIG_TEMPLATE}
+    ${TAYWEE_ARGS_CMAKE_PROJECT_CONFIG_FILE}
+    @ONLY
 )
 
-include(CPack)
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkg-config.pc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+)
+
+if(ARGS_Install)
+    install(
+        FILES ${TAYWEE_ARGS_INCLUDE_FILE}
+        DESTINATION ${TAYWEE_ARGS_INCLUDE_INSTALL_DIR}
+    )
+    install(
+        FILES ${TAYWEE_ARGS_CMAKE_PROJECT_CONFIG_FILE} ${TAYWEE_ARGS_CMAKE_VERSION_CONFIG_FILE}
+        DESTINATION ${TAYWEE_ARGS_CONFIG_INSTALL_DIR}
+    )
+    if (NLOHMANN_ADD_NATVIS)
+        install(
+            FILES ${NLOHMANN_NATVIS_FILE}
+            DESTINATION .
+    )
+    endif()
+    export(
+        TARGETS ${TAYWEE_ARGS_TARGET_NAME}
+        NAMESPACE ${PROJECT_NAME}::
+        FILE ${TAYWEE_ARGS_CMAKE_PROJECT_TARGETS_FILE}
+    )
+    install(
+        TARGETS ${TAYWEE_ARGS_TARGET_NAME}
+        EXPORT ${TAYWEE_ARGS_TARGETS_EXPORT_NAME}
+        INCLUDES DESTINATION ${TAYWEE_ARGS_INCLUDE_INSTALL_DIR}
+    )
+    install(
+        EXPORT ${TAYWEE_ARGS_TARGETS_EXPORT_NAME}
+        NAMESPACE ${PROJECT_NAME}::
+        DESTINATION ${TAYWEE_ARGS_CONFIG_INSTALL_DIR}
+    )
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+        DESTINATION ${TAYWEE_ARGS_PKGCONFIG_INSTALL_DIR}
+    )
+endif()
