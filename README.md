@@ -125,7 +125,7 @@ Simply add the following entry to your `.tipi/deps` file
 
 ```json
 {
-    "taywee/args": { "@": "6.3.0" }
+    "taywee/args": { "@": "6.4.1" }
 }
 ```
 
