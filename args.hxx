@@ -33,10 +33,10 @@
 #ifndef ARGS_HXX
 #define ARGS_HXX
 
-#define ARGS_VERSION "6.3.0"
+#define ARGS_VERSION "6.4.2"
 #define ARGS_VERSION_MAJOR 6
-#define ARGS_VERSION_MINOR 3
-#define ARGS_VERSION_PATCH 0
+#define ARGS_VERSION_MINOR 4
+#define ARGS_VERSION_PATCH 2
 
 #include <algorithm>
 #include <iterator>
@@ -922,7 +922,7 @@ namespace args
             }
 
             /// Only for ARGS_NOEXCEPT
-            std::string GetErrorMsg() const
+            virtual std::string GetErrorMsg() const
             {
                 return errorMsg;
             }
@@ -1620,6 +1620,24 @@ namespace args
                 } else
                 {
                     return (*it)->GetError();
+                }
+            }
+
+            /// Only for ARGS_NOEXCEPT
+            virtual std::string GetErrorMsg() const override
+            {
+                if (error != Error::None)
+                {
+                    return errorMsg;
+                }
+
+                auto it = std::find_if(Children().begin(), Children().end(), [](const Base *child){return child->GetError() != Error::None;});
+                if (it == Children().end())
+                {
+                    return "";
+                } else
+                {
+                    return (*it)->GetErrorMsg();
                 }
             }
 #endif

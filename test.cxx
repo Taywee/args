@@ -1433,19 +1433,23 @@ TEST_CASE("Required flags work as expected in noexcept mode", "[args]")
     parser1.ParseArgs(std::vector<std::string>{"-f", "42"});
     REQUIRE(*foo == 42);
     REQUIRE(parser1.GetError() == argstest::Error::None);
+    REQUIRE(parser1.GetErrorMsg() == std::string{});
 
     parser1.ParseArgs(std::vector<std::string>{"-b4"});
     REQUIRE(parser1.GetError() == argstest::Error::Required);
+    REQUIRE(parser1.GetErrorMsg() != std::string{});
 
     argstest::ArgumentParser parser2("Test command");
     argstest::Positional<int> pos1(parser2, "a", "a");
     parser2.ParseArgs(std::vector<std::string>{});
     REQUIRE(parser2.GetError() == argstest::Error::None);
+    REQUIRE(parser2.GetErrorMsg() == std::string{});
 
     argstest::ArgumentParser parser3("Test command");
     argstest::Positional<int> pos2(parser3, "a", "a", argstest::Options::Required);
     parser3.ParseArgs(std::vector<std::string>{});
     REQUIRE(parser3.GetError() == argstest::Error::Required);
+    REQUIRE(parser3.GetErrorMsg() != std::string{});
 }
 
 TEST_CASE("Subparser validation works as expected in noexcept mode", "[args]")
