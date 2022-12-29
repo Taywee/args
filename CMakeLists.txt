@@ -21,18 +21,16 @@
 
 cmake_minimum_required(VERSION 3.2)
 
-include(GNUInstallDirs)
 string(REPLACE "/${CMAKE_LIBRARY_ARCHITECTURE}" "" CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
-
 
 set(ARGS_MAIN_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(ARGS_MAIN_PROJECT ON)
 endif()
-project(args CXX)
-set(PROJECT_DESCRIPTION "A simple, small, flexible, single-header C++11 argument parsing library. that is designed to appear somewhat similar to Python's argparse.")
-set(PROJECT_HOMEPAGE_URL "https://github.com/Taywee/args")
-set(PROJECT_VERSION 6.4.2)
+
+project(args LANGUAGES CXX VERSION 6.4.3 DESCRIPTION "A flexible single-header C++11 argument parsing library that is designed to appear somewhat similar to Python's argparse" HOMEPAGE_URL "https://github.com/Taywee/args")
+
+include(GNUInstallDirs)
 
 option(ARGS_BUILD_EXAMPLE "Build example" ON)
 option(ARGS_BUILD_UNITTESTS "Build unittests" ON)
@@ -46,12 +44,16 @@ target_include_directories(args INTERFACE
 	$<INSTALL_INTERFACE:include>)
 
 if(ARGS_MAIN_PROJECT)
+    include(CMakePackageConfigHelpers)
     install(FILES args.hxx DESTINATION include)
     install(TARGETS args EXPORT args-targets)
     install(EXPORT args-targets
         FILE args-config.cmake
         NAMESPACE taywee::
         DESTINATION lib/cmake/args)
+
+    write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" DESTINATION lib/cmake/args)
 endif()
 
 if (ARGS_BUILD_EXAMPLE)
