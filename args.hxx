@@ -2014,7 +2014,16 @@ namespace args
             {
                 UpdateSubparserHelp(params);
 
-                auto res = Group::GetProgramLine(params);
+                std::vector<std::string> res;
+
+                if ((subparserHasFlag || Group::HasFlag()) && params.showProglineOptions && !params.proglineShowFlags)
+                {
+                    res.push_back(params.proglineOptions);
+                }
+
+                auto group_res = Group::GetProgramLine(params);
+                std::move(std::move(group_res).begin(), std::move(group_res).end(), std::back_inserter(res));
+
                 res.insert(res.end(), subparserProgramLine.begin(), subparserProgramLine.end());
 
                 if (!params.proglineCommand.empty() && (Group::HasCommand() || subparserHasCommand))
@@ -2025,11 +2034,6 @@ namespace args
                 if (!Name().empty())
                 {
                     res.insert(res.begin(), Name());
-                }
-
-                if ((subparserHasFlag || Group::HasFlag()) && params.showProglineOptions && !params.proglineShowFlags)
-                {
-                    res.push_back(params.proglineOptions);
                 }
 
                 if (!ProglinePostfix().empty())

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <functional>
-#include <args.hxx>
+#include "args.hxx"
 
 void Init(const std::string &progname, std::vector<std::string>::const_iterator beginargs, std::vector<std::string>::const_iterator endargs);
 void Add(const std::string &progname, std::vector<std::string>::const_iterator beginargs, std::vector<std::string>::const_iterator endargs);
