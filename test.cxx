@@ -1007,8 +1007,8 @@ TEST_CASE("GetProgramLine works as expected", "[args]")
     };
 
     REQUIRE(line(p) == "COMMAND {OPTIONS}");
-    REQUIRE(line(a) == "a positional {OPTIONS}");
-    REQUIRE(line(b) == "b [positional] {OPTIONS}");
+    REQUIRE(line(a) == "a {OPTIONS} positional");
+    REQUIRE(line(b) == "b {OPTIONS} [positional]");
 
     p.helpParams.proglineShowFlags = true;
     REQUIRE(line(p) == "COMMAND [-g]");
