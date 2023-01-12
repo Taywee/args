@@ -21,7 +21,7 @@
 
 cmake_minimum_required(VERSION 3.2)
 
-project(args LANGUAGES CXX VERSION 6.4.5 DESCRIPTION "A flexible single-header C++11 argument parsing library that is designed to appear somewhat similar to Python's argparse" HOMEPAGE_URL "https://github.com/Taywee/args")
+project(args LANGUAGES CXX VERSION 6.4.6 DESCRIPTION "A flexible single-header C++11 argument parsing library that is designed to appear somewhat similar to Python's argparse" HOMEPAGE_URL "https://github.com/Taywee/args")
 
 include(GNUInstallDirs)
 
