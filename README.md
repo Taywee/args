@@ -1,6 +1,8 @@
 # args
 
-#### Note that this library is essentially in maintenance mode.  I haven't had the time to work on it or give it the love that it deserves.  I'm not adding new features, but I will fix bugs.  I will also very gladly accept pull requests.
+**This library is considered feature-complete by its creator.  It will still
+receive bug fixes, and good pull requests will be accepted, but no new major
+functionality or API changes will be added to this codebase.**
 
 [![Cpp Standard](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B11)
 [![Travis status](https://travis-ci.org/Taywee/args.svg?branch=master)](https://travis-ci.org/Taywee/args)
