@@ -104,6 +104,10 @@ sudo make install DESTDIR=/opt/mydir
 You can also copy the file into your source tree, if you want to be absolutely
 sure you keep a stable API between projects.
 
+If you prefer other installation methods, many standard ones are available and
+included, including CMake, conan, buck, and meson.  An example CMake file using
+args is included in the examples directory.
+
 ## I also want man pages.
 
 ```shell
