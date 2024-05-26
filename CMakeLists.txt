@@ -91,6 +91,12 @@ if (ARGS_BUILD_UNITTESTS)
     add_test(NAME "test-multiple-inclusion" COMMAND argstest-multiple-inclusion)
 endif()
 
+add_library(taywee::args ALIAS args)
+export(
+    TARGETS args
+    NAMESPACE taywee::
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/args-targets.cmake")
+
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_PACKAGE_VENDOR "${PROJECT_NAME} developers")
