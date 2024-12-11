@@ -770,6 +770,8 @@ int main(int argc, char **argv)
 
 ## Completion
 
+Completion currently only supports bash.
+
 ```cpp
 #include <iostream>
 #include <args.hxx>
