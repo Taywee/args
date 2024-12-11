@@ -768,6 +768,62 @@ int main(int argc, char **argv)
  %
 ```
 
+## Completion
+
+```cpp
+#include <iostream>
+#include <args.hxx>
+int main(int argc, char **argv)
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
+    args::CompletionFlag completion(parser, {"complete"});
+    args::ValueFlag<std::string> foo(parser, "name", "description", {'f', "foo"}, "abc");
+    args::ValueFlag<std::string> bar(parser, "name", "description", {'b', "bar"}, "abc");
+    args::ValueFlag<std::string> baz(parser, "name", "description", {'a', "baz"}, "abc");
+    try
+    {
+        parser.ParseCLI(argc, argv);
+    }
+    catch (const args::Completion& e)
+    {
+        std::cout << e.what();
+        return 0;
+    }
+    catch (const args::Help&)
+    {
+        std::cout << parser;
+        return 0;
+    }
+    catch (const args::ParseError& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << parser;
+        return 1;
+    }
+    return 0;
+}
+```
+
+```sh
+g++ -ocompletiontest ./completiontest.cxx "-I$args_path"
+PATH="$PWD:$PATH"
+_args() {
+    _init_completion -n 2> /dev/null
+    local program comparg
+
+    program="${COMP_WORDS[0]}"
+    comparg="--complete" # replace this with your flag
+
+    COMPREPLY=($("$program" "$comparg" bash "$COMP_CWORD" "${COMP_WORDS[@]}" 2> /dev/null))
+    [[ $COMPREPLY ]] && return
+    _filedir
+}
+complete -F _args completiontest
+
+# Now when you type `completiontest --` and press tab, you'll get completion
+```
+
 ## Customizing parser prefixes
 
 ### dd-style
@@ -950,7 +1006,7 @@ int main(int argc, char **argv)
  %                                                                                
 ```
 
-# Mapping arguments
+## Mapping arguments
 
 I haven't written out a long example for this, but here's the test case you should be able to discern the meaning from:
 

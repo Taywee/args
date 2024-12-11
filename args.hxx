@@ -2,7 +2,7 @@
  *
  * https://github.com/Taywee/args
  *
- * Copyright (c) 2016-2021 Taylor C. Richberger <taywee@gmx.com> and Pavel
+ * Copyright (c) 2016-2021 Taylor C. Richberger <taylor@axfive.net> and Pavel
  * Belikov
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
