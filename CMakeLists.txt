@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Taylor C. Richberger <taylor@axfive.net> and Pavel
+# Copyright (c) 2016-2024 Taylor C. Richberger <taylor@axfive.net> and Pavel
 # Belikov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -1,4 +1,4 @@
-/* Copyright © 2016 Taylor C. Richberger <taylor@axfive.net>
+/* Copyright © 2016-2024 Taylor C. Richberger <taylor@axfive.net>
  * This code is released under the license described in the LICENSE file
  */
 
