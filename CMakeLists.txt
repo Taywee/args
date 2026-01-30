@@ -54,6 +54,12 @@ if(ARGS_MAIN_PROJECT)
 
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" DESTINATION lib/cmake/args)
+
+    set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
+    configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
+    install(FILES "${PKG_CONFIG_FILE_NAME}"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR_ARCHIND}/pkgconfig"
+    )
 endif()
 
 if (ARGS_BUILD_EXAMPLE)
@@ -120,11 +126,5 @@ set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_RPM_COMPONENT_INSTALL ON)
 set(CPACK_NSIS_COMPONENT_INSTALL ON)
 set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
-
-set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
-configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
-install(FILES "${PKG_CONFIG_FILE_NAME}"
-	DESTINATION "${CMAKE_INSTALL_LIBDIR_ARCHIND}/pkgconfig"
-)
 
 include(CPack)
