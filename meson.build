@@ -1,5 +1,5 @@
 project('args.hxx', ['cpp'],
-  version: '6.4.7',
+  version: '6.4.8',
   default_options: 'cpp_std=c++11',
   license: 'MIT'
 )
