@@ -3327,15 +3327,31 @@ namespace args
         typename std::enable_if<!std::is_assignable<T, std::string>::value, bool>::type
         operator ()(const std::string &name, const std::string &value, T &destination)
         {
-            std::istringstream ss(value);
-            bool failed = !(ss >> destination);
+            bool failed = false;
 
-            if (!failed)
+            // Prevent "-1" style inputs from being accepted for unsigned integral destinations.
+            if (std::is_integral<T>::value && std::is_unsigned<T>::value)
             {
-                ss >> std::ws;
+                const auto firstNonSpace = std::find_if_not(value.begin(), value.end(), [](char c)
+                {
+                    return std::isspace(static_cast<unsigned char>(c)) != 0;
+                });
+
+                if (firstNonSpace != value.end() && *firstNonSpace == '-')
+                {
+                    failed = true;
+                }
             }
 
-            if (ss.rdbuf()->in_avail() > 0 || failed)
+            std::istringstream ss(value);
+            if (!failed)
+            {
+                ss >> destination;
+                ss >> std::ws;
+                failed = ss.fail() || ss.peek() != std::char_traits<char>::eof();
+            }
+
+            if (failed)
             {
 #ifdef ARGS_NOEXCEPT
                 (void)name;

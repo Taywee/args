@@ -129,6 +129,16 @@ TEST_CASE("Invalid argument parsing throws parsing exceptions", "[args]")
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "7e4"}), args::ParseError);
 }
 
+TEST_CASE("Negative values are rejected for unsigned flags", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::ValueFlag<unsigned int> uid(parser, "UID", "numeric id", {'u', "uid"});
+
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--uid", "-1"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--uid=-1"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--uid", "123abc"}), args::ParseError);
+}
+
 TEST_CASE("Argument flag lists work as expected", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
@@ -1422,6 +1432,21 @@ TEST_CASE("Noexcept mode works as expected", "[args]")
     REQUIRE(parser.GetError() == argstest::Error::Map);
     parser.ParseArgs(std::vector<std::string>{"--mf", "yellow"});
     REQUIRE(parser.GetError() == argstest::Error::None);
+}
+
+TEST_CASE("Negative values are rejected for unsigned flags in noexcept mode", "[args]")
+{
+    argstest::ArgumentParser parser("Test command");
+    argstest::ValueFlag<unsigned int> uid(parser, "UID", "numeric id", {'u', "uid"});
+
+    parser.ParseArgs(std::vector<std::string>{"--uid", "-1"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+
+    parser.ParseArgs(std::vector<std::string>{"--uid=-1"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
+
+    parser.ParseArgs(std::vector<std::string>{"--uid", "123abc"});
+    REQUIRE(parser.GetError() == argstest::Error::Parse);
 }
 
 TEST_CASE("Required flags work as expected in noexcept mode", "[args]")
