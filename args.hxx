@@ -3323,19 +3323,57 @@ namespace args
      */
     struct ValueReader
     {
+      private:
+        template <typename T>
+        static typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, bool>::type
+        HasUnsignedNegativeSign(const std::string &value)
+        {
+            const auto firstNonSpace = std::find_if_not(value.begin(), value.end(), [](char c)
+            {
+                return std::isspace(static_cast<unsigned char>(c)) != 0;
+            });
+
+            return firstNonSpace != value.end() && *firstNonSpace == '-';
+        }
+
+        template <typename T>
+        static typename std::enable_if<!std::is_integral<T>::value || !std::is_unsigned<T>::value, bool>::type
+        HasUnsignedNegativeSign(const std::string &)
+        {
+            return false;
+        }
+
+      public:
         template <typename T>
         typename std::enable_if<!std::is_assignable<T, std::string>::value, bool>::type
         operator ()(const std::string &name, const std::string &value, T &destination)
         {
-            std::istringstream ss(value);
-            bool failed = !(ss >> destination);
+            bool failed = HasUnsignedNegativeSign<T>(value);
 
+            std::istringstream ss(value);
             if (!failed)
             {
-                ss >> std::ws;
+                ss >> destination;
+                if (ss.fail())
+                {
+                    failed = true;
+                }
+                else
+                {
+                    // If we can read a non-whitespace character after parsing, the input had junk.
+                    char extra;
+                    if (ss >> extra)
+                    {
+                        failed = true;
+                    }
+                    else if (!ss.eof())
+                    {
+                        failed = true;
+                    }
+                }
             }
 
-            if (ss.rdbuf()->in_avail() > 0 || failed)
+            if (failed)
             {
 #ifdef ARGS_NOEXCEPT
                 (void)name;
