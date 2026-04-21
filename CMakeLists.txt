@@ -83,6 +83,10 @@ if (ARGS_BUILD_UNITTESTS)
         target_compile_options(argstest PRIVATE -Wall -Wextra -Werror -pedantic -Wshadow -Wunused-parameter)
     endif ()
 
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 22)
+        target_compile_options(argstest PRIVATE -Wno-c2y-extensions)
+    endif ()
+
     add_executable(argstest-multiple-inclusion test/multiple_inclusion_1.cxx test/multiple_inclusion_2.cxx)
 
     target_link_libraries(argstest-multiple-inclusion args)
