@@ -1258,7 +1258,56 @@ namespace args
             virtual void ParseValue(const std::vector<std::string> &value_) override
             {
                 syntax = value_.at(0);
-                std::istringstream(value_.at(1)) >> cword;
+                const std::string &raw = value_.at(1);
+                bool failed = false;
+
+                const auto firstNonSpace = std::find_if_not(raw.begin(), raw.end(), [](char c)
+                {
+                    return std::isspace(static_cast<unsigned char>(c)) != 0;
+                });
+
+                if (firstNonSpace != raw.end() && *firstNonSpace == '-')
+                {
+                    failed = true;
+                }
+
+                size_t parsed = 0;
+                if (!failed)
+                {
+                    std::istringstream ss(raw);
+                    ss >> parsed;
+                    if (ss.fail())
+                    {
+                        failed = true;
+                    }
+                    else
+                    {
+                        char extra;
+                        if (ss >> extra)
+                        {
+                            failed = true;
+                        }
+                        else if (!ss.eof())
+                        {
+                            failed = true;
+                        }
+                    }
+                }
+
+                if (failed)
+                {
+#ifdef ARGS_NOEXCEPT
+                    error = Error::Parse;
+                    errorMsg = "Argument 'completion' received invalid value type '" + raw + "'";
+#else
+                    std::ostringstream problem;
+                    problem << "Argument 'completion' received invalid value type '" << raw << "'";
+                    throw ParseError(problem.str());
+#endif
+                    return;
+                }
+
+                cword = parsed;
             }
 
             /** Get the completion reply
@@ -2760,6 +2809,16 @@ namespace args
                     if (!readCompletion && completion != nullptr && completion->Matched())
                     {
 #ifdef ARGS_NOEXCEPT
+                        if (completion->GetError() != Error::None)
+                        {
+                            error = completion->GetError();
+                            if (errorMsg.empty())
+                            {
+                                errorMsg = completion->GetErrorMsg();
+                            }
+                            return it;
+                        }
+
                         error = Error::Completion;
 #endif
                         readCompletion = true;
@@ -3360,16 +3419,9 @@ namespace args
                 }
                 else
                 {
-                    // If we can read a non-whitespace character after parsing, the input had junk.
-                    char extra;
-                    if (ss >> extra)
-                    {
-                        failed = true;
-                    }
-                    else if (!ss.eof())
-                    {
-                        failed = true;
-                    }
+                    // Skip trailing whitespace and require full consumption.
+                    ss >> std::ws;
+                    failed = ss.peek() != std::char_traits<char>::eof();
                 }
             }
 

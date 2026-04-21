@@ -1370,6 +1370,17 @@ TEST_CASE("Completion works as expected", "[args]")
     REQUIRE_THROWS_WITH(p2.ParseArgs(std::vector<std::string>{"--completion", "bash", "3", "test", "command1", "-f", "-"}), Equals(""));
 }
 
+TEST_CASE("Completion rejects malformed cword values", "[args]")
+{
+    args::ArgumentParser p("parser");
+    args::CompletionFlag c(p, {"completion"});
+    args::Group g(p);
+    args::ValueFlag<std::string> f(g, "name", "description", {'f', "foo"}, "abc");
+
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1x", "test", "-"}), args::ParseError);
+    REQUIRE_THROWS_AS(p.ParseArgs(std::vector<std::string>{"--completion", "bash", "-1", "test", "-"}), args::ParseError);
+}
+
 #undef ARGS_HXX
 #define ARGS_TESTNAMESPACE
 #define ARGS_NOEXCEPT
@@ -1547,4 +1558,18 @@ TEST_CASE("Completion works as expected in noexcept mode", "[args]")
     p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1", "test", "-"});
     REQUIRE(p.GetError() == argstest::Error::Completion);
     REQUIRE(argstest::get(c) == "-f\n-b");
+}
+
+TEST_CASE("Completion rejects malformed cword values in noexcept mode", "[args]")
+{
+    argstest::ArgumentParser p("parser");
+    argstest::CompletionFlag c(p, {"completion"});
+    argstest::Group g(p);
+    argstest::ValueFlag<std::string> f(g, "name", "description", {'f', "foo"}, "abc");
+
+    p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1x", "test", "-"});
+    REQUIRE(p.GetError() == argstest::Error::Parse);
+
+    p.ParseArgs(std::vector<std::string>{"--completion", "bash", "-1", "test", "-"});
+    REQUIRE(p.GetError() == argstest::Error::Parse);
 }
