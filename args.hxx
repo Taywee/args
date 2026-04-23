@@ -51,6 +51,9 @@
 #include <type_traits>
 #include <cstddef>
 #include <cctype>
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
 #include <iostream>
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
@@ -3404,28 +3407,85 @@ namespace args
 
       public:
         template <typename T>
+        typename std::enable_if<
+            std::is_integral<T>::value &&
+            !std::is_same<T, bool>::value &&
+            !std::is_same<T, char>::value &&
+            !std::is_same<T, signed char>::value &&
+            !std::is_same<T, unsigned char>::value,
+            bool>::type
+        ParseNumericValue(const std::string &value, T &destination)
+        {
+            if (HasUnsignedNegativeSign<T>(value))
+            {
+                return false;
+            }
+
+            errno = 0;
+            const char *begin = value.c_str();
+            char *end = nullptr;
+
+            if (std::is_unsigned<T>::value)
+            {
+                const unsigned long long parsed = std::strtoull(begin, &end, 0);
+                while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
+                {
+                    ++end;
+                }
+                if (end == begin || *end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
+                {
+                    return false;
+                }
+
+                destination = static_cast<T>(parsed);
+            }
+            else
+            {
+                const long long parsed = std::strtoll(begin, &end, 0);
+                while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
+                {
+                    ++end;
+                }
+                if (end == begin || *end != '\0' || errno == ERANGE ||
+                    parsed < static_cast<long long>(std::numeric_limits<T>::min()) ||
+                    parsed > static_cast<long long>(std::numeric_limits<T>::max()))
+                {
+                    return false;
+                }
+
+                destination = static_cast<T>(parsed);
+            }
+
+            return true;
+        }
+
+        template <typename T>
+        typename std::enable_if<
+            !std::is_integral<T>::value ||
+            std::is_same<T, bool>::value ||
+            std::is_same<T, char>::value ||
+            std::is_same<T, signed char>::value ||
+            std::is_same<T, unsigned char>::value,
+            bool>::type
+        ParseNumericValue(const std::string &value, T &destination)
+        {
+            std::istringstream ss(value);
+            ss >> destination;
+            if (ss.fail())
+            {
+                return false;
+            }
+
+            ss >> std::ws;
+            return ss.peek() == std::char_traits<char>::eof();
+        }
+
+        template <typename T>
         typename std::enable_if<!std::is_assignable<T, std::string>::value, bool>::type
         operator ()(const std::string &name, const std::string &value, T &destination)
         {
-            bool failed = HasUnsignedNegativeSign<T>(value);
-
-            std::istringstream ss(value);
-            if (!failed)
-            {
-                ss >> destination;
-                if (ss.fail())
-                {
-                    failed = true;
-                }
-                else
-                {
-                    // Skip trailing whitespace and require full consumption.
-                    ss >> std::ws;
-                    failed = ss.peek() != std::char_traits<char>::eof();
-                }
-            }
-
-            if (failed)
+            const bool success = ParseNumericValue(value, destination);
+            if (!success)
             {
 #ifdef ARGS_NOEXCEPT
                 (void)name;

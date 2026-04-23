@@ -139,6 +139,16 @@ TEST_CASE("Negative values are rejected for unsigned flags", "[args]")
     REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--uid", "123abc"}), args::ParseError);
 }
 
+TEST_CASE("Integer overflow values are rejected", "[args]")
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::ValueFlag<int> foo(parser, "FOO", "test flag", {'f', "foo"});
+    args::ValueFlag<unsigned int> uid(parser, "UID", "numeric id", {'u', "uid"});
+
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--foo", "2147483648"}), args::ParseError);
+    REQUIRE_THROWS_AS(parser.ParseArgs(std::vector<std::string>{"--uid", "4294967296"}), args::ParseError);
+}
+
 TEST_CASE("Argument flag lists work as expected", "[args]")
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
