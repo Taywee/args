@@ -50,7 +50,7 @@ if(ARGS_MAIN_PROJECT)
     install(EXPORT args-targets
         FILE args-config.cmake
         NAMESPACE taywee::
-        DESTINATION lib/cmake/args)
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/args)
 
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" DESTINATION lib/cmake/args)
@@ -58,7 +58,7 @@ if(ARGS_MAIN_PROJECT)
     set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
     configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
     install(FILES "${PKG_CONFIG_FILE_NAME}"
-        DESTINATION "${CMAKE_INSTALL_LIBDIR_ARCHIND}/pkgconfig"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/pkgconfig"
     )
 endif()
 
