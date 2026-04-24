@@ -3713,7 +3713,7 @@ namespace args
 
                 for (const std::string &value : values_)
                 {
-                    T v;
+                    T v {};
 #ifdef ARGS_NOEXCEPT
                     if (!reader(name, value, v))
                     {
