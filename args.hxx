@@ -33,10 +33,10 @@
 #ifndef ARGS_HXX
 #define ARGS_HXX
 
-#define ARGS_VERSION "6.4.11"
+#define ARGS_VERSION "6.4.12"
 #define ARGS_VERSION_MAJOR 6
 #define ARGS_VERSION_MINOR 4
-#define ARGS_VERSION_PATCH 11
+#define ARGS_VERSION_PATCH 12
 
 #include <algorithm>
 #include <iterator>
@@ -3852,7 +3852,7 @@ namespace args
             {
                 const std::string &value_ = values_.at(0);
 
-                T v;
+                T v{};
 #ifdef ARGS_NOEXCEPT
                 if (!reader(name, value_, v))
                 {
@@ -4362,7 +4362,7 @@ namespace args
 
             virtual void ParseValue(const std::string &value_) override
             {
-                T v;
+                T v{};
 #ifdef ARGS_NOEXCEPT
                 if (!reader(name, value_, v))
                 {
