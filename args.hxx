@@ -3017,8 +3017,10 @@ namespace args
             {
                 auto &command = SelectedCommand();
                 const auto &commandDescription = command.Description().empty() ? command.Help() : command.Description();
-                const auto description_text = Wrap(commandDescription, helpParams.width - helpParams.descriptionindent);
-                const auto epilog_text = Wrap(command.Epilog(), helpParams.width - helpParams.descriptionindent);
+                const auto desc_indent = helpParams.descriptionindent;
+                const auto effective_desc_width = (helpParams.width > desc_indent) ? helpParams.width - desc_indent : 0;
+                const auto description_text = Wrap(commandDescription, effective_desc_width);
+                const auto epilog_text = Wrap(command.Epilog(), effective_desc_width);
 
                 const bool hasoptions = command.HasFlag();
                 const bool hasarguments = command.HasPositional();
@@ -3029,9 +3031,12 @@ namespace args
                 auto commandProgLine = command.GetProgramLine(helpParams);
                 prognameline.insert(prognameline.end(), commandProgLine.begin(), commandProgLine.end());
 
+                const auto prog_sum = helpParams.progindent + helpParams.progtailindent;
+                const auto effective_prog_width = (helpParams.width > prog_sum) ? helpParams.width - prog_sum : 0;
+                const auto effective_prog_first = (helpParams.width > helpParams.progindent) ? helpParams.width - helpParams.progindent : 0;
                 const auto proglines = Wrap(prognameline.begin(), prognameline.end(),
-                                            helpParams.width - (helpParams.progindent + helpParams.progtailindent),
-                                            helpParams.width - helpParams.progindent);
+                                            effective_prog_width,
+                                            effective_prog_first);
                 auto progit = std::begin(proglines);
                 if (progit != std::end(proglines))
                 {
@@ -3065,8 +3070,12 @@ namespace args
                 {
                     lastDescriptionIsNewline = std::get<0>(desc).empty() && std::get<1>(desc).empty();
                     const auto groupindent = std::get<2>(desc) * helpParams.eachgroupindent;
-                    const auto flags = Wrap(std::get<0>(desc), helpParams.width - (helpParams.flagindent + helpParams.helpindent + helpParams.gutter));
-                    const auto info = Wrap(std::get<1>(desc), helpParams.width - (helpParams.helpindent + groupindent));
+                    const auto flag_sum = helpParams.flagindent + helpParams.helpindent + helpParams.gutter;
+                    const auto effective_flag_width = (helpParams.width > flag_sum) ? helpParams.width - flag_sum : 0;
+                    const auto flags = Wrap(std::get<0>(desc), effective_flag_width);
+                    const auto info_sum = helpParams.helpindent + groupindent;
+                    const auto effective_info_width = (helpParams.width > info_sum) ? helpParams.width - info_sum : 0;
+                    const auto info = Wrap(std::get<1>(desc), effective_info_width);
 
                     std::string::size_type flagssize = 0;
                     for (auto flagsit = std::begin(flags); flagsit != std::end(flags); ++flagsit)
@@ -3087,7 +3096,9 @@ namespace args
                     } else
                     {
                         // groupindent is on both sides of the minus sign, and therefore doesn't actually need to be in here
-                        help_ << std::string(helpParams.helpindent - (helpParams.flagindent + flagssize), ' ') << *infoit << '\n';
+                        const auto indent_sum = helpParams.flagindent + flagssize;
+                        const auto effective_space = (helpParams.helpindent > indent_sum) ? helpParams.helpindent - indent_sum : 0;
+                        help_ << std::string(effective_space, ' ') << *infoit << '\n';
                         ++infoit;
                     }
                     for (; infoit != std::end(info); ++infoit)
@@ -3098,7 +3109,8 @@ namespace args
                 if (hasoptions && hasarguments && helpParams.showTerminator)
                 {
                     lastDescriptionIsNewline = false;
-                    for (const auto &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", helpParams.width - helpParams.flagindent))
+                    const auto effective_term_width = (helpParams.width > helpParams.flagindent) ? helpParams.width - helpParams.flagindent : 0;
+                    for (const auto &item: Wrap(std::string("\"") + terminator + "\" can be used to terminate flag options and force all following arguments to be treated as positional options", effective_term_width))
                     {
                         help_ << std::string(helpParams.flagindent, ' ') << item << '\n';
                     }
