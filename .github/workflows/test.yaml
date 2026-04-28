@@ -26,3 +26,32 @@ jobs:
       - name: Test
         working-directory: build
         run: ctest --output-on-failure -C ${{ matrix.build_type }}
+
+      - name: Install
+        shell: bash
+        run: |
+          cmake --install build --config ${{ matrix.build_type }} --prefix "$PWD/staging"
+          test -f staging/include/args.hxx
+
+  meson:
+    name: meson / ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install meson
+        run: sudo apt-get update && sudo apt-get install -y meson ninja-build
+
+      - name: Configure
+        run: meson setup build -Dunittests=true -Dexamples=true
+
+      - name: Build
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+      - name: Install
+        run: |
+          meson install -C build --destdir "$PWD/staging"
+          test -f staging/usr/local/include/args.hxx

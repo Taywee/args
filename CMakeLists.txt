@@ -91,26 +91,19 @@ if (ARGS_BUILD_UNITTESTS)
         endif ()
     endfunction()
 
-    add_executable(argstest-multiple-inclusion
-        test/multiple_inclusion_1.cxx test/multiple_inclusion_2.cxx)
-    args_configure_test(argstest-multiple-inclusion)
-    add_test(NAME "multiple-inclusion" COMMAND argstest-multiple-inclusion)
-
-    add_executable(argstest-windows-h test/windows_h.cxx)
-    args_configure_test(argstest-windows-h)
-    add_test(NAME "windows-h" COMMAND argstest-windows-h)
-
+    # One test per primary .cxx in test/. A test may have additional
+    # translation units named <basename>.aux*.cxx that get linked into
+    # the same executable (used by the multi-TU inclusion test).
     file(GLOB ARGS_TEST_SOURCES CONFIGURE_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cxx")
-    list(REMOVE_ITEM ARGS_TEST_SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/test/multiple_inclusion_1.cxx"
-        "${CMAKE_CURRENT_SOURCE_DIR}/test/multiple_inclusion_2.cxx"
-        "${CMAKE_CURRENT_SOURCE_DIR}/test/windows_h.cxx")
+    list(FILTER ARGS_TEST_SOURCES EXCLUDE REGEX "\\.aux[^/]*\\.cxx$")
 
     foreach (test_src ${ARGS_TEST_SOURCES})
         get_filename_component(test_name ${test_src} NAME_WE)
         set(target_name "argstest-${test_name}")
-        add_executable(${target_name} ${test_src})
+        file(GLOB aux_srcs CONFIGURE_DEPENDS
+            "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.aux*.cxx")
+        add_executable(${target_name} ${test_src} ${aux_srcs})
         args_configure_test(${target_name})
         add_test(NAME ${test_name} COMMAND ${target_name})
     endforeach ()

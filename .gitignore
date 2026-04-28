@@ -52,3 +52,4 @@ gitlike
 /buck-out/
 /.buckd/
 .buckconfig.local
+.venv
