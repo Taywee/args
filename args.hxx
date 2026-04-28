@@ -32,6 +32,10 @@
 
 #ifndef ARGS_HXX
 #define ARGS_HXX
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
 
 #define ARGS_VERSION "6.4.13"
 #define ARGS_VERSION_MAJOR 6
@@ -4753,4 +4757,6 @@ namespace args
     };
 }
 
+#pragma pop_macro("min")
+#pragma pop_macro("max")
 #endif
