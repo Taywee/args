@@ -5,8 +5,7 @@ receive bug fixes, and good pull requests will be accepted, but no new major
 functionality or API changes will be added to this codebase.**
 
 [![Cpp Standard](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B11)
-[![Travis status](https://travis-ci.org/Taywee/args.svg?branch=master)](https://travis-ci.org/Taywee/args)
-[![AppVeyor status](https://ci.appveyor.com/api/projects/status/nlnlmpttdjlndyc2?svg=true)](https://ci.appveyor.com/project/Taywee/args)
+[![Tests status](https://img.shields.io/github/actions/workflow/status/Taywee/args/test.yaml?branch=master&label=tests)](https://github.com/Taywee/args/actions/workflows/test.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/Taywee/args/badge.svg?branch=master)](https://coveralls.io/github/Taywee/args?branch=master)
 [![Read the Docs](https://img.shields.io/readthedocs/pip.svg)](https://taywee.github.io/args)
 
