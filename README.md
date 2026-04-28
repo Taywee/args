@@ -7,7 +7,7 @@ functionality or API changes will be added to this codebase.**
 [![Cpp Standard](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B11)
 [![Tests status](https://img.shields.io/github/actions/workflow/status/Taywee/args/test.yaml?branch=master&label=tests)](https://github.com/Taywee/args/actions/workflows/test.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/Taywee/args/badge.svg?branch=master)](https://coveralls.io/github/Taywee/args?branch=master)
-[![Read the Docs](https://img.shields.io/readthedocs/pip.svg)](https://taywee.github.io/args)
+[![Read the Docs](https://img.shields.io/github/actions/workflow/status/Taywee/args/docs.yaml?branch=master&label=docs)](https://taywee.github.io/args)
 
 A simple, small, flexible, single-header C++11 argument parsing library.
 
