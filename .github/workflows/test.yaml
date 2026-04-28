@@ -27,6 +27,12 @@ jobs:
         working-directory: build
         run: ctest --output-on-failure -C ${{ matrix.build_type }}
 
+      - name: Install
+        shell: bash
+        run: |
+          cmake --install build --config ${{ matrix.build_type }} --prefix "$PWD/staging"
+          test -f staging/include/args.hxx
+
   meson:
     name: meson / ubuntu-latest
     runs-on: ubuntu-latest
