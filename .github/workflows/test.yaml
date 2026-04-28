@@ -1,4 +1,4 @@
-name: CI
+name: Test
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
         build_type: [Debug, Release]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
