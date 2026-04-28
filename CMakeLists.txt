@@ -73,33 +73,47 @@ if (ARGS_BUILD_EXAMPLE)
 endif()
 
 if (ARGS_BUILD_UNITTESTS)
-    add_executable(argstest test.cxx)
-    target_link_libraries(argstest args)
-    set_property(TARGET argstest PROPERTY CXX_STANDARD 11)
+    enable_testing()
 
-    if (MSVC)
-        target_compile_options(argstest PRIVATE /W4 /WX /bigobj)
-    else ()
-        target_compile_options(argstest PRIVATE -Wall -Wextra -Werror -pedantic -Wshadow -Wunused-parameter)
-    endif ()
+    function(args_configure_test target)
+        target_link_libraries(${target} args)
+        target_include_directories(${target} PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/test)
+        set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+        if (MSVC)
+            target_compile_options(${target} PRIVATE /W4 /WX /bigobj)
+        else ()
+            target_compile_options(${target} PRIVATE
+                -Wall -Wextra -Werror -pedantic -Wshadow -Wunused-parameter)
+        endif ()
+        if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 22)
+            target_compile_options(${target} PRIVATE -Wno-c2y-extensions)
+        endif ()
+    endfunction()
 
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 22)
-        target_compile_options(argstest PRIVATE -Wno-c2y-extensions)
-    endif ()
-
-    add_executable(argstest-multiple-inclusion test/multiple_inclusion_1.cxx test/multiple_inclusion_2.cxx)
-
-    target_link_libraries(argstest-multiple-inclusion args)
-    set_property(TARGET argstest-multiple-inclusion PROPERTY CXX_STANDARD 11)
+    add_executable(argstest-multiple-inclusion
+        test/multiple_inclusion_1.cxx test/multiple_inclusion_2.cxx)
+    args_configure_test(argstest-multiple-inclusion)
+    add_test(NAME "multiple-inclusion" COMMAND argstest-multiple-inclusion)
 
     add_executable(argstest-windows-h test/windows_h.cxx)
-    target_link_libraries(argstest-windows-h args)
-    set_property(TARGET argstest-windows-h PROPERTY CXX_STANDARD 11)
+    args_configure_test(argstest-windows-h)
+    add_test(NAME "windows-h" COMMAND argstest-windows-h)
 
-    enable_testing()
-    add_test(NAME "test" COMMAND argstest)
-    add_test(NAME "test-multiple-inclusion" COMMAND argstest-multiple-inclusion)
-    add_test(NAME "test-windows-h" COMMAND argstest-windows-h)
+    file(GLOB ARGS_TEST_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cxx")
+    list(REMOVE_ITEM ARGS_TEST_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/test/multiple_inclusion_1.cxx"
+        "${CMAKE_CURRENT_SOURCE_DIR}/test/multiple_inclusion_2.cxx"
+        "${CMAKE_CURRENT_SOURCE_DIR}/test/windows_h.cxx")
+
+    foreach (test_src ${ARGS_TEST_SOURCES})
+        get_filename_component(test_name ${test_src} NAME_WE)
+        set(target_name "argstest-${test_name}")
+        add_executable(${target_name} ${test_src})
+        args_configure_test(${target_name})
+        add_test(NAME ${test_name} COMMAND ${target_name})
+    endforeach ()
 endif()
 
 add_library(taywee::args ALIAS args)
