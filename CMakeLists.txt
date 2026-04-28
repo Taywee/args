@@ -99,6 +99,7 @@ if (ARGS_BUILD_UNITTESTS)
     enable_testing()
     add_test(NAME "test" COMMAND argstest)
     add_test(NAME "test-multiple-inclusion" COMMAND argstest-multiple-inclusion)
+    add_test(NAME "test-windows-h" COMMAND argstest-windows-h)
 endif()
 
 add_library(taywee::args ALIAS args)
