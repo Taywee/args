@@ -64,17 +64,11 @@
 #define noexcept
 #endif
 
-#ifdef ARGS_TESTNAMESPACE
-namespace argstest
-{
-#else
-
 /** \namespace args
  * \brief contains all the functionality of the args library
  */
 namespace args
 {
-#endif
     /** Getter to grab the value from the argument type.
      *
      * If the Get() function of the type returns a reference, so does this, and
