@@ -34,9 +34,10 @@ The code can be downloaded at https://github.com/Taywee/args
 
 There are also somewhat extensive examples below.
 
-You can find the complete test cases at
-https://github.com/Taywee/args/blob/master/test.cxx, which should very well
-describe the usage, as it's built to push the boundaries.
+You can find all the test cases in
+https://github.com/Taywee/args/tree/master/test.  Each test is a small
+self-contained `.cxx` file with its own `main()`, so they double as
+focused usage examples.
 
 # What does it do?
 
@@ -166,22 +167,31 @@ groups and spit out messages accordingly.
 
 # Is it developed with regression tests?
 
-Yes.  tests.cxx in the git repository has a set of standard tests (which are
-still relatively small in number, but I would welcome some expansion here), and
-thanks to Travis CI and AppVeyor, these tests run with every single push:
+Yes.  The `test/` directory contains the regression suite, with each test
+compiled into its own executable and run via CMake's ctest.  Tests run on
+every push and pull request via
+[GitHub Actions](https://github.com/Taywee/args/actions), covering Linux,
+macOS, and Windows in both Debug and Release builds.
+
+To run them locally:
 
 ```shell
-% make runtests
-g++ test.cxx -o test.o -I. -std=c++11 -O2 -c -MMD
-g++ -o test test.o -std=c++11 -O2
-./test
-===============================================================================
-All tests passed (74 assertions in 15 test cases)
-
-%
+cmake -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
 ```
 
-The testing library used is [Catch](https://github.com/philsquared/Catch).
+Or via the Makefile wrapper:
+
+```shell
+make runtests
+```
+
+The tests don't depend on any third-party framework — `test/test_helpers.hxx`
+provides a handful of inline assertion helpers (`test::require`,
+`test::require_throws_as`, etc.) and that's it.  To debug a single failure,
+just run the corresponding executable directly, e.g.
+`./build/argstest-help_flag`.
 
 # Examples
 
