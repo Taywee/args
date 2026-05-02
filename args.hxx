@@ -3183,11 +3183,17 @@ namespace args
              */
             bool ParseCLI(const int argc, const char * const * argv)
             {
-                if (Prog().empty())
+                if (argc > 0 && argv != nullptr && argv[0] != nullptr && Prog().empty())
                 {
                     Prog(argv[0]);
                 }
-                const std::vector<std::string> args(argv + 1, argv + argc);
+
+                std::vector<std::string> args;
+                if (argc > 1 && argv != nullptr)
+                {
+                    args.assign(argv + 1, argv + argc);
+                }
+
                 return ParseArgs(args) == std::end(args);
             }
             
