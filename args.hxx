@@ -4015,11 +4015,12 @@ namespace args
             {
                 const std::string &value_ = values_.at(0);
 
-                K key;
+                K key{};
 #ifdef ARGS_NOEXCEPT
                 if (!reader(name, value_, key))
                 {
                     error = Error::Parse;
+                    return;
                 }
 #else
                 reader(name, value_, key);
@@ -4135,16 +4136,17 @@ namespace args
 
             virtual void ParseValue(const std::vector<std::string> &values_) override
             {
-                const std::string &value = values_.at(0);
+                const std::string &value_ = values_.at(0);
 
-                K key;
+                K key{};
 #ifdef ARGS_NOEXCEPT
-                if (!reader(name, value, key))
+                if (!reader(name, value_, key))
                 {
                     error = Error::Parse;
+                    return;
                 }
 #else
-                reader(name, value, key);
+                reader(name, value_, key);
 #endif
                 auto it = map.find(key);
                 if (it == std::end(map))
@@ -4517,11 +4519,12 @@ namespace args
 
             virtual void ParseValue(const std::string &value_) override
             {
-                K key;
+                K key{};
 #ifdef ARGS_NOEXCEPT
                 if (!reader(name, value_, key))
                 {
                     error = Error::Parse;
+                    return;
                 }
 #else
                 reader(name, value_, key);
@@ -4641,11 +4644,12 @@ namespace args
 
             virtual void ParseValue(const std::string &value_) override
             {
-                K key;
+                K key{};
 #ifdef ARGS_NOEXCEPT
                 if (!reader(name, value_, key))
                 {
                     error = Error::Parse;
+                    return;
                 }
 #else
                 reader(name, value_, key);
