@@ -53,7 +53,7 @@ if(ARGS_MAIN_PROJECT)
         DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/args)
 
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" DESTINATION lib/cmake/args)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/args-config-version.cmake" DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/args)
 
     set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
     configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
