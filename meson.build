@@ -58,6 +58,7 @@ test_names = [
   'noexcept_matcher_validation',
   'noexcept_mode',
   'noexcept_nargs',
+  'noexcept_parser_failure_state',
   'noexcept_required_flags',
   'noexcept_subparser_validation',
   'noexcept_unsigned_negative',
