@@ -3742,6 +3742,7 @@ namespace args
                     if (!reader(name, value, v))
                     {
                         error = Error::Parse;
+                        return;
                     }
 #else
                     reader(name, value, v);
@@ -3881,6 +3882,7 @@ namespace args
                 if (!reader(name, value_, v))
                 {
                     error = Error::Parse;
+                    return;
                 }
 #else
                 reader(name, value_, v);
@@ -4293,6 +4295,7 @@ namespace args
                 if (!reader(name, value_, this->value))
                 {
                     error = Error::Parse;
+                    return;
                 }
 #else
                 reader(name, value_, this->value);
@@ -4393,6 +4396,7 @@ namespace args
                 if (!reader(name, value_, v))
                 {
                     error = Error::Parse;
+                    return;
                 }
 #else
                 reader(name, value_, v);
