@@ -2585,7 +2585,7 @@ namespace args
                 {
                     if (completion->syntax == "bash" && ParseOption(choice) == OptionType::LongFlag && choice.find(longseparator) != std::string::npos)
                     {
-                        completion->reply.push_back(choice.substr(choice.find(longseparator) + 1));
+                        completion->reply.push_back(choice.substr(choice.find(longseparator) + longseparator.size()));
                     } else
                     {
                         completion->reply.push_back(choice);
