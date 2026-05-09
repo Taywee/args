@@ -151,7 +151,21 @@ namespace args
             }
 
             auto itemsize = Glyphs(*it);
-            if ((line.length() + 1 + itemsize) > currentwidth)
+            
+            // Security fix: Safe comparison that avoids undefined behavior from unsigned integer overflow
+            // The original expression (line.length() + 1 + itemsize) > currentwidth performs addition
+            // of three size_t values which could overflow. This refactored version prevents that.
+            bool needsWrap = false;
+            if (itemsize >= currentwidth)
+            {
+                needsWrap = true;
+            }
+            else if (line.length() + 1 > currentwidth - itemsize)
+            {
+                needsWrap = true;
+            }
+            
+            if (needsWrap)
             {
                 if (!empty)
                 {
@@ -2846,21 +2860,25 @@ namespace args
                         if (completion->syntax == "bash")
                         {
                             // bash tokenizes --flag=value as --flag=value
+                            // Security fix: Use size_t arithmetic throughout to avoid conversion issues
                             for (size_t idx = 0; idx < curArgs.size(); )
                             {
                                 if (idx > 0 && curArgs[idx] == "=")
                                 {
-                                    curArgs[idx - 1] += "=";
-                                    // Avoid warnings from -Wsign-conversion
-                                    const auto signedIdx = static_cast<std::ptrdiff_t>(idx);
+                                    size_t prev_idx = idx - 1;  // Safe since we checked idx > 0
+                                    curArgs[prev_idx] += "=";
                                     if (idx + 1 < curArgs.size())
                                     {
-                                        curArgs[idx - 1] += curArgs[idx + 1];
-                                        curArgs.erase(curArgs.begin() + signedIdx, curArgs.begin() + signedIdx + 2);
+                                        curArgs[prev_idx] += curArgs[idx + 1];
+                                        // Erase the '=' token and the following value token.
+                                        curArgs.erase(curArgs.begin() + idx,
+                                                     curArgs.begin() + idx + 2);
                                     } else
                                     {
-                                        curArgs.erase(curArgs.begin() + signedIdx);
+                                        // Safe erase of single '=' token at the end
+                                        curArgs.erase(curArgs.begin() + idx);
                                     }
+                                    // Do not increment idx - next element slides into current position
                                 } else
                                 {
                                     ++idx;
@@ -3445,8 +3463,44 @@ namespace args
                 return false;
             }
 
-            errno = 0;
             const char *begin = value.c_str();
+            
+            // Security enhancement: Use C++17 std::from_chars when available (thread-safe, no errno)
+            // Fallback to strtoll/strtoull for C++11/14 compatibility with careful errno handling
+#if __cplusplus >= 201703L
+            const char *end_pos = value.c_str() + value.length();
+            T parsed = 0;
+            auto result = std::from_chars(begin, end_pos, parsed);
+            
+            // Find end of valid parse
+            end_pos = result.ptr;
+            
+            // Skip trailing whitespace following std::from_chars parse
+            while (end_pos != value.c_str() + value.length() && 
+                   std::isspace(static_cast<unsigned char>(*end_pos)))
+            {
+                ++end_pos;
+            }
+            
+            if (end_pos != value.c_str() + value.length() || 
+                result.ec == std::errc::invalid_argument ||
+                result.ec == std::errc::result_out_of_range)
+            {
+                return false;
+            }
+            
+            destination = parsed;
+            return true;
+#else
+            // C++11/14 fallback: Use strtoll/strtoull
+            // SECURITY WARNING: errno is global and not thread-safe. This fallback is provided
+            // for C++11/14 compatibility but multithreaded applications should compile with
+            // C++17 and use std::from_chars for thread-safe parsing.
+            
+            // Save errno to detect if strtoull/strtoll sets it
+            const int saved_errno = errno;
+            errno = 0;
+            
             char *end = nullptr;
 
             if (std::is_unsigned<T>::value)
@@ -3458,6 +3512,7 @@ namespace args
                 }
                 if (end == begin || *end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
                 {
+                    errno = saved_errno;  // Restore errno on error
                     return false;
                 }
 
@@ -3474,13 +3529,16 @@ namespace args
                     parsed < static_cast<long long>(std::numeric_limits<T>::min()) ||
                     parsed > static_cast<long long>(std::numeric_limits<T>::max()))
                 {
+                    errno = saved_errno;  // Restore errno on error
                     return false;
                 }
 
                 destination = static_cast<T>(parsed);
             }
-
+            
+            errno = saved_errno;  // Restore errno on success
             return true;
+#endif
         }
 
         template <typename T>
