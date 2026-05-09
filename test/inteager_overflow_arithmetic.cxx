@@ -14,12 +14,6 @@ int main()
     
     std::cout << "Testing integer overflow in Wrap function...\n";
     
-    // Create strings that will cause near-overflow with size_t arithmetic
-    std::vector<std::string> items;
-    
-    // SIZE_MAX - 10 when interpreted as size_t length
-    const std::string::size_type hugeString = std::numeric_limits<std::string::size_type>::max() - 10;
-    
     // Create a dummy vector to pass to Wrap
     std::vector<std::string> test_items;
     test_items.push_back("a");  // small item
