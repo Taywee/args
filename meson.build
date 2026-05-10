@@ -60,6 +60,7 @@ test_names = [
   'noexcept_nargs',
   'noexcept_parser_failure_state',
   'noexcept_required_flags',
+  'noexcept_single_flag_repeat',
   'noexcept_subparser_validation',
   'noexcept_unsigned_negative',
   'option_terminator',

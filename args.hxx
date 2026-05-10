@@ -2495,6 +2495,17 @@ namespace args
 
                 if (auto flag = Match(arg))
                 {
+#ifdef ARGS_NOEXCEPT
+                    // Match() may set the flag's error (e.g. Error::Extra when
+                    // Options::Single is violated). In non-noexcept mode that
+                    // path throws and parsing stops before the value is read;
+                    // in noexcept mode we must mirror that and skip the value
+                    // parsing so the previously-stored value is preserved.
+                    if (flag->GetError() != Error::None)
+                    {
+                        return false;
+                    }
+#endif
                     std::vector<std::string> values;
                     const std::string errorMessage = ParseArgsValues(*flag, arg, it, end, allowSeparateLongValue, allowJoinedLongValue,
                                                                      separator != argchunk.npos, joined, false, values);
@@ -2545,6 +2556,15 @@ namespace args
 
                     if (auto flag = Match(arg))
                     {
+#ifdef ARGS_NOEXCEPT
+                        // See ParseLong: if Match recorded an error
+                        // (e.g. Options::Single violation), bail before the
+                        // value is parsed so the prior value is preserved.
+                        if (flag->GetError() != Error::None)
+                        {
+                            return false;
+                        }
+#endif
                         const std::string value(argit + 1, std::end(argchunk));
                         std::vector<std::string> values;
                         const std::string errorMessage = ParseArgsValues(*flag, std::string(1, arg), it, end,
@@ -3356,6 +3376,16 @@ namespace args
                 auto me = FlagBase::Match(arg);
                 if (me)
                 {
+#ifdef ARGS_NOEXCEPT
+                    // Suppress increment when FlagBase::Match recorded an
+                    // error on this same call (e.g. Options::Single violated).
+                    // In non-noexcept mode that path would have thrown before
+                    // reaching here and the count would not have advanced.
+                    if (GetError() != Error::None)
+                    {
+                        return me;
+                    }
+#endif
                     ++count;
                 }
                 return me;
