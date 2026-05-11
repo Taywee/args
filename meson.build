@@ -55,6 +55,7 @@ test_names = [
   'nargs',
   'noexcept_completion',
   'noexcept_completion_bad_cword',
+  'noexcept_flag_error_no_shadow',
   'noexcept_matcher_validation',
   'noexcept_mode',
   'noexcept_nargs',
