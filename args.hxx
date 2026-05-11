@@ -2512,6 +2512,17 @@ namespace args
                     if (!readCompletion)
                     {
                         flag->ParseValue(values);
+#ifdef ARGS_NOEXCEPT
+                        // Non-noexcept ParseValue paths throw on Help, reader
+                        // failure, or Map miss, which halts parsing. Mirror
+                        // that here so a later parser-level error (e.g. an
+                        // unknown flag) cannot shadow the flag's error in
+                        // ArgumentParser::GetError().
+                        if (flag->GetError() != Error::None)
+                        {
+                            return false;
+                        }
+#endif
                     }
 
                     if (flag->KickOut())
@@ -2565,6 +2576,15 @@ namespace args
                         if (!readCompletion)
                         {
                             flag->ParseValue(values);
+#ifdef ARGS_NOEXCEPT
+                            // See ParseLong: ensure a flag-level error from
+                            // ParseValue (Help, Parse, Map) halts parsing so
+                            // it cannot be shadowed by a later parser error.
+                            if (flag->GetError() != Error::None)
+                            {
+                                return false;
+                            }
+#endif
                         }
 
                         if (flag->KickOut())
