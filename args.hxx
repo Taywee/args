@@ -101,6 +101,76 @@ namespace args
         return length;
     }
 
+    /** Safe addition to prevent integer overflow.
+     * Returns true if the addition is successful, false if it would overflow.
+     */
+    template<typename T>
+    bool SafeAdd(T a, T b, T& out)
+    {
+        static_assert(std::is_integral<T>::value, "SafeAdd requires integral types.");
+        if (std::is_unsigned<T>::value)
+        {
+            if (b > std::numeric_limits<T>::max() - a)
+            {
+                return false;
+            }
+        } else
+        {
+            if ((b > 0 && a > std::numeric_limits<T>::max() - b) ||
+                (b < 0 && a < std::numeric_limits<T>::min() - b))
+            {
+                return false;
+            }
+        }
+        out = a + b;
+        return true;
+    }
+
+    /** Safe multiplication to prevent integer overflow.
+     * Returns true if the multiplication is successful, false if it would overflow.
+     */
+    template<typename T>
+    bool SafeMultiply(T a, T b, T& out)
+    {
+        static_assert(std::is_integral<T>::value, "SafeMultiply requires integral types.");
+
+        if (a == 0 || b == 0)
+        {
+            out = 0;
+            return true;
+        }
+
+        if (std::is_unsigned<T>::value)
+        {
+            if (b > std::numeric_limits<T>::max() / a)
+            {
+                return false; // Overflow would occur
+            }
+        }
+        else
+        {
+            if (a == -1 && b == std::numeric_limits<T>::min())
+            {
+                return false;
+            }
+            if (b == -1 && a == std::numeric_limits<T>::min())
+            {
+                return false;
+            }
+
+            if ((a > 0 && b > 0 && a > std::numeric_limits<T>::max() / b) ||
+                (a > 0 && b < 0 && b < std::numeric_limits<T>::min() / a) ||
+                (a < 0 && b > 0 && a < std::numeric_limits<T>::min() / b) ||
+                (a < 0 && b < 0 && a < std::numeric_limits<T>::max() / b))
+            {
+                return false;
+            }
+        }
+
+        out = a * b;
+        return true;
+    }
+
     /** (INTERNAL) Wrap a vector of words into a vector of lines
      *
      * Empty words are skipped. Word "\n" forces wrapping.
@@ -152,17 +222,20 @@ namespace args
 
             auto itemsize = Glyphs(*it);
             
-            // Security fix: Safe comparison that avoids undefined behavior from unsigned integer overflow
-            // The original expression (line.length() + 1 + itemsize) > currentwidth performs addition
-            // of three size_t values which could overflow. This refactored version prevents that.
+            // Refactored to prevent integer overflow
             bool needsWrap = false;
             if (itemsize >= currentwidth)
             {
                 needsWrap = true;
             }
-            else if (line.length() + 1 > currentwidth - itemsize)
+            else
             {
-                needsWrap = true;
+                size_t remainingWidth = (currentwidth > itemsize) ? (currentwidth - itemsize) : 0;
+                size_t nextLength = 0;
+                if (!SafeAdd<std::string::size_type>(line.length(), static_cast<std::string::size_type>(1), nextLength) || nextLength > remainingWidth)
+                {
+                    needsWrap = true;
+                }
             }
             
             if (needsWrap)
@@ -2348,8 +2421,8 @@ namespace args
             bool allowSeparateShortValue = true;
             bool allowSeparateLongValue = true;
 
-            CompletionFlag *completion = nullptr;
             bool readCompletion = false;
+            CompletionFlag *completion = nullptr;
 
         protected:
             enum class OptionType
@@ -2907,12 +2980,17 @@ namespace args
                                 {
                                     size_t prev_idx = idx - 1;  // Safe since we checked idx > 0
                                     curArgs[prev_idx] += "=";
-                                    if (idx + 1 < curArgs.size())
+                                    size_t next_idx = 0;
+                                    if (SafeAdd<size_t>(idx, static_cast<size_t>(1), next_idx) && next_idx < curArgs.size())
                                     {
-                                        curArgs[prev_idx] += curArgs[idx + 1];
+                                        curArgs[prev_idx] += curArgs[next_idx];
                                         // Erase the '=' token and the following value token.
-                                        curArgs.erase(curArgs.begin() + idx,
-                                                     curArgs.begin() + idx + 2);
+                                        size_t erase_end = 0;
+                                        if (SafeAdd<size_t>(next_idx, static_cast<size_t>(1), erase_end))
+                                        {
+                                            curArgs.erase(curArgs.begin() + idx,
+                                                         curArgs.begin() + erase_end);
+                                        }
                                     } else
                                     {
                                         // Safe erase of single '=' token at the end
@@ -3024,7 +3102,7 @@ namespace args
                 } else
                 {
                     this->longseparator = longseparator_;
-                    this->helpParams.longSeparator = allowJoinedLongValue ? longseparator_ : " ";
+                    this->helpParams.longSeparator = allowJoinedLongValue ? longseparator : " ";
                 }
             }
 
@@ -4245,7 +4323,8 @@ namespace args
             typedef std::reverse_iterator<iterator> reverse_iterator;
             typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-            MapFlagList(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, const Container &defaultValues_ = Container()): ValueFlagBase(name_, help_, std::move(matcher_)), map(map_), values(defaultValues_), defaultValues(defaultValues_)
+            MapFlagList(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const Map<K, T> &map_, const Container &defaultValues_ = Container(), Options options_ = {}):
+                ValueFlagBase(name_, help_, std::move(matcher_), options_), map(map_), values(defaultValues_), defaultValues(defaultValues_)
             {
                 group_.Add(*this);
             }
