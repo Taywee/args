@@ -3452,11 +3452,15 @@ namespace args
             if (std::is_unsigned<T>::value)
             {
                 const unsigned long long parsed = std::strtoull(begin, &end, 0);
+                if (end == begin)
+                {
+                    return false;
+                }
                 while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
-                if (end == begin || *end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
+                if (*end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
                 {
                     return false;
                 }
@@ -3466,11 +3470,15 @@ namespace args
             else
             {
                 const long long parsed = std::strtoll(begin, &end, 0);
+                if (end == begin)
+                {
+                    return false;
+                }
                 while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
-                if (end == begin || *end != '\0' || errno == ERANGE ||
+                if (*end != '\0' || errno == ERANGE ||
                     parsed < static_cast<long long>(std::numeric_limits<T>::min()) ||
                     parsed > static_cast<long long>(std::numeric_limits<T>::max()))
                 {
