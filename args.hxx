@@ -275,16 +275,58 @@ namespace args
         std::string Join(const T& array, const std::string &delimiter)
         {
             std::string res;
-            for (auto &element : array)
+            
+            // Safely compute reservation size to avoid unbounded reallocations
+            using size_type = std::string::size_type;
+            size_type total = 0;
+            size_type count = 0;
+            const size_type delim_size = static_cast<size_type>(delimiter.size());
+            bool can_reserve = true;
+            
+            for (const auto &element : array)
             {
-                if (!res.empty())
+                const size_type elem_size = static_cast<size_type>(element.size());
+                if (!SafeAdd<size_type>(total, elem_size, total))
+                {
+                    can_reserve = false;
+                    break;
+                }
+                ++count;
+            }
+            
+            if (can_reserve && count > 1)
+            {
+                size_type delim_count = count - 1;
+                size_type delim_total = 0;
+                if (!SafeMultiply<size_type>(delim_count, delim_size, delim_total) ||
+                    !SafeAdd<size_type>(total, delim_total, total))
+                {
+                    can_reserve = false;
+                }
+            }
+            
+            if (can_reserve && total > 0)
+            {
+                try
+                {
+                    res.reserve(total);
+                }
+                catch (...) {
+                    // Fall back to default allocation
+                }
+            }
+            
+            bool first = true;
+            for (const auto &element : array)
+            {
+                if (!first)
                 {
                     res += delimiter;
                 }
-
                 res += element;
+                first = false;
             }
-
+            
             return res;
         }
     }
