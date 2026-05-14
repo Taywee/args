@@ -125,17 +125,6 @@ namespace args
         {
 #if defined(__clang__) || defined(__GNUC__)
             return !__builtin_add_overflow(a, b, &out);
-#elif defined(_MSC_VER)
-            if (b > 0 && a > std::numeric_limits<T>::max() - b)
-            {
-                return false;
-            }
-            if (b < 0 && a < std::numeric_limits<T>::min() - b)
-            {
-                return false;
-            }
-            out = a + b;
-            return true;
 #else
             // Fallback bounds check
             if (b > 0 && a > std::numeric_limits<T>::max() - b)
@@ -183,39 +172,6 @@ namespace args
         {
 #if defined(__clang__) || defined(__GNUC__)
             return !__builtin_mul_overflow(a, b, &out);
-#elif defined(_MSC_VER)
-            if (a == -1 && b == std::numeric_limits<T>::min())
-            {
-                return false;
-            }
-            if (b == -1 && a == std::numeric_limits<T>::min())
-            {
-                return false;
-            }
-            if (a > 0)
-            {
-                if (b > 0 && a > std::numeric_limits<T>::max() / b)
-                {
-                    return false;
-                }
-                if (b < 0 && b < std::numeric_limits<T>::min() / a)
-                {
-                    return false;
-                }
-            }
-            if (a < 0)
-            {
-                if (b > 0 && a < std::numeric_limits<T>::min() / b)
-                {
-                    return false;
-                }
-                if (b < 0 && a < std::numeric_limits<T>::max() / b)
-                {
-                    return false;
-                }
-            }
-            out = a * b;
-            return true;
 #else
             // Fallback bounds check
             if (a == -1 && b == std::numeric_limits<T>::min())
@@ -259,17 +215,6 @@ namespace args
         {
 #if defined(__clang__) || defined(__GNUC__)
             return !__builtin_sub_overflow(a, b, &out);
-#elif defined(_MSC_VER)
-            if (b > 0 && a < std::numeric_limits<T>::min() + b)
-            {
-                return false;
-            }
-            if (b < 0 && a > std::numeric_limits<T>::max() + b)
-            {
-                return false;
-            }
-            out = a - b;
-            return true;
 #else
             // Fallback bounds check
             if (b > 0 && a < std::numeric_limits<T>::min() + b)
