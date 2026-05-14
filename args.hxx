@@ -60,19 +60,6 @@
 #include <limits>
 #include <iostream>
 
-// Provide a C++11-compatible alias for make_unsigned_t when building
-// with C++11 (some CI runners use -std=c++11). Using the alias in the
-// `std` namespace is technically undefined behavior, but this is a
-// targeted compatibility shim to allow code that uses `std::make_unsigned_t`
-// (C++14) to build under C++11. Prefer using `typename std::make_unsigned<T>::type`
-// directly where possible.
-#if __cplusplus < 201402L
-namespace std {
-    template <typename T>
-    using make_unsigned_t = typename std::make_unsigned<T>::type;
-}
-#endif
-
 #if defined(_MSC_VER) && _MSC_VER <= 1800
 #define noexcept
 #endif
@@ -114,45 +101,62 @@ namespace args
         return length;
     }
 
-    /** Safe addition to prevent integer overflow (unsigned specialization).
+    /** Safe addition to prevent integer overflow.
      * Returns true if the addition is successful, false if it would overflow.
      */
     template<typename T>
-    typename std::enable_if<std::is_unsigned<T>::value, bool>::type
-    SafeAdd(T a, T b, T& out)
+    constexpr bool SafeAdd(T a, T b, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeAdd requires integral types.");
-        if (b > std::numeric_limits<T>::max() - a)
+        if (std::is_unsigned<T>::value)
         {
-            return false;
+            using U = std::make_unsigned_t<T>;
+            const U ua = static_cast<U>(a);
+            const U ub = static_cast<U>(b);
+            const U maxv = std::numeric_limits<U>::max();
+            if (ua > maxv - ub)
+            {
+                return false;
+            }
+            out = static_cast<T>(ua + ub);
+            return true;
         }
-        out = a + b;
-        return true;
+        else
+        {
+#if defined(__clang__) || defined(__GNUC__)
+            return !__builtin_add_overflow(a, b, &out);
+#elif defined(_MSC_VER)
+            if (b > 0 && a > std::numeric_limits<T>::max() - b)
+            {
+                return false;
+            }
+            if (b < 0 && a < std::numeric_limits<T>::min() - b)
+            {
+                return false;
+            }
+            out = a + b;
+            return true;
+#else
+            // Fallback bounds check
+            if (b > 0 && a > std::numeric_limits<T>::max() - b)
+            {
+                return false;
+            }
+            if (b < 0 && a < std::numeric_limits<T>::min() - b)
+            {
+                return false;
+            }
+            out = a + b;
+            return true;
+#endif
+        }
     }
 
-    /** Safe addition to prevent integer overflow (signed specialization).
-     * Returns true if the addition is successful, false if it would overflow.
-     */
-    template<typename T>
-    typename std::enable_if<std::is_signed<T>::value, bool>::type
-    SafeAdd(T a, T b, T& out)
-    {
-        static_assert(std::is_integral<T>::value, "SafeAdd requires integral types.");
-        if ((b > 0 && a > std::numeric_limits<T>::max() - b) ||
-            (b < 0 && a < std::numeric_limits<T>::min() - b))
-        {
-            return false;
-        }
-        out = a + b;
-        return true;
-    }
-
-    /** Safe multiplication to prevent integer overflow (unsigned specialization).
+    /** Safe multiplication to prevent integer overflow.
      * Returns true if the multiplication is successful, false if it would overflow.
      */
     template<typename T>
-    typename std::enable_if<std::is_unsigned<T>::value, bool>::type
-    SafeMultiply(T a, T b, T& out)
+    constexpr bool SafeMultiply(T a, T b, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeMultiply requires integral types.");
 
@@ -162,44 +166,154 @@ namespace args
             return true;
         }
 
-        if (b > std::numeric_limits<T>::max() / a)
+        if (std::is_unsigned<T>::value)
+        {
+            using U = std::make_unsigned_t<T>;
+            const U ua = static_cast<U>(a);
+            const U ub = static_cast<U>(b);
+            const U maxv = std::numeric_limits<U>::max();
+            if (ub > maxv / ua)
+            {
+                return false;
+            }
+            out = static_cast<T>(ua * ub);
+            return true;
+        }
+        else
+        {
+#if defined(__clang__) || defined(__GNUC__)
+            return !__builtin_mul_overflow(a, b, &out);
+#elif defined(_MSC_VER)
+            if (a == -1 && b == std::numeric_limits<T>::min())
+            {
+                return false;
+            }
+            if (b == -1 && a == std::numeric_limits<T>::min())
+            {
+                return false;
+            }
+            if (a > 0)
+            {
+                if (b > 0 && a > std::numeric_limits<T>::max() / b)
+                {
+                    return false;
+                }
+                if (b < 0 && b < std::numeric_limits<T>::min() / a)
+                {
+                    return false;
+                }
+            }
+            if (a < 0)
+            {
+                if (b > 0 && a < std::numeric_limits<T>::min() / b)
+                {
+                    return false;
+                }
+                if (b < 0 && a < std::numeric_limits<T>::max() / b)
+                {
+                    return false;
+                }
+            }
+            out = a * b;
+            return true;
+#else
+            // Fallback bounds check
+            if (a == -1 && b == std::numeric_limits<T>::min())
+            {
+                return false;
+            }
+            if (b == -1 && a == std::numeric_limits<T>::min())
+            {
+                return false;
+            }
+            if ((a > 0 && b > 0 && a > std::numeric_limits<T>::max() / b) ||
+                (a > 0 && b < 0 && b < std::numeric_limits<T>::min() / a) ||
+                (a < 0 && b > 0 && a < std::numeric_limits<T>::min() / b) ||
+                (a < 0 && b < 0 && a < std::numeric_limits<T>::max() / b))
+            {
+                return false;
+            }
+            out = a * b;
+            return true;
+#endif
+        }
+    }
+
+    /** Safe subtraction to prevent integer underflow.
+     * Returns true if the subtraction is successful, false if it would underflow.
+     */
+    template<typename T>
+    constexpr bool SafeSub(T a, T b, T& out) noexcept
+    {
+        static_assert(std::is_integral<T>::value, "SafeSub requires integral types.");
+        if (std::is_unsigned<T>::value)
+        {
+            if (a < b)
+            {
+                return false;
+            }
+            out = a - b;
+            return true;
+        }
+        else
+        {
+#if defined(__clang__) || defined(__GNUC__)
+            return !__builtin_sub_overflow(a, b, &out);
+#elif defined(_MSC_VER)
+            if (b > 0 && a < std::numeric_limits<T>::min() + b)
+            {
+                return false;
+            }
+            if (b < 0 && a > std::numeric_limits<T>::max() + b)
+            {
+                return false;
+            }
+            out = a - b;
+            return true;
+#else
+            // Fallback bounds check
+            if (b > 0 && a < std::numeric_limits<T>::min() + b)
+            {
+                return false;
+            }
+            if (b < 0 && a > std::numeric_limits<T>::max() + b)
+            {
+                return false;
+            }
+            out = a - b;
+            return true;
+#endif
+        }
+    }
+
+    /** Safe negation to prevent integer overflow.
+     * Returns true if the negation is successful, false if it would overflow.
+     */
+    // Unsigned overload
+    template<typename T>
+    constexpr typename std::enable_if<std::is_unsigned<T>::value, bool>::type
+    SafeNeg(T a, T& out) noexcept
+    {
+        static_assert(std::is_integral<T>::value, "SafeNeg requires integral types.");
+        if (a != 0)
         {
             return false;
         }
-
-        out = a * b;
+        out = 0;
         return true;
     }
 
-
-
-    template <typename T>
-    typename std::enable_if<std::is_signed<T>::value, bool>::type
-    SafeMultiply(T a, T b, T &result)
+    // Signed overload
+    template<typename T>
+    constexpr typename std::enable_if<std::is_signed<T>::value, bool>::type
+    SafeNeg(T a, T& out) noexcept
     {
-        typedef typename std::make_unsigned<T>::type U;
-
-        if (a == 0 || b == 0)
-        {
-            result = 0;
-            return true;
-        }
-
-        if ((a == -1 && b == std::numeric_limits<T>::min()) ||
-            (b == -1 && a == std::numeric_limits<T>::min()))
+        static_assert(std::is_integral<T>::value, "SafeNeg requires integral types.");
+        if (a == std::numeric_limits<T>::min())
         {
             return false;
         }
-
-        const U ua = static_cast<U>(a < 0 ? -a : a);
-        const U ub = static_cast<U>(b < 0 ? -b : b);
-
-        if (ua > static_cast<U>(std::numeric_limits<T>::max()) / ub)
-        {
-            return false;
-        }
-
-        result = a * b;
+        out = -a;
         return true;
     }
 
@@ -3708,15 +3822,11 @@ namespace args
             if (std::is_unsigned<T>::value)
             {
                 const unsigned long long parsed = std::strtoull(begin, &end, 0);
-                if (end == begin)
-                {
-                    return false;
-                }
                 while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
-                if (*end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
+                if (end == begin || *end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
                 {
                     errno = saved_errno;  // Restore errno on error
                     return false;
@@ -3727,15 +3837,11 @@ namespace args
             else
             {
                 const long long parsed = std::strtoll(begin, &end, 0);
-                if (end == begin)
-                {
-                    return false;
-                }
                 while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
-                if (*end != '\0' || errno == ERANGE ||
+                if (end == begin || *end != '\0' || errno == ERANGE ||
                     parsed < static_cast<long long>(std::numeric_limits<T>::min()) ||
                     parsed > static_cast<long long>(std::numeric_limits<T>::max()))
                 {
