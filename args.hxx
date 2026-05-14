@@ -105,12 +105,12 @@ namespace args
      * Returns true if the addition is successful, false if it would overflow.
      */
     template<typename T>
-    constexpr bool SafeAdd(T a, T b, T& out) noexcept
+    bool SafeAdd(T a, T b, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeAdd requires integral types.");
         if (std::is_unsigned<T>::value)
         {
-            using U = std::make_unsigned_t<T>;
+            using U = typename std::make_unsigned<T>::type;
             const U ua = static_cast<U>(a);
             const U ub = static_cast<U>(b);
             const U maxv = std::numeric_limits<U>::max();
@@ -145,7 +145,7 @@ namespace args
      * Returns true if the multiplication is successful, false if it would overflow.
      */
     template<typename T>
-    constexpr bool SafeMultiply(T a, T b, T& out) noexcept
+    bool SafeMultiply(T a, T b, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeMultiply requires integral types.");
 
@@ -157,7 +157,7 @@ namespace args
 
         if (std::is_unsigned<T>::value)
         {
-            using U = std::make_unsigned_t<T>;
+            using U = typename std::make_unsigned<T>::type;
             const U ua = static_cast<U>(a);
             const U ub = static_cast<U>(b);
             const U maxv = std::numeric_limits<U>::max();
@@ -199,7 +199,7 @@ namespace args
      * Returns true if the subtraction is successful, false if it would underflow.
      */
     template<typename T>
-    constexpr bool SafeSub(T a, T b, T& out) noexcept
+    bool SafeSub(T a, T b, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeSub requires integral types.");
         if (std::is_unsigned<T>::value)
