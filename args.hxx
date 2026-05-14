@@ -236,7 +236,7 @@ namespace args
      */
     // Unsigned overload
     template<typename T>
-    constexpr typename std::enable_if<std::is_unsigned<T>::value, bool>::type
+    typename std::enable_if<std::is_unsigned<T>::value, bool>::type
     SafeNeg(T a, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeNeg requires integral types.");
@@ -250,7 +250,7 @@ namespace args
 
     // Signed overload
     template<typename T>
-    constexpr typename std::enable_if<std::is_signed<T>::value, bool>::type
+    typename std::enable_if<std::is_signed<T>::value, bool>::type
     SafeNeg(T a, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeNeg requires integral types.");
