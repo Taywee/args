@@ -59,6 +59,10 @@
 #include <cstdlib>
 #include <limits>
 #include <iostream>
+#if __cplusplus >= 201703L
+#include <charconv>
+#include <system_error>
+#endif
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
 #define noexcept
@@ -3635,12 +3639,36 @@ namespace args
 
             const char *begin = value.c_str();
             
-            // Security enhancement: Use C++17 std::from_chars when available (thread-safe, no errno)
-            // Fallback to strtoll/strtoull for C++11/14 compatibility with careful errno handling
+            // Preserve existing parsing semantics with std::from_chars
 #if __cplusplus >= 201703L
             const char *end_pos = value.c_str() + value.length();
-            T parsed = 0;
-            auto result = std::from_chars(begin, end_pos, parsed);
+            while (begin != end_pos && std::isspace(static_cast<unsigned char>(*begin)))
+            {
+                ++begin;
+            }
+            const bool negative = begin != end_pos && *begin == '-';
+            if (negative || (begin != end_pos && *begin == '+'))
+            {
+                ++begin;
+            }
+
+            int base = 10;
+            if (end_pos - begin > 1 && *begin == '0')
+            {
+                if (*(begin + 1) == 'x' || *(begin + 1) == 'X')
+                {
+                    begin += 2;
+                    base = 16;
+                }
+                else
+                {
+                    base = 8;
+                }
+            }
+
+            typedef typename std::make_unsigned<T>::type UnsignedT;
+            UnsignedT parsed = 0;
+            auto result = std::from_chars(begin, end_pos, parsed, base);
             
             // Find end of valid parse
             end_pos = result.ptr;
@@ -3659,13 +3687,29 @@ namespace args
                 return false;
             }
             
-            destination = parsed;
+            if (negative)
+            {
+                const UnsignedT minMagnitude =
+                    static_cast<UnsignedT>(std::numeric_limits<T>::max()) + static_cast<UnsignedT>(1);
+                if (parsed > minMagnitude)
+                {
+                    return false;
+                }
+                destination = parsed == minMagnitude ?
+                    std::numeric_limits<T>::min() :
+                    static_cast<T>(-static_cast<T>(parsed));
+            }
+            else
+            {
+                if (parsed > static_cast<UnsignedT>(std::numeric_limits<T>::max()))
+                {
+                    return false;
+                }
+                destination = static_cast<T>(parsed);
+            }
             return true;
 #else
-            // C++11/14 fallback: Use strtoll/strtoull
-            // SECURITY WARNING: errno is global and not thread-safe. This fallback is provided
-            // for C++11/14 compatibility but multithreaded applications should compile with
-            // C++17 and use std::from_chars for thread-safe parsing.
+            // C++11/14 fallback using strtoll/strtoull
             
             // Save errno to detect if strtoull/strtoll sets it
             const int saved_errno = errno;

@@ -48,6 +48,7 @@ test_names = [
   'hidden_options',
   'implicit_values',
   'integer_overflow',
+  'integer_parser',
   'invalid_arg_parse',
   'kickout_flags',
   'mapping_types',
