@@ -122,6 +122,90 @@ void TestSafeMultiplyInt()
     std::cout << "PASS: SafeMultiply int negative (-10 * 20 = -200)" << std::endl;
 }
 
+// Test SafeSub with int
+void TestSafeSubInt()
+{
+    int result;
+
+    // Test normal subtraction
+    test::require(args::SafeSub<int>(100, 50, result));
+    test::require(result == 50);
+    std::cout << "PASS: SafeSub int normal case (100 - 50 = 50)" << std::endl;
+
+    // Test subtraction with negative result
+    test::require(args::SafeSub<int>(50, 100, result));
+    test::require(result == -50);
+    std::cout << "PASS: SafeSub int negative result (50 - 100 = -50)" << std::endl;
+
+    // Test underflow detection
+    test::require_false(args::SafeSub<int>(std::numeric_limits<int>::min(), 1, result));
+    std::cout << "PASS: SafeSub int underflow detection (INT_MIN - 1)" << std::endl;
+
+    // Test overflow detection (negative subtraction)
+    test::require_false(args::SafeSub<int>(std::numeric_limits<int>::max(), -1, result));
+    std::cout << "PASS: SafeSub int overflow detection (INT_MAX - (-1))" << std::endl;
+}
+
+// Test SafeSub with unsigned int
+void TestSafeSubUnsigned()
+{
+    unsigned int result;
+
+    // Test normal subtraction
+    test::require(args::SafeSub<unsigned int>(100, 50, result));
+    test::require(result == 50);
+    std::cout << "PASS: SafeSub unsigned normal case (100 - 50 = 50)" << std::endl;
+
+    // Test underflow detection
+    test::require_false(args::SafeSub<unsigned int>(50, 100, result));
+    std::cout << "PASS: SafeSub unsigned underflow detection (50 - 100)" << std::endl;
+
+    // Test subtraction to zero
+    test::require(args::SafeSub<unsigned int>(100, 100, result));
+    test::require(result == 0);
+    std::cout << "PASS: SafeSub unsigned to zero (100 - 100 = 0)" << std::endl;
+}
+
+// Test SafeNeg with int
+void TestSafeNegInt()
+{
+    int result;
+
+    // Test normal negation
+    test::require(args::SafeNeg<int>(100, result));
+    test::require(result == -100);
+    std::cout << "PASS: SafeNeg int normal case (-100)" << std::endl;
+
+    // Test negation of negative number
+    test::require(args::SafeNeg<int>(-50, result));
+    test::require(result == 50);
+    std::cout << "PASS: SafeNeg int negative to positive (--50 = 50)" << std::endl;
+
+    // Test overflow detection (INT_MIN negation)
+    test::require_false(args::SafeNeg<int>(std::numeric_limits<int>::min(), result));
+    std::cout << "PASS: SafeNeg int overflow detection (-INT_MIN)" << std::endl;
+
+    // Test zero negation
+    test::require(args::SafeNeg<int>(0, result));
+    test::require(result == 0);
+    std::cout << "PASS: SafeNeg int zero (0)" << std::endl;
+}
+
+// Test SafeNeg with unsigned int
+void TestSafeNegUnsigned()
+{
+    unsigned int result;
+
+    // Test zero negation (only valid case)
+    test::require(args::SafeNeg<unsigned int>(0, result));
+    test::require(result == 0);
+    std::cout << "PASS: SafeNeg unsigned zero (0)" << std::endl;
+
+    // Test non-zero negation (should fail)
+    test::require_false(args::SafeNeg<unsigned int>(100, result));
+    std::cout << "PASS: SafeNeg unsigned non-zero rejection (100)" << std::endl;
+}
+
 // Test Wrap function with boundary conditions
 void TestWrapBoundaryConditions()
 {
@@ -189,6 +273,14 @@ int main()
     std::cout << "\n=== SafeMultiply Tests ===" << std::endl;
     TestSafeMultiplySizeT();
     TestSafeMultiplyInt();
+
+    std::cout << "\n=== SafeSub Tests ===" << std::endl;
+    TestSafeSubInt();
+    TestSafeSubUnsigned();
+
+    std::cout << "\n=== SafeNeg Tests ===" << std::endl;
+    TestSafeNegInt();
+    TestSafeNegUnsigned();
 
     std::cout << "\n=== Wrap Function Boundary Tests ===" << std::endl;
     TestWrapBoundaryConditions();

@@ -109,32 +109,47 @@ namespace args
      * Returns true if the addition is successful, false if it would overflow.
      */
     template<typename T>
-    bool SafeAdd(T a, T b, T& out)
+    bool SafeAdd(T a, T b, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeAdd requires integral types.");
         if (std::is_unsigned<T>::value)
         {
-            if (b > std::numeric_limits<T>::max() - a)
+            using U = typename std::make_unsigned<T>::type;
+            const U ua = static_cast<U>(a);
+            const U ub = static_cast<U>(b);
+            const U maxv = std::numeric_limits<U>::max();
+            if (ua > maxv - ub)
             {
                 return false;
             }
-        } else
-        {
-            if ((b > 0 && a > std::numeric_limits<T>::max() - b) ||
-                (b < 0 && a < std::numeric_limits<T>::min() - b))
-            {
-                return false;
-            }
+            out = static_cast<T>(ua + ub);
+            return true;
         }
-        out = a + b;
-        return true;
+        else
+        {
+#if defined(__clang__) || defined(__GNUC__)
+            return !__builtin_add_overflow(a, b, &out);
+#else
+            // Fallback bounds check
+            if (b > 0 && a > std::numeric_limits<T>::max() - b)
+            {
+                return false;
+            }
+            if (b < 0 && a < std::numeric_limits<T>::min() - b)
+            {
+                return false;
+            }
+            out = a + b;
+            return true;
+#endif
+        }
     }
 
     /** Safe multiplication to prevent integer overflow.
      * Returns true if the multiplication is successful, false if it would overflow.
      */
     template<typename T>
-    bool SafeMultiply(T a, T b, T& out)
+    bool SafeMultiply(T a, T b, T& out) noexcept
     {
         static_assert(std::is_integral<T>::value, "SafeMultiply requires integral types.");
 
@@ -146,13 +161,23 @@ namespace args
 
         if (std::is_unsigned<T>::value)
         {
-            if (b > std::numeric_limits<T>::max() / a)
+            using U = typename std::make_unsigned<T>::type;
+            const U ua = static_cast<U>(a);
+            const U ub = static_cast<U>(b);
+            const U maxv = std::numeric_limits<U>::max();
+            if (ub > maxv / ua)
             {
-                return false; // Overflow would occur
+                return false;
             }
+            out = static_cast<T>(ua * ub);
+            return true;
         }
         else
         {
+#if defined(__clang__) || defined(__GNUC__)
+            return !__builtin_mul_overflow(a, b, &out);
+#else
+            // Fallback bounds check
             if (a == -1 && b == std::numeric_limits<T>::min())
             {
                 return false;
@@ -161,7 +186,6 @@ namespace args
             {
                 return false;
             }
-
             if ((a > 0 && b > 0 && a > std::numeric_limits<T>::max() / b) ||
                 (a > 0 && b < 0 && b < std::numeric_limits<T>::min() / a) ||
                 (a < 0 && b > 0 && a < std::numeric_limits<T>::min() / b) ||
@@ -169,9 +193,76 @@ namespace args
             {
                 return false;
             }
+            out = a * b;
+            return true;
+#endif
         }
+    }
 
-        out = a * b;
+    /** Safe subtraction to prevent integer underflow.
+     * Returns true if the subtraction is successful, false if it would underflow.
+     */
+    template<typename T>
+    bool SafeSub(T a, T b, T& out) noexcept
+    {
+        static_assert(std::is_integral<T>::value, "SafeSub requires integral types.");
+        if (std::is_unsigned<T>::value)
+        {
+            if (a < b)
+            {
+                return false;
+            }
+            out = a - b;
+            return true;
+        }
+        else
+        {
+#if defined(__clang__) || defined(__GNUC__)
+            return !__builtin_sub_overflow(a, b, &out);
+#else
+            // Fallback bounds check
+            if (b > 0 && a < std::numeric_limits<T>::min() + b)
+            {
+                return false;
+            }
+            if (b < 0 && a > std::numeric_limits<T>::max() + b)
+            {
+                return false;
+            }
+            out = a - b;
+            return true;
+#endif
+        }
+    }
+
+    /** Safe negation to prevent integer overflow.
+     * Returns true if the negation is successful, false if it would overflow.
+     */
+    // Unsigned overload
+    template<typename T>
+    typename std::enable_if<std::is_unsigned<T>::value, bool>::type
+    SafeNeg(T a, T& out) noexcept
+    {
+        static_assert(std::is_integral<T>::value, "SafeNeg requires integral types.");
+        if (a != 0)
+        {
+            return false;
+        }
+        out = 0;
+        return true;
+    }
+
+    // Signed overload
+    template<typename T>
+    typename std::enable_if<std::is_signed<T>::value, bool>::type
+    SafeNeg(T a, T& out) noexcept
+    {
+        static_assert(std::is_integral<T>::value, "SafeNeg requires integral types.");
+        if (a == std::numeric_limits<T>::min())
+        {
+            return false;
+        }
+        out = -a;
         return true;
     }
 
