@@ -17,6 +17,8 @@ int main()
 
     test::require_throws_as<args::ParseError>([&] { p.ParseArgs(std::vector<std::string>{"--completion", "bash", "1x", "test", "-"}); });
     test::require_throws_as<args::ParseError>([&] { p.ParseArgs(std::vector<std::string>{"--completion", "bash", "-1", "test", "-"}); });
+    test::require_throws_as<args::ParseError>([&] { p.ParseArgs(std::vector<std::string>{"--completion", "bash", "+1", "test", "-"}); });
+
     test::require_throws_as<args::Completion>([&] { p.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "-"}); });
     return 0;
 }
