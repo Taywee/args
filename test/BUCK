@@ -56,6 +56,7 @@ test_names = [
     'required_flags',
     'simple_commands',
     'single_flag_repeat',
+    'safe_arithmetic',
     'subparser_commands',
     'subparser_commands_kickout',
     'subparser_group_validation',

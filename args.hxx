@@ -266,6 +266,67 @@ namespace args
         return true;
     }
 
+    /** Parse an untrusted decimal size_t without locale-sensitive conversions.
+     * Leading and trailing whitespace are accepted, but signs and embedded
+     * whitespace are rejected. Returns false on overflow.
+     */
+    inline bool ParseSizeT(const std::string &value, size_t &out)
+    {
+        auto it = std::find_if_not(value.begin(), value.end(), [](char c)
+        {
+            return std::isspace(static_cast<unsigned char>(c)) != 0;
+        });
+
+        if (it == value.end() || *it == '+' || *it == '-')
+        {
+            return false;
+        }
+
+        size_t parsed = 0;
+        bool sawDigit = false;
+        for (; it != value.end(); ++it)
+        {
+            const unsigned char ch = static_cast<unsigned char>(*it);
+            if (std::isspace(ch) != 0)
+            {
+                break;
+            }
+            if (!std::isdigit(ch))
+            {
+                return false;
+            }
+
+            size_t multiplied = 0;
+            if (!SafeMultiply<size_t>(parsed, static_cast<size_t>(10), multiplied))
+            {
+                return false;
+            }
+
+            const size_t digit = static_cast<size_t>(ch - static_cast<unsigned char>('0'));
+            if (!SafeAdd<size_t>(multiplied, digit, parsed))
+            {
+                return false;
+            }
+            sawDigit = true;
+        }
+
+        if (!sawDigit)
+        {
+            return false;
+        }
+
+        for (; it != value.end(); ++it)
+        {
+            if (std::isspace(static_cast<unsigned char>(*it)) == 0)
+            {
+                return false;
+            }
+        }
+
+        out = parsed;
+        return true;
+    }
+
     /** (INTERNAL) Wrap a vector of words into a vector of lines
      *
      * Empty words are skipped. Word "\n" forces wrapping.
@@ -1484,42 +1545,9 @@ namespace args
             {
                 syntax = value_.at(0);
                 const std::string &raw = value_.at(1);
-                bool failed = false;
-
-                const auto firstNonSpace = std::find_if_not(raw.begin(), raw.end(), [](char c)
-                {
-                    return std::isspace(static_cast<unsigned char>(c)) != 0;
-                });
-
-                if (firstNonSpace != raw.end() && *firstNonSpace == '-')
-                {
-                    failed = true;
-                }
 
                 size_t parsed = 0;
-                if (!failed)
-                {
-                    std::istringstream ss(raw);
-                    ss >> parsed;
-                    if (ss.fail())
-                    {
-                        failed = true;
-                    }
-                    else
-                    {
-                        char extra;
-                        if (ss >> extra)
-                        {
-                            failed = true;
-                        }
-                        else if (!ss.eof())
-                        {
-                            failed = true;
-                        }
-                    }
-                }
-
-                if (failed)
+                if (!ParseSizeT(raw, parsed))
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Parse;

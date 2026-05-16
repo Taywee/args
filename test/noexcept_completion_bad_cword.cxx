@@ -22,6 +22,9 @@ int main()
     p.ParseArgs(std::vector<std::string>{"--completion", "bash", "-1", "test", "-"});
     test::require(p.GetError() == args::Error::Parse);
 
+    p.ParseArgs(std::vector<std::string>{"--completion", "bash", "+1", "test", "-"});
+    test::require(p.GetError() == args::Error::Parse);
+
     p.ParseArgs(std::vector<std::string>{"--completion", "bash", "2", "test", "-"});
     test::require(p.GetError() == args::Error::Completion);
     test::require(c.Get().empty());
