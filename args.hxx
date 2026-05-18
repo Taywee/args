@@ -2681,7 +2681,16 @@ namespace args
                     {
                         if (Complete(flag, valueIt, end))
                         {
-                            it = end;
+                            // Park `it` on the completion position rather than
+                            // `end`. In ARGS_NOEXCEPT mode Complete returns
+                            // true (no throw), so the caller's for-loop will
+                            // run its ++it after we return; advancing an
+                            // already-end iterator is undefined behavior and
+                            // causes a subsequent out-of-bounds read of the
+                            // arg vector. Since Complete only fires when
+                            // ++nextIt == end, valueIt is the last element,
+                            // and ++(it=valueIt) safely lands on end.
+                            it = valueIt;
                             return "";
                         }
 
@@ -3184,7 +3193,15 @@ namespace args
                             throw Completion("");
                         }
 #else
-                        return Parse(curArgs.begin(), curArgs.end());
+                        // Discard the nested Parse's return value: it points
+                        // into the local curArgs vector, which is destroyed
+                        // when this function returns, leaving the caller with
+                        // a dangling iterator that would be compared against
+                        // the outer `end` in ParseCLI. Return the outer
+                        // `end` instead so the iterator stays in the caller's
+                        // container.
+                        Parse(curArgs.begin(), curArgs.end());
+                        return end;
 #endif
                     }
                 }
