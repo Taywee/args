@@ -41,13 +41,27 @@ int main()
 
     {
         args::ArgumentParser parser("Test command");
+        args::Positional<int> first(parser, "FIRST", "test", 123);
+        args::Positional<int> second(parser, "SECOND", "test", 456);
+
+        parser.ParseArgs(std::vector<std::string>{"abc", "10"});
+        test::require(parser.GetError() == args::Error::Parse);
+        test::require(*first == 123);
+        test::require_false(static_cast<bool>(first));
+        test::require(*second == 456);
+        test::require_false(static_cast<bool>(second));
+    }
+
+    {
+        args::ArgumentParser parser("Test command");
         args::PositionalList<int> poslist(parser, "POSLIST", "test", {99});
 
-        parser.ParseArgs(std::vector<std::string>{"abc"});
+        parser.ParseArgs(std::vector<std::string>{"abc", "10"});
         test::require(parser.GetError() == args::Error::Parse);
         test::require((*poslist == std::vector<int>{}));
         test::require_false(static_cast<bool>(poslist));
     }
+
 
     return 0;
 }

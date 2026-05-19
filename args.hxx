@@ -3090,6 +3090,12 @@ namespace args
                         if (pos)
                         {
                             pos->ParseValue(chunk);
+#ifdef ARGS_NOEXCEPT
+                            if (pos->GetError() != Error::None)
+                            {
+                                return it;
+                            }
+#endif
 
                             if (pos->KickOut())
                             {
