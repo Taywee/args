@@ -3922,8 +3922,22 @@ namespace args
                 return false;
             }
 
-            ss >> std::ws;
-            return ss.peek() == std::char_traits<char>::eof();
+            // Check for trailing garbage by attempting to extract any remaining characters.
+            // Do not use 'ss >> std::ws' followed by peek(), as std::ws can set failbit
+            // on EOF, causing false rejection of valid input.
+            char extra = '\0';
+            ss >> std::ws >> extra;
+            // If extraction succeeded, there's trailing garbage (return false).
+            // If extraction failed due to EOF only (goodbit after ws extraction), it's valid (return true).
+            // If extraction failed for other reasons, it's invalid (return false).
+            if (ss.fail())
+            {
+                // Clear the failbit to check if EOF is the only issue
+                ss.clear(ss.rdstate() & ~std::ios::failbit);
+                return ss.eof();
+            }
+            // Extraction succeeded, meaning there's trailing garbage
+            return false;
         }
 
         template <typename T>
