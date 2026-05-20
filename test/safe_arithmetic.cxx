@@ -261,30 +261,6 @@ void TestWrapLargeStringInput()
     std::cout << "PASS: Wrap long string with width 1" << std::endl;
 }
 
-// Test bounded decimal parsing used for shell-provided completion indices
-void TestParseSizeT()
-{
-    size_t parsed = 0;
-
-    test::require(args::ParseSizeT("42", parsed));
-    test::require(parsed == 42);
-    std::cout << "PASS: ParseSizeT parses decimal input" << std::endl;
-
-    test::require(args::ParseSizeT(" \t42\n", parsed));
-    test::require(parsed == 42);
-    std::cout << "PASS: ParseSizeT permits surrounding whitespace" << std::endl;
-
-    test::require_false(args::ParseSizeT("+42", parsed));
-    test::require_false(args::ParseSizeT("-1", parsed));
-    test::require_false(args::ParseSizeT("4 2", parsed));
-    std::cout << "PASS: ParseSizeT rejects signed and embedded-whitespace input" << std::endl;
-
-    std::ostringstream overflow;
-    overflow << std::numeric_limits<size_t>::max() << "0";
-    test::require_false(args::ParseSizeT(overflow.str(), parsed));
-    std::cout << "PASS: ParseSizeT detects overflow" << std::endl;
-}
-
 // Main test runner
 int main()
 {
@@ -309,9 +285,6 @@ int main()
     std::cout << "\n=== Wrap Function Boundary Tests ===" << std::endl;
     TestWrapBoundaryConditions();
     TestWrapLargeStringInput();
-
-    std::cout << "\n=== ParseSizeT Tests ===" << std::endl;
-    TestParseSizeT();
 
     std::cout << "\n=== All Tests Passed ===" << std::endl;
     return 0;

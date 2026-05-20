@@ -59,10 +59,6 @@
 #include <cstdlib>
 #include <limits>
 #include <iostream>
-#if __cplusplus >= 201703L
-#include <charconv>
-#include <system_error>
-#endif
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
 #define noexcept
@@ -1491,7 +1487,10 @@ namespace args
                     return std::isspace(static_cast<unsigned char>(c)) != 0;
                 });
 
-                if (firstNonSpace != raw.end() && *firstNonSpace == '-')
+                // Reject explicit signs: cword must be a plain non-negative
+                // decimal index. istringstream would otherwise silently
+                // accept "+1".
+                if (firstNonSpace != raw.end() && (*firstNonSpace == '-' || *firstNonSpace == '+'))
                 {
                     failed = true;
                 }
@@ -3729,95 +3728,14 @@ namespace args
             }
 
             const char *begin = value.c_str();
-            
-            // Preserve existing parsing semantics with std::from_chars
-#if __cplusplus >= 201703L
-            const char *end_pos = value.c_str() + value.length();
-            while (begin != end_pos && std::isspace(static_cast<unsigned char>(*begin)))
-            {
-                ++begin;
-            }
 
-            if (std::is_unsigned<T>::value && begin != end_pos && *begin == '-')
-            {
-                return false;
-            }
-
-            if (begin == end_pos)
-            {
-                return false;
-            }
-
-            const bool success = [&]() {
-                // Use automatic base detection to preserve 0 and 0x prefixes
-                if (std::is_unsigned<T>::value)
-                {
-                    typedef typename std::make_unsigned<T>::type UnsignedT;
-                    UnsignedT parsed = 0;
-                    auto result = std::from_chars(begin, end_pos, parsed, 0);
-
-                    end_pos = result.ptr;
-                    while (end_pos != value.c_str() + value.length() &&
-                           std::isspace(static_cast<unsigned char>(*end_pos)))
-                    {
-                        ++end_pos;
-                    }
-
-                    if (end_pos != value.c_str() + value.length() ||
-                        result.ec == std::errc::invalid_argument ||
-                        result.ec == std::errc::result_out_of_range)
-                    {
-                        return false;
-                    }
-
-                    // Defensive check: Ensure parsed value won't overflow when cast
-                    if (parsed > static_cast<UnsignedT>(std::numeric_limits<T>::max()))
-                    {
-                        return false;
-                    }
-
-                    destination = static_cast<T>(parsed);
-                    return true;
-                }
-                else
-                {
-                    T parsed = 0;
-                    auto result = std::from_chars(begin, end_pos, parsed, 0);
-
-                    end_pos = result.ptr;
-                    while (end_pos != value.c_str() + value.length() &&
-                           std::isspace(static_cast<unsigned char>(*end_pos)))
-                    {
-                        ++end_pos;
-                    }
-
-                    if (end_pos != value.c_str() + value.length() ||
-                        result.ec == std::errc::invalid_argument ||
-                        result.ec == std::errc::result_out_of_range)
-                    {
-                        return false;
-                    }
-
-                    // Defensive check: Ensure parsed value is within bounds
-                    if (parsed > std::numeric_limits<T>::max() || 
-                        parsed < std::numeric_limits<T>::min())
-                    {
-                        return false;
-                    }
-
-                    destination = parsed;
-                    return true;
-                }
-            }();
-
-            return success;
-#else
-            // C++11/14 fallback using strtoll/strtoull
-            
-            // Save errno to detect if strtoull/strtoll sets it
+            // C++11-compatible: use strtoull/strtoll. Hardening retained from
+            // the original from_chars draft (errno save/restore, ERANGE check,
+            // narrowing range check, trailing-whitespace tolerance). No
+            // unconditional dependency on <charconv> / C++17.
             const int saved_errno = errno;
             errno = 0;
-            
+
             char *end = nullptr;
 
             if (std::is_unsigned<T>::value)
@@ -3832,9 +3750,10 @@ namespace args
                 {
                     ++end;
                 }
-                if (*end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
+                if (*end != '\0' || errno == ERANGE ||
+                    parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
                 {
-                    errno = saved_errno;  // Restore errno on error
+                    errno = saved_errno;
                     return false;
                 }
 
@@ -3856,16 +3775,15 @@ namespace args
                     parsed < static_cast<long long>(std::numeric_limits<T>::min()) ||
                     parsed > static_cast<long long>(std::numeric_limits<T>::max()))
                 {
-                    errno = saved_errno;  // Restore errno on error
+                    errno = saved_errno;
                     return false;
                 }
 
                 destination = static_cast<T>(parsed);
             }
-            
-            errno = saved_errno;  // Restore errno on success
+
+            errno = saved_errno;
             return true;
-#endif
         }
 
         template <typename T>
