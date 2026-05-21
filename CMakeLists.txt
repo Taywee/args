@@ -24,48 +24,70 @@ cmake_minimum_required(VERSION 3.10)
 project(args LANGUAGES CXX VERSION 6.4.16 DESCRIPTION "A flexible single-header C++11 argument parsing library that is designed to appear somewhat similar to Python's argparse" HOMEPAGE_URL "https://github.com/Taywee/args")
 
 include(GNUInstallDirs)
+include(CheckCXXCompilerFlag)
+
+option(ARGS_ENABLE_SECURITY_HARDENING "Enable additional compiler/linker hardening flags" ON)
+option(ARGS_ENABLE_HARDENING_WERROR "Treat hardening warnings as errors" OFF)
 
 # ============================================
 # SECURITY HARDENING COMPILER FLAGS
 # ============================================
-if(MSVC)
-    # MSVC security flags
-    add_compile_options(
-        /W4                           # High warning level
-        /WX                           # Treat warnings as errors
-        /sdl                          # Security Development Lifecycle checks
-        /GS                           # Buffer security check
-        /guard:cf                     # Control Flow Guard
-    )
-    add_link_options(/GUARD:CF)
-else()
-    # GCC/Clang security flags
-    add_compile_options(
-        -Wall -Wextra                 # All warnings
-        -Wpedantic                    # Strict standard compliance
-        -Werror                       # Warnings as errors
-        -Wconversion                  # Implicit conversion warnings
-        -Wsign-conversion             # Sign conversion warnings
-        -Wunsafe-buffer-usage         # Buffer usage warnings (Clang)
-        -Wnull-dereference            # Null dereference detection
-        -Wformat=2                    # Format string attacks
-        -Wshadow                      # Variable shadowing
-        -Wcast-align                  # Potential undefined behavior
-        -Wunused                      # Dead code detection
-    )
-    
-    # Sanitizers for debugging (optional, off by default)
-    option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
-    option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
-    
-    if(ENABLE_ASAN)
-        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-        add_link_options(-fsanitize=address)
+function(args_add_compile_flag_if_supported flag)
+    string(MAKE_C_IDENTIFIER "${flag}" flag_id)
+    set(flag_var "ARGS_HAS_${flag_id}")
+    check_cxx_compiler_flag("${flag}" ${flag_var})
+    if(${flag_var})
+        add_compile_options("${flag}")
     endif()
-    
-    if(ENABLE_UBSAN)
-        add_compile_options(-fsanitize=undefined)
-        add_link_options(-fsanitize=undefined)
+endfunction()
+
+if(ARGS_ENABLE_SECURITY_HARDENING)
+    if(MSVC)
+        # MSVC security-oriented defaults
+        add_compile_options(
+            /W4
+            /sdl
+            /GS
+            /guard:cf
+        )
+        add_link_options(/GUARD:CF)
+        if(ARGS_ENABLE_HARDENING_WERROR)
+            add_compile_options(/WX)
+        endif()
+    else()
+        # GCC/Clang hardening flags (only when supported)
+        args_add_compile_flag_if_supported(-Wall)
+        args_add_compile_flag_if_supported(-Wextra)
+        args_add_compile_flag_if_supported(-Wpedantic)
+        args_add_compile_flag_if_supported(-Wconversion)
+        args_add_compile_flag_if_supported(-Wsign-conversion)
+        args_add_compile_flag_if_supported(-Wnull-dereference)
+        args_add_compile_flag_if_supported(-Wformat=2)
+        args_add_compile_flag_if_supported(-Wshadow)
+        args_add_compile_flag_if_supported(-Wcast-align)
+        args_add_compile_flag_if_supported(-Wunused)
+
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            args_add_compile_flag_if_supported(-Wunsafe-buffer-usage)
+        endif()
+
+        if(ARGS_ENABLE_HARDENING_WERROR)
+            args_add_compile_flag_if_supported(-Werror)
+        endif()
+
+        # Sanitizers for debugging (optional, off by default)
+        option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+        option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+
+        if(ENABLE_ASAN)
+            add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+            add_link_options(-fsanitize=address)
+        endif()
+
+        if(ENABLE_UBSAN)
+            add_compile_options(-fsanitize=undefined)
+            add_link_options(-fsanitize=undefined)
+        endif()
     endif()
 endif()
 

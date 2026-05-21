@@ -31,6 +31,11 @@ int main() {
     assert(SafeCast<unsigned short>(100u, &out16) && out16 == 100u);
     assert(!SafeCast<unsigned short>(std::numeric_limits<unsigned int>::max(), &out16));
 
+#ifdef NDEBUG
+    (void)out;
+    (void)out16;
+#endif
+
     std::cout << "All safe_arithmetic tests passed.\n";
     return 0;
 }
