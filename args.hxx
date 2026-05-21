@@ -1499,6 +1499,12 @@ namespace args
                 if (!failed)
                 {
                     std::istringstream ss(raw);
+                    // Use the C locale so that the cword index parses
+                    // consistently regardless of any std::locale::global call
+                    // elsewhere in the process. A locale with a non-empty
+                    // grouping facet would otherwise reject digit-only inputs
+                    // like "12" when grouping rules expect separators.
+                    ss.imbue(std::locale::classic());
                     ss >> parsed;
                     if (ss.fail())
                     {
@@ -3820,6 +3826,12 @@ namespace args
         ParseNumericValue(const std::string &value, T &destination)
         {
             std::istringstream ss(value);
+            // Pin parsing to the C locale so that the decimal separator and
+            // thousands grouping behavior do not silently depend on whatever
+            // std::locale::global was last set to elsewhere in the process.
+            // Without this, e.g. "3.14" parses as 3 (with ".14" trailing) in
+            // any locale whose numpunct facet treats ',' as the decimal point.
+            ss.imbue(std::locale::classic());
             ss >> destination;
             if (ss.fail())
             {
