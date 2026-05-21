@@ -25,11 +25,67 @@ project(args LANGUAGES CXX VERSION 6.4.16 DESCRIPTION "A flexible single-header 
 
 include(GNUInstallDirs)
 
+# ============================================
+# SECURITY HARDENING COMPILER FLAGS
+# ============================================
+if(MSVC)
+    # MSVC security flags
+    add_compile_options(
+        /W4                           # High warning level
+        /WX                           # Treat warnings as errors
+        /sdl                          # Security Development Lifecycle checks
+        /GS                           # Buffer security check
+        /guard:cf                     # Control Flow Guard
+    )
+    add_link_options(/GUARD:CF)
+else()
+    # GCC/Clang security flags
+    add_compile_options(
+        -Wall -Wextra                 # All warnings
+        -Wpedantic                    # Strict standard compliance
+        -Werror                       # Warnings as errors
+        -Wconversion                  # Implicit conversion warnings
+        -Wsign-conversion             # Sign conversion warnings
+        -Wunsafe-buffer-usage         # Buffer usage warnings (Clang)
+        -Wnull-dereference            # Null dereference detection
+        -Wformat=2                    # Format string attacks
+        -Wshadow                      # Variable shadowing
+        -Wcast-align                  # Potential undefined behavior
+        -Wunused                      # Dead code detection
+    )
+    
+    # Sanitizers for debugging (optional, off by default)
+    option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+    option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+    
+    if(ENABLE_ASAN)
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address)
+    endif()
+    
+    if(ENABLE_UBSAN)
+        add_compile_options(-fsanitize=undefined)
+        add_link_options(-fsanitize=undefined)
+    endif()
+endif()
+
 string(REPLACE "/${CMAKE_LIBRARY_ARCHITECTURE}" "" CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
 
 set(ARGS_MAIN_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(ARGS_MAIN_PROJECT ON)
+endif()
+
+# ============================================
+# FUZZING TARGET (if libFuzzer available)
+# ============================================
+option(BUILD_FUZZERS "Build fuzzing targets" OFF)
+
+if(BUILD_FUZZERS AND NOT MSVC)
+    add_executable(fuzz_parser fuzz/fuzz_parser.cpp)
+    target_link_libraries(fuzz_parser args)
+    target_compile_options(fuzz_parser PRIVATE -fsanitize=fuzzer,address)
+    target_link_options(fuzz_parser PRIVATE -fsanitize=fuzzer,address)
 endif()
 
 option(ARGS_BUILD_EXAMPLE "Build example" ON)
