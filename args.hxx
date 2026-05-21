@@ -59,10 +59,6 @@
 #include <cstdlib>
 #include <limits>
 #include <iostream>
-#if __cplusplus >= 201703L
-#include <charconv>
-#include <system_error>
-#endif
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
 #define noexcept
@@ -263,67 +259,6 @@ namespace args
             return false;
         }
         out = -a;
-        return true;
-    }
-
-    /** Parse an untrusted decimal size_t without locale-sensitive conversions.
-     * Leading and trailing whitespace are accepted, but signs and embedded
-     * whitespace are rejected. Returns false on overflow.
-     */
-    inline bool ParseSizeT(const std::string &value, size_t &out)
-    {
-        auto it = std::find_if_not(value.begin(), value.end(), [](char c)
-        {
-            return std::isspace(static_cast<unsigned char>(c)) != 0;
-        });
-
-        if (it == value.end() || *it == '+' || *it == '-')
-        {
-            return false;
-        }
-
-        size_t parsed = 0;
-        bool sawDigit = false;
-        for (; it != value.end(); ++it)
-        {
-            const unsigned char ch = static_cast<unsigned char>(*it);
-            if (std::isspace(ch) != 0)
-            {
-                break;
-            }
-            if (!std::isdigit(ch))
-            {
-                return false;
-            }
-
-            size_t multiplied = 0;
-            if (!SafeMultiply<size_t>(parsed, static_cast<size_t>(10), multiplied))
-            {
-                return false;
-            }
-
-            const size_t digit = static_cast<size_t>(ch - static_cast<unsigned char>('0'));
-            if (!SafeAdd<size_t>(multiplied, digit, parsed))
-            {
-                return false;
-            }
-            sawDigit = true;
-        }
-
-        if (!sawDigit)
-        {
-            return false;
-        }
-
-        for (; it != value.end(); ++it)
-        {
-            if (std::isspace(static_cast<unsigned char>(*it)) == 0)
-            {
-                return false;
-            }
-        }
-
-        out = parsed;
         return true;
     }
 
@@ -1545,9 +1480,45 @@ namespace args
             {
                 syntax = value_.at(0);
                 const std::string &raw = value_.at(1);
+                bool failed = false;
+
+                const auto firstNonSpace = std::find_if_not(raw.begin(), raw.end(), [](char c)
+                {
+                    return std::isspace(static_cast<unsigned char>(c)) != 0;
+                });
+
+                // Reject explicit signs: cword must be a plain non-negative
+                // decimal index. istringstream would otherwise silently
+                // accept "+1".
+                if (firstNonSpace != raw.end() && (*firstNonSpace == '-' || *firstNonSpace == '+'))
+                {
+                    failed = true;
+                }
 
                 size_t parsed = 0;
-                if (!ParseSizeT(raw, parsed))
+                if (!failed)
+                {
+                    std::istringstream ss(raw);
+                    ss >> parsed;
+                    if (ss.fail())
+                    {
+                        failed = true;
+                    }
+                    else
+                    {
+                        char extra;
+                        if (ss >> extra)
+                        {
+                            failed = true;
+                        }
+                        else if (!ss.eof())
+                        {
+                            failed = true;
+                        }
+                    }
+                }
+
+                if (failed)
                 {
 #ifdef ARGS_NOEXCEPT
                     error = Error::Parse;
@@ -3780,83 +3751,14 @@ namespace args
             }
 
             const char *begin = value.c_str();
-            
-            // Preserve existing parsing semantics with std::from_chars
-#if __cplusplus >= 201703L
-            const char *end_pos = value.c_str() + value.length();
-            while (begin != end_pos && std::isspace(static_cast<unsigned char>(*begin)))
-            {
-                ++begin;
-            }
-            const bool negative = begin != end_pos && *begin == '-';
-            if (negative || (begin != end_pos && *begin == '+'))
-            {
-                ++begin;
-            }
 
-            int base = 10;
-            if (end_pos - begin > 1 && *begin == '0')
-            {
-                if (*(begin + 1) == 'x' || *(begin + 1) == 'X')
-                {
-                    begin += 2;
-                    base = 16;
-                }
-                else
-                {
-                    base = 8;
-                }
-            }
-
-            typedef typename std::make_unsigned<T>::type UnsignedT;
-            UnsignedT parsed = 0;
-            auto result = std::from_chars(begin, end_pos, parsed, base);
-            
-            // Find end of valid parse
-            end_pos = result.ptr;
-            
-            // Skip trailing whitespace following std::from_chars parse
-            while (end_pos != value.c_str() + value.length() && 
-                   std::isspace(static_cast<unsigned char>(*end_pos)))
-            {
-                ++end_pos;
-            }
-            
-            if (end_pos != value.c_str() + value.length() || 
-                result.ec == std::errc::invalid_argument ||
-                result.ec == std::errc::result_out_of_range)
-            {
-                return false;
-            }
-            
-            if (negative)
-            {
-                const UnsignedT minMagnitude =
-                    static_cast<UnsignedT>(std::numeric_limits<T>::max()) + static_cast<UnsignedT>(1);
-                if (parsed > minMagnitude)
-                {
-                    return false;
-                }
-                destination = parsed == minMagnitude ?
-                    std::numeric_limits<T>::min() :
-                    static_cast<T>(-static_cast<T>(parsed));
-            }
-            else
-            {
-                if (parsed > static_cast<UnsignedT>(std::numeric_limits<T>::max()))
-                {
-                    return false;
-                }
-                destination = static_cast<T>(parsed);
-            }
-            return true;
-#else
-            // C++11/14 fallback using strtoll/strtoull
-            
-            // Save errno to detect if strtoull/strtoll sets it
+            // C++11-compatible: use strtoull/strtoll. Hardening retained from
+            // the original from_chars draft (errno save/restore, ERANGE check,
+            // narrowing range check, trailing-whitespace tolerance). No
+            // unconditional dependency on <charconv> / C++17.
             const int saved_errno = errno;
             errno = 0;
-            
+
             char *end = nullptr;
 
             if (std::is_unsigned<T>::value)
@@ -3864,15 +3766,17 @@ namespace args
                 const unsigned long long parsed = std::strtoull(begin, &end, 0);
                 if (end == begin)
                 {
+                    errno = saved_errno;
                     return false;
                 }
-                while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
+                while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
-                if (*end != '\0' || errno == ERANGE || parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
+                if (*end != '\0' || errno == ERANGE ||
+                    parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
                 {
-                    errno = saved_errno;  // Restore errno on error
+                    errno = saved_errno;
                     return false;
                 }
 
@@ -3883,9 +3787,10 @@ namespace args
                 const long long parsed = std::strtoll(begin, &end, 0);
                 if (end == begin)
                 {
+                    errno = saved_errno;
                     return false;
                 }
-                while (end != nullptr && *end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
+                while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
@@ -3893,16 +3798,15 @@ namespace args
                     parsed < static_cast<long long>(std::numeric_limits<T>::min()) ||
                     parsed > static_cast<long long>(std::numeric_limits<T>::max()))
                 {
-                    errno = saved_errno;  // Restore errno on error
+                    errno = saved_errno;
                     return false;
                 }
 
                 destination = static_cast<T>(parsed);
             }
-            
-            errno = saved_errno;  // Restore errno on success
+
+            errno = saved_errno;
             return true;
-#endif
         }
 
         template <typename T>
