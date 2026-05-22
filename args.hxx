@@ -3145,13 +3145,15 @@ namespace args
                                         size_t erase_end = 0;
                                         if (SafeAdd<size_t>(next_idx, static_cast<size_t>(1), erase_end))
                                         {
-                                            curArgs.erase(curArgs.begin() + idx,
-                                                         curArgs.begin() + erase_end);
+                                            typedef std::vector<std::string>::difference_type diff_t;
+                                            curArgs.erase(curArgs.begin() + static_cast<diff_t>(idx),
+                                                         curArgs.begin() + static_cast<diff_t>(erase_end));
                                         }
                                     } else
                                     {
                                         // Safe erase of single '=' token at the end
-                                        curArgs.erase(curArgs.begin() + idx);
+                                        typedef std::vector<std::string>::difference_type diff_t;
+                                        curArgs.erase(curArgs.begin() + static_cast<diff_t>(idx));
                                     }
                                     // Do not increment idx - next element slides into current position
                                 } else

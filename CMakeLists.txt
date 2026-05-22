@@ -24,12 +24,90 @@ cmake_minimum_required(VERSION 3.10)
 project(args LANGUAGES CXX VERSION 6.4.16 DESCRIPTION "A flexible single-header C++11 argument parsing library that is designed to appear somewhat similar to Python's argparse" HOMEPAGE_URL "https://github.com/Taywee/args")
 
 include(GNUInstallDirs)
+include(CheckCXXCompilerFlag)
+
+option(ARGS_ENABLE_SECURITY_HARDENING "Enable additional compiler/linker hardening flags" ON)
+option(ARGS_ENABLE_HARDENING_WERROR "Treat hardening warnings as errors" OFF)
+
+# ============================================
+# SECURITY HARDENING COMPILER FLAGS
+# ============================================
+function(args_add_compile_flag_if_supported flag)
+    string(MAKE_C_IDENTIFIER "${flag}" flag_id)
+    set(flag_var "ARGS_HAS_${flag_id}")
+    check_cxx_compiler_flag("${flag}" ${flag_var})
+    if(${flag_var})
+        add_compile_options("${flag}")
+    endif()
+endfunction()
+
+if(ARGS_ENABLE_SECURITY_HARDENING)
+    if(MSVC)
+        # MSVC security-oriented defaults
+        add_compile_options(
+            /W4
+            /sdl
+            /GS
+            /guard:cf
+        )
+        add_link_options(/GUARD:CF)
+        if(ARGS_ENABLE_HARDENING_WERROR)
+            add_compile_options(/WX)
+        endif()
+    else()
+        # GCC/Clang hardening flags (only when supported)
+        args_add_compile_flag_if_supported(-Wall)
+        args_add_compile_flag_if_supported(-Wextra)
+        args_add_compile_flag_if_supported(-Wpedantic)
+        args_add_compile_flag_if_supported(-Wconversion)
+        args_add_compile_flag_if_supported(-Wsign-conversion)
+        args_add_compile_flag_if_supported(-Wnull-dereference)
+        args_add_compile_flag_if_supported(-Wformat=2)
+        args_add_compile_flag_if_supported(-Wshadow)
+        args_add_compile_flag_if_supported(-Wcast-align)
+        args_add_compile_flag_if_supported(-Wunused)
+
+        # -Wunsafe-buffer-usage (clang) flags all raw pointer arithmetic,
+        # including the standard `argv + 1, argv + argc` idiom. It produces
+        # false positives on bounded argv handling, so it is not enabled.
+
+        if(ARGS_ENABLE_HARDENING_WERROR)
+            args_add_compile_flag_if_supported(-Werror)
+        endif()
+
+        # Sanitizers for debugging (optional, off by default)
+        option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+        option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+
+        if(ENABLE_ASAN)
+            add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+            add_link_options(-fsanitize=address)
+        endif()
+
+        if(ENABLE_UBSAN)
+            add_compile_options(-fsanitize=undefined)
+            add_link_options(-fsanitize=undefined)
+        endif()
+    endif()
+endif()
 
 string(REPLACE "/${CMAKE_LIBRARY_ARCHITECTURE}" "" CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
 
 set(ARGS_MAIN_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(ARGS_MAIN_PROJECT ON)
+endif()
+
+# ============================================
+# FUZZING TARGET (if libFuzzer available)
+# ============================================
+option(BUILD_FUZZERS "Build fuzzing targets" OFF)
+
+if(BUILD_FUZZERS AND NOT MSVC)
+    add_executable(fuzz_parser fuzz/fuzz_parser.cpp)
+    target_link_libraries(fuzz_parser args)
+    target_compile_options(fuzz_parser PRIVATE -fsanitize=fuzzer,address)
+    target_link_options(fuzz_parser PRIVATE -fsanitize=fuzzer,address)
 endif()
 
 option(ARGS_BUILD_EXAMPLE "Build example" ON)
