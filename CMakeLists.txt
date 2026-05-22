@@ -67,9 +67,9 @@ if(ARGS_ENABLE_SECURITY_HARDENING)
         args_add_compile_flag_if_supported(-Wcast-align)
         args_add_compile_flag_if_supported(-Wunused)
 
-        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            args_add_compile_flag_if_supported(-Wunsafe-buffer-usage)
-        endif()
+        # -Wunsafe-buffer-usage (clang) flags all raw pointer arithmetic,
+        # including the standard `argv + 1, argv + argc` idiom. It produces
+        # false positives on bounded argv handling, so it is not enabled.
 
         if(ARGS_ENABLE_HARDENING_WERROR)
             args_add_compile_flag_if_supported(-Werror)
