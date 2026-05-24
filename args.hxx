@@ -3502,7 +3502,21 @@ namespace args
                 std::vector<std::string> args;
                 if (argc > 1 && argv != nullptr)
                 {
-                    args.assign(argv + 1, argv + argc);
+                    args.reserve(static_cast<std::vector<std::string>::size_type>(argc - 1));
+                    for (int i = 1; i < argc; ++i)
+                    {
+                        if (argv[i] == nullptr)
+                        {
+#ifdef ARGS_NOEXCEPT
+                            error = Error::Parse;
+                            errorMsg = "argv contains a null argument";
+                            return false;
+#else
+                            throw ParseError("argv contains a null argument");
+#endif
+                        }
+                        args.emplace_back(argv[i]);
+                    }
                 }
 
                 return ParseArgs(args) == std::end(args);
