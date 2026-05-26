@@ -990,7 +990,7 @@ namespace args
 #ifndef ARGS_NOEXCEPT
             if (max < min)
             {
-                throw UsageError("Nargs: max > min");
+                throw UsageError("Nargs: max < min");
             }
 #endif
         }
