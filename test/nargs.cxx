@@ -17,7 +17,7 @@ int main()
     args::NargsValueFlag<int> d(parser, "", "", {'d'}, {1, 3});
     args::Flag f(parser, "", "", {'f'});
 
-    test::require_throws_as<args::UsageError>([&] { args::Nargs(3, 2); });
+    test::require_throws_with([&] { args::Nargs(3, 2); }, "Nargs: max < min");
 
     test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"}); });
     test::require((*a == std::vector<int>{1, 2}));
