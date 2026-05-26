@@ -3186,6 +3186,8 @@ namespace args
                         // `end` instead so the iterator stays in the caller's
                         // container.
                         Parse(curArgs.begin(), curArgs.end());
+                        error = Error::Completion;
+                        errorMsg.clear();
                         return end;
 #endif
                     }
