@@ -67,9 +67,10 @@ if(ARGS_ENABLE_SECURITY_HARDENING)
         args_add_compile_flag_if_supported(-Wcast-align)
         args_add_compile_flag_if_supported(-Wunused)
 
-        # -Wunsafe-buffer-usage (clang) flags all raw pointer arithmetic,
-        # including the standard `argv + 1, argv + argc` idiom. It produces
-        # false positives on bounded argv handling, so it is not enabled.
+        # -Wunsafe-buffer-usage (clang) flags all raw pointer arithmetic.
+        # The library now avoids raw argv range arithmetic in security-sensitive
+        # code paths, so this warning is useful for catching unsafe buffer usage.
+        args_add_compile_flag_if_supported(-Wunsafe-buffer-usage)
 
         if(ARGS_ENABLE_HARDENING_WERROR)
             args_add_compile_flag_if_supported(-Werror)

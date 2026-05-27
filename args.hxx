@@ -3504,7 +3504,14 @@ namespace args
                 std::vector<std::string> args;
                 if (argc > 1 && argv != nullptr)
                 {
-                    args.assign(argv + 1, argv + argc);
+                    args.reserve(static_cast<size_t>(argc - 1));
+                    for (int idx = 1; idx < argc; ++idx)
+                    {
+                        if (argv[idx] != nullptr)
+                        {
+                            args.emplace_back(argv[idx]);
+                        }
+                    }
                 }
 
                 return ParseArgs(args) == std::end(args);
