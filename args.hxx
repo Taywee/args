@@ -3761,6 +3761,14 @@ namespace args
             }
 
             const char *begin = value.c_str();
+            // The true end of the value, derived from its length rather than
+            // from the first NUL. strtoull/strtoll treat the buffer as a C
+            // string and stop at an embedded '\0', so checking `*end == '\0'`
+            // for "no trailing data" is defeated by a value like "12\0junk":
+            // end lands on the embedded NUL and the junk after it is silently
+            // accepted. Comparing against `stop` validates the whole string
+            // and matches the istringstream-based reader used for other types.
+            const char *const stop = begin + value.size();
 
             // C++11-compatible: use strtoull/strtoll. Hardening retained from
             // the original from_chars draft (errno save/restore, ERANGE check,
@@ -3779,11 +3787,11 @@ namespace args
                     errno = saved_errno;
                     return false;
                 }
-                while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
+                while (end != stop && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
-                if (*end != '\0' || errno == ERANGE ||
+                if (end != stop || errno == ERANGE ||
                     parsed > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
                 {
                     errno = saved_errno;
@@ -3800,11 +3808,11 @@ namespace args
                     errno = saved_errno;
                     return false;
                 }
-                while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
+                while (end != stop && std::isspace(static_cast<unsigned char>(*end)))
                 {
                     ++end;
                 }
-                if (*end != '\0' || errno == ERANGE ||
+                if (end != stop || errno == ERANGE ||
                     parsed < static_cast<long long>(std::numeric_limits<T>::min()) ||
                     parsed > static_cast<long long>(std::numeric_limits<T>::max()))
                 {
