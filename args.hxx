@@ -2949,7 +2949,20 @@ namespace args
                         if (optionType == OptionType::LongFlag && allowJoinedLongValue)
                         {
                             const auto separator = longseparator.empty() ? chunk.npos : chunk.find(longseparator);
-                            if (separator != chunk.npos)
+                            // Only attempt joined-value completion when the
+                            // separator lies at or past the long prefix, so
+                            // there is a (possibly empty) flag name between
+                            // them. With a custom longseparator that overlaps
+                            // the prefix (e.g. LongSeparator("-") under the
+                            // default "--" prefix), an attacker-controlled
+                            // completion word like "--x" puts the separator
+                            // inside the prefix, making `arg` shorter than
+                            // longprefix. arg.substr(longprefix.size()) would
+                            // then throw std::out_of_range, which escapes the
+                            // parser as a non-args exception (bypassing the
+                            // documented catch(args::Error) idiom) and is
+                            // thrown even under ARGS_NOEXCEPT.
+                            if (separator != chunk.npos && separator >= longprefix.size())
                             {
                                 std::string arg(chunk, 0, separator);
                                 if (auto flag = this->Match(arg.substr(longprefix.size())))
