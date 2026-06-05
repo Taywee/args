@@ -46,6 +46,7 @@
 #include <iterator>
 #include <exception>
 #include <functional>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -2565,6 +2566,13 @@ namespace args
 
             bool readCompletion = false;
             CompletionFlag *completion = nullptr;
+            // Mutex to serialize Parse calls on this ArgumentParser instance.
+            // Recursive mutex is required because Parse may call Parse recursively
+            // (nested Parse for completion/subparsers).
+            // Can be disabled for reproducer builds by defining ARGS_DISABLE_PARSE_MUTEX
+#ifndef ARGS_DISABLE_PARSE_MUTEX
+            mutable std::recursive_mutex parseMutex;
+#endif
 
         protected:
             enum class OptionType
@@ -3478,6 +3486,11 @@ namespace args
             template <typename It>
             It ParseArgs(It begin, It end)
             {
+                // Serialize concurrent Parse calls on the same parser instance (unless disabled)
+#ifndef ARGS_DISABLE_PARSE_MUTEX
+                std::lock_guard<std::recursive_mutex> parseLock(parseMutex);
+#endif
+
                 // Reset all Matched statuses and errors
                 Reset();
 #ifdef ARGS_NOEXCEPT

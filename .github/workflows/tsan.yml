@@ -1,0 +1,49 @@
+name: ThreadSanitizer repro & verify
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tsan-compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake build-essential ninja-build
+
+      - name: Create build dir
+        run: mkdir -p build
+
+      - name: Build & run (mutex disabled) - expect races
+        run: |
+          cmake -S . -B build/mutex_disabled -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_CXX_FLAGS='-fsanitize=thread -g -fno-omit-frame-pointer' \
+            -DARGS_DISABLE_PARSE_MUTEX=1
+          cmake --build build/mutex_disabled --parallel
+          echo "Running concurrency reproducer with ARGS_DISABLE_PARSE_MUTEX=1 (should show races)"
+          build/mutex_disabled/argstest-concurrency_reproducer || true
+        env:
+          ASAN_OPTIONS: 'halt_on_error=1'
+
+      - name: Build & run (mutex enabled) - expect no races
+        run: |
+          cmake -S . -B build/mutex_enabled -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_CXX_FLAGS='-fsanitize=thread -g -fno-omit-frame-pointer' \
+            -DARGS_DISABLE_PARSE_MUTEX=0
+          cmake --build build/mutex_enabled --parallel
+          echo "Running concurrency reproducer with mutex enabled (should be clean)"
+          build/mutex_enabled/argstest-concurrency_reproducer || true
+        env:
+          ASAN_OPTIONS: 'halt_on_error=1'
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: tsan-logs
+          path: |
+            build/mutex_disabled/tsan-log-*.txt
+            build/mutex_enabled/tsan-log-*.txt

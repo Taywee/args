@@ -71,6 +71,10 @@ if(ARGS_ENABLE_SECURITY_HARDENING)
         # including the standard `argv + 1, argv + argc` idiom. It produces
         # false positives on bounded argv handling, so it is not enabled.
 
+        # -Wunsafe-buffer-usage (clang) flags all raw pointer arithmetic,
+        # including the standard `argv + 1, argv + argc` idiom. It produces
+        # false positives on bounded argv handling, so it is not enabled.
+
         if(ARGS_ENABLE_HARDENING_WERROR)
             args_add_compile_flag_if_supported(-Werror)
         endif()
