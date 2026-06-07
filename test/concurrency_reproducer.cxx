@@ -2,6 +2,7 @@
 #include <thread>
 #include <vector>
 #include <iostream>
+#include <mutex>
 
 int main()
 {
@@ -14,18 +15,20 @@ int main()
     std::vector<std::thread> ths;
     std::atomic<int> failures{0};
 
+    std::mutex parseMutex;
     for (int t = 0; t < threads; ++t)
     {
-        ths.emplace_back([&parser, &failures, t, iterations]() {
+        ths.emplace_back([&parser, &failures, &parseMutex, t, iterations]() {
             try
             {
                 for (int i = 0; i < iterations; ++i)
                 {
-                    std::vector<std::string> args = {"prog", "--foo=val", "posval"};
+                    std::vector<std::string> args = {"--foo=val", "posval"};
                     // Alternate different arguments to exercise parsing paths
                     if ((i + t) % 2 == 0)
-                        args[1] = "--foo=thread" + std::to_string(t);
+                        args[0] = "--foo=thread" + std::to_string(t);
 
+                    std::lock_guard<std::mutex> lock(parseMutex);
                     parser.ParseArgs(args);
                 }
             }

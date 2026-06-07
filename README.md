@@ -152,6 +152,14 @@ interpreted as a boolean to see if they've been matched.
 All variables can be pulled (including the boolean match status for regular
 args::Flag variables) with args::get.
 
+## Thread Safety
+
+- `args::ArgumentParser` serializes concurrent `ParseArgs` calls internally to
+    protect shared parser state. You can still create and use separate parser
+    instances concurrently if desired. If you need to disable the internal
+    serialization (for reproducer builds), define `ARGS_DISABLE_PARSE_MUTEX`
+    before building.
+
 # Group validation is weird.  How do I get more helpful output for failed validation?
 
 This is unfortunately not possible, given the power of the groups available.
