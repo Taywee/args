@@ -2653,6 +2653,7 @@ namespace args
                     ++valueIt;
 
                     while (valueIt != end &&
+                           *valueIt != terminator &&
                            values.size() < nargs.max &&
                            (values.size() < nargs.min || ParseOption(*valueIt) == OptionType::Positional))
                     {
