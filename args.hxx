@@ -1788,6 +1788,18 @@ namespace args
                         std::count_if(std::begin(Children()), std::end(Children()), [](const Base *child){return child->Matched();}));
             }
 
+            /** Get the list of children which were matched
+             */
+            std::vector<Base *> GetMatchedChildren() const
+            {
+                // Could be replaced by C++ 20 filter, or a custom iterator.
+                std::vector<Base*> matched_children;
+                std::copy_if(children.begin(), children.end(), std::back_inserter(matched_children), [](Base* b){
+                    return b->Matched();
+                });
+                return matched_children;
+            }
+
             /** Whether or not this group matches validation
              */
             virtual bool Matched() const noexcept override
