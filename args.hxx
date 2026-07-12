@@ -2576,12 +2576,26 @@ namespace args
 
             OptionType ParseOption(const std::string &s, bool allowEmpty = false)
             {
-                if (s.find(longprefix) == 0 && (allowEmpty || s.length() > longprefix.length()))
+                const bool matchesLong = s.find(longprefix) == 0 && (allowEmpty || s.length() > longprefix.length());
+                const bool matchesShort = s.find(shortprefix) == 0 && (allowEmpty || s.length() > shortprefix.length());
+
+                // A chunk can start with both prefixes when one is a prefix of
+                // the other, or when the long prefix is empty (every string
+                // starts with it). Resolve to the longer, more specific prefix:
+                // this keeps the default "--"/"-" preference for long flags
+                // while letting a short flag be recognised under an empty long
+                // prefix instead of being swallowed as a nameless long flag.
+                if (matchesLong && matchesShort)
+                {
+                    return longprefix.length() >= shortprefix.length() ? OptionType::LongFlag : OptionType::ShortFlag;
+                }
+
+                if (matchesLong)
                 {
                     return OptionType::LongFlag;
                 }
 
-                if (s.find(shortprefix) == 0 && (allowEmpty || s.length() > shortprefix.length()))
+                if (matchesShort)
                 {
                     return OptionType::ShortFlag;
                 }
