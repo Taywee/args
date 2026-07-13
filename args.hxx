@@ -2902,7 +2902,7 @@ namespace args
             }
 
             template <typename It>
-            bool Complete(It it, It end)
+            bool Complete(It it, It end, bool terminated)
             {
                 auto nextIt = it;
                 if (!readCompletion || (++nextIt != end))
@@ -2915,7 +2915,11 @@ namespace args
                 std::vector<Command *> commands = GetCommands();
                 const auto optionType = ParseOption(chunk, true);
 
-                if (!commands.empty() && (chunk.empty() || optionType == OptionType::Positional))
+                // Once the terminator has been seen the parser treats every
+                // following chunk as positional, so only positional choices are
+                // valid completions here. Suggesting flags or commands past the
+                // terminator offers candidates the parser would then reject.
+                if (!terminated && !commands.empty() && (chunk.empty() || optionType == OptionType::Positional))
                 {
                     for (auto &cmd : commands)
                     {
@@ -2928,7 +2932,7 @@ namespace args
                 {
                     bool hasPositionalCompletion = true;
 
-                    if (!commands.empty())
+                    if (!terminated && !commands.empty())
                     {
                         for (auto &cmd : commands)
                         {
@@ -2950,7 +2954,7 @@ namespace args
                         }
                     }
 
-                    if (hasPositionalCompletion)
+                    if (!terminated && hasPositionalCompletion)
                     {
                         auto flags = GetAllFlags();
                         for (auto flag : flags)
@@ -3034,7 +3038,7 @@ namespace args
                 // Check all arg chunks
                 for (auto it = begin; it != end; ++it)
                 {
-                    if (Complete(it, end))
+                    if (Complete(it, end, terminated))
                     {
                         return end;
                     }
