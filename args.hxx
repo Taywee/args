@@ -4114,6 +4114,43 @@ namespace args
             }
     };
 
+    /** A boolean flag containing a retrievable constant.
+     * 
+     * \tparam T the type of the constant
+     */
+    template <typename T>
+    class ConstantFlag : public Flag
+    {
+        T value;
+
+        public:
+
+        ConstantFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_, const T& value):
+        Flag(group_, name_, help_, std::move(matcher_), options_),
+        value(value)
+        {}
+
+        ConstantFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T& value, bool extraError = false):
+        Flag(group_, name_, help_, std::move(matcher_), extraError),
+        value(value)
+        {}
+
+        T operator * () const noexcept
+        {
+            return value;
+        }
+
+        T Get() const noexcept
+        {
+            return value;
+        }
+
+        T *operator -> () const noexcept
+        {
+            return &value;
+        }
+    };
+
     /** A variadic arguments accepting flag class
      *
      * \tparam T the type to extract the argument as
