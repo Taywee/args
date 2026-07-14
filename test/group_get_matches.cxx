@@ -2,16 +2,9 @@
  * This code is released under the license described in the LICENSE file
  */
 
-#include "test_common.hxx"
-
 #include <args.hxx>
 
 #include "test_helpers.hxx"
-
-inline void require_contains(const std::vector<args::Base *> vec, const args::Flag *target)
-{
-    test::require(std::find(vec.begin(), vec.end(), target) != vec.end());
-}
 
 int main()
 {
@@ -43,7 +36,7 @@ int main()
     parser.ParseArgs(std::vector<std::string>{"-g", "-h", "-i"});
     auto allmatched = allgroup.GetMatchedChildren();
     test::require(allmatched.size() == 3);
-    require_contains(allmatched, &all_g);
-    require_contains(allmatched, &all_h);
-    require_contains(allmatched, &all_i);
+    test::require_contains(allmatched, &all_g);
+    test::require_contains(allmatched, &all_h);
+    test::require_contains(allmatched, &all_i);
 }
