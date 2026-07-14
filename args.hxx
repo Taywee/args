@@ -1800,6 +1800,29 @@ namespace args
                 return matched_children;
             }
 
+            /** Gets the children which are a certain type.
+              * \tparam ChildType The type of child to select. 
+              * \param matching Return only children of the type which matched (default false).
+              * \return Vector of children meeting the criteria.
+             */
+             template <typename ChildType>
+             std::vector<ChildType *> GetFilteredChildren(bool matching = false) const
+             {
+                std::vector<ChildType *> filtered_children;
+                for(Base *child : children) {
+                    if(!matching || child->Matched())
+                    {
+                        ChildType* cast_result = dynamic_cast<ChildType*>(child);
+                        if(cast_result != nullptr)
+                        {
+                            filtered_children.push_back(cast_result);
+                        }
+
+                    }
+                }
+                return filtered_children;
+             }
+
             /** Whether or not this group matches validation
              */
             virtual bool Matched() const noexcept override
