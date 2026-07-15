@@ -101,6 +101,12 @@ void require_throws_with(F &&f, const std::string &expected)
     fail("require_throws_with: nothing thrown");
 }
 
+template <typename ContainerT, typename TargetT>
+void require_contains(const ContainerT& container, const TargetT& target)
+{
+    test::require(std::find(container.begin(), container.end(), target) != container.end());
+}
+
 } // namespace test
 
 #endif
