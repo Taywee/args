@@ -4125,14 +4125,14 @@ namespace args
 
         public:
 
-        ConstantFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_, const T& value):
+        ConstantFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, Options options_, const T& value_):
         Flag(group_, name_, help_, std::move(matcher_), options_),
-        value(value)
+        value(value_)
         {}
 
-        ConstantFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T& value, bool extraError = false):
-        Flag(group_, name_, help_, std::move(matcher_), extraError),
-        value(value)
+        ConstantFlag(Group &group_, const std::string &name_, const std::string &help_, Matcher &&matcher_, const T& value_, bool extraError_ = false):
+        Flag(group_, name_, help_, std::move(matcher_), extraError_),
+        value(value_)
         {}
 
         T operator * () const noexcept
