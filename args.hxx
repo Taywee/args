@@ -1072,6 +1072,11 @@ namespace args
                 return false;
             }
 
+            virtual bool IsFlag() const
+            {
+                return false;
+            }
+
             virtual FlagBase *Match(const EitherFlag &)
             {
                 return nullptr;
@@ -1338,6 +1343,11 @@ namespace args
 
             virtual ~FlagBase() {}
 
+            virtual bool IsFlag() const override
+            {
+                return true;
+            }
+
             virtual FlagBase *Match(const EitherFlag &flag) override
             {
                 if (matcher.Match(flag))
@@ -1410,8 +1420,21 @@ namespace args
 
 #ifdef ARGS_NOEXCEPT
             /// Only for ARGS_NOEXCEPT
+            bool usageError = false;
+            void SetUsageError()
+            {
+                usageError = true;
+            }
+            void ClearUsageError()
+            {
+                usageError = false;
+            }
             virtual Error GetError() const override
             {
+                if(usageError)
+                {
+                    return Error::Usage;
+                }
                 const auto nargs = NumberOfArguments();
                 if (nargs.min > nargs.max)
                 {
@@ -1622,6 +1645,7 @@ namespace args
     class Group : public Base
     {
         private:
+            Group* parent;
             std::vector<Base*> children;
             std::function<bool(const Group &)> validator;
 
@@ -1678,11 +1702,15 @@ namespace args
                 }
             };
             /// If help is empty, this group will not be printed in help output
-            Group(const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare, Options options_ = {}) : Base(help_, options_), validator(validator_) {}
+            Group(const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare, Options options_ = {}) : Base(help_, options_), validator(validator_)
+            {
+                parent = nullptr;
+            }
             /// If help is empty, this group will not be printed in help output
             Group(Group &group_, const std::string &help_ = std::string(), const std::function<bool(const Group &)> &validator_ = Validators::DontCare, Options options_ = {}) : Base(help_, options_), validator(validator_)
             {
                 group_.Add(*this);
+                parent = &group_;
             }
             virtual ~Group() {}
 
@@ -1691,6 +1719,10 @@ namespace args
             void Add(Base &child)
             {
                 children.emplace_back(&child);
+
+                if(child.IsFlag()) {
+                    SignalDetectDuplicates();
+                }
             }
 
             /** Get all this group's children
@@ -1916,6 +1948,77 @@ namespace args
                 error = Error::None;
                 errorMsg.clear();
 #endif
+            }
+
+            /** Sends a signal to the root of the tree to begin checking for
+              * duplicates. If this is the root, begins checking.
+              */
+            void SignalDetectDuplicates()
+            {
+                if(parent != nullptr) parent->SignalDetectDuplicates();
+                else DetectDuplicateFlags();
+            }
+
+            /** Detect duplicate flags.
+              * In a noexcept context, sets an error on the duplicate flag.
+              * In a normal context, throws a ParseError.
+              */
+            void DetectDuplicateFlags()
+            {
+                std::unordered_set<char> usedShortFlags;
+                std::unordered_set<std::string> usedLongFlags;
+                DetectDuplicateFlags(usedShortFlags, usedLongFlags);
+            }
+        
+            /** Used by parameterless DetectDuplicateFlags.
+              */
+            void DetectDuplicateFlags(std::unordered_set<char> &usedShortFlags, std::unordered_set<std::string> &usedLongFlags)
+            {
+                for (Base *child: Children())
+                {
+                    if(auto flag = dynamic_cast<FlagBase*>(child))
+                    {
+                        // Check for duplicate flags, setting a usage error on the
+                        // flag if a duplicate is detected.
+                        for(EitherFlag flagString: flag->GetMatcher().GetFlagStrings())
+                        {
+                            if(flagString.isShort)
+                            {
+                                if(usedShortFlags.count(flagString.shortFlag))
+                                {
+#ifdef ARGS_NOEXCEPT
+                                    flag->SetUsageError();
+#else
+                                    throw ParseError("duplicate short flag detected");
+#endif
+                                }
+                                else
+                                {
+                                    usedShortFlags.insert(flagString.shortFlag);
+                                }
+                            }
+                            else
+                            {
+                                if(usedLongFlags.count(flagString.longFlag))
+                                {
+#ifdef ARGS_NOEXCEPT
+                                    flag->SetUsageError();
+#else
+                                    throw ParseError("duplicate long flag detected");
+#endif
+                                }
+                                else
+                                {
+                                    usedLongFlags.insert(flagString.longFlag);
+                                }
+                            }
+                        }
+                    }
+                    else if(auto group = dynamic_cast<Group*>(child))
+                    {
+                        group->DetectDuplicateFlags(usedShortFlags, usedLongFlags);
+                    }
+                }
             }
 
 #ifdef ARGS_NOEXCEPT
