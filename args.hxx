@@ -2782,14 +2782,14 @@ namespace args
 
                 Nargs nargs = flag.NumberOfArguments();
 
-                if (hasJoined && !allowJoined && nargs.min != 0)
+                if (hasJoined && !allowJoined && (nargs.min != 0 || !canDiscardJoined))
                 {
                     return "Flag '" + arg + "' was passed a joined argument, but these are disallowed";
                 }
 
                 if (hasJoined)
                 {
-                    if (!canDiscardJoined || nargs.max != 0)
+                    if (!canDiscardJoined || (allowJoined && nargs.max != 0))
                     {
                         values.push_back(joinedArg);
                     }
