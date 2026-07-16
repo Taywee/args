@@ -1441,6 +1441,45 @@ namespace args
             virtual void ParseValue(const std::vector<std::string> &value) = 0;
     };
 
+    /** (INTERNAL) Find a flag string claimed by two distinct options.
+     *
+     * When two separate options answer to the same short or long flag the
+     * configuration is ambiguous: Match() returns the first one it finds and
+     * the second option can never be reached. Returns the offending flag with
+     * its prefix, or an empty string when every matcher is unique. The owner
+     * comparison keeps a single option that is shared between groups from
+     * reporting itself.
+     */
+    inline std::string FindAmbiguousFlag(const std::vector<FlagBase *> &flags, const std::string &shortPrefix, const std::string &longPrefix)
+    {
+        std::unordered_map<char, const FlagBase *> shortOwners;
+        std::unordered_map<std::string, const FlagBase *> longOwners;
+        for (const FlagBase *flag : flags)
+        {
+            for (const EitherFlag &each : flag->GetMatcher().GetFlagStrings())
+            {
+                if (each.isShort)
+                {
+                    const auto inserted = shortOwners.emplace(each.shortFlag, flag);
+                    if (!inserted.second && inserted.first->second != flag)
+                    {
+                        return each.str(shortPrefix, longPrefix);
+                    }
+                }
+                else
+                {
+                    const auto inserted = longOwners.emplace(each.longFlag, flag);
+                    if (!inserted.second && inserted.first->second != flag)
+                    {
+                        return each.str(shortPrefix, longPrefix);
+                    }
+                }
+            }
+        }
+
+        return {};
+    }
+
     /** Base class for value-accepting flag options
      */
     class ValueFlagBase : public FlagBase
@@ -3260,6 +3299,22 @@ namespace args
                     }
                 }
 
+                if (!readCompletion)
+                {
+                    const std::string ambiguous = FindAmbiguousFlag(GetAllFlags(), shortprefix, longprefix);
+                    if (!ambiguous.empty())
+                    {
+                        const std::string problem = "Flag '" + ambiguous + "' is used by more than one option";
+#ifndef ARGS_NOEXCEPT
+                        throw UsageError(problem);
+#else
+                        error = Error::Usage;
+                        errorMsg = problem;
+                        return end;
+#endif
+                    }
+                }
+
                 Validate(shortprefix, longprefix);
                 return end;
             }
@@ -3615,6 +3670,21 @@ namespace args
         }
 
         auto it = parser->Parse(args.begin(), args.end());
+
+        const std::string ambiguous = FindAmbiguousFlag(GetAllFlags(), parser->ShortPrefix(), parser->LongPrefix());
+        if (!ambiguous.empty())
+        {
+#ifndef ARGS_NOEXCEPT
+            throw UsageError("Flag '" + ambiguous + "' is used by more than one option");
+#else
+            if (GetError() == Error::None)
+            {
+                error = Error::Usage;
+                errorMsg = "Flag '" + ambiguous + "' is used by more than one option";
+            }
+#endif
+        }
+
         command.Validate(parser->ShortPrefix(), parser->LongPrefix());
         kicked.assign(it, args.end());
 
