@@ -15,6 +15,11 @@ enum class LogLevel {
 
 using LogFlag = args::ConstantFlag<LogLevel>;
 
+struct Version {
+    int high;
+    int low;
+};
+
 int main()
 {
     args::ArgumentParser parser("This is a test program.", "This goes after the options.");
@@ -53,6 +58,20 @@ int main()
     test::require(longWarningMatches.size() == 1);
     test::require(longWarningMatches[0]->Get() == LogLevel::WARNING);
     test::require(**(longWarningMatches[0]) == LogLevel::WARNING);
+
+    // Reach into a class-typed constant through operator->. This instantiates
+    // ConstantFlag<T>::operator->, which the checks above never do because they
+    // use a ConstantFlag pointer (plain pointer arrow) rather than the flag
+    // object itself.
+    args::ArgumentParser versionParser("This is a test program.");
+    args::ConstantFlag<Version> stable(versionParser, "stable", "stable version", {'s', "stable"}, Version{2, 5});
+    versionParser.ParseArgs(std::vector<std::string>{"--stable"});
+    test::require(stable->high == 2);
+    test::require(stable->low == 5);
+    test::require((*stable).high == 2);
+
+    const args::ConstantFlag<Version> &constStable = stable;
+    test::require(constStable->low == 5);
 
     return 0;
 }

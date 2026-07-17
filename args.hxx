@@ -4248,7 +4248,7 @@ namespace args
             return value;
         }
 
-        T *operator -> () const noexcept
+        const T *operator -> () const noexcept
         {
             return &value;
         }
