@@ -70,6 +70,55 @@ void testDuplicateLongInTwoGroups()
     });
 }
 
+void testFlagReuseAcrossCommandBoundary()
+{
+    // A flag inside a command and a flag in an ancestor scope may share a
+    // name: they live in separate namespaces. Declaring the command flag
+    // first must not be reported as a duplicate.
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command run(commands, "run", "run command");
+    args::Flag run_message(run, "message", "message", {'m', "message"});
+    test::require_nothrow([&]{
+        args::Flag top_message(parser, "message", "top message", {'m', "message"});
+    });
+}
+
+void testFlagReuseInNestedGroupAcrossCommandBoundary()
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command run(commands, "run", "run command");
+    args::Group runopts(run, "run options");
+    args::Flag run_message(runopts, "message", "message", {'m', "message"});
+    test::require_nothrow([&]{
+        args::Flag top_message(parser, "message", "top message", {'m', "message"});
+    });
+}
+
+void testFlagReuseBetweenSiblingCommands()
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command commit(commands, "commit", "commit command");
+    args::Flag commit_message(commit, "message", "message", {'m', "message"});
+    args::Command tag(commands, "tag", "tag command");
+    test::require_nothrow([&]{
+        args::Flag tag_message(tag, "message", "message", {'m', "message"});
+    });
+}
+
+void testDuplicateWithinCommandStillDetected()
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command run(commands, "run", "run command");
+    args::Flag run_aone(run, "aone", "test flag", {'a', "aone"});
+    test::require_throws_as<args::ParseError>([&]{
+        args::Flag run_atwo(run, "atwo", "test flag", {'a', "atwo"});
+    });
+}
+
 int main()
 {
     testDuplicateShort();
@@ -78,5 +127,9 @@ int main()
     testDuplicateLongInGroup();
     testDuplicateShortInTwoGroups();
     testDuplicateLongInTwoGroups();
+    testFlagReuseAcrossCommandBoundary();
+    testFlagReuseInNestedGroupAcrossCommandBoundary();
+    testFlagReuseBetweenSiblingCommands();
+    testDuplicateWithinCommandStillDetected();
 
 }
