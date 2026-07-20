@@ -2016,7 +2016,15 @@ namespace args
                     }
                     else if(auto group = dynamic_cast<Group*>(child))
                     {
-                        group->DetectDuplicateFlags(usedShortFlags, usedLongFlags);
+                        // A command opens its own flag namespace and runs its
+                        // own duplicate detection as a separate root, so a flag
+                        // reused either side of a command boundary is not a
+                        // genuine duplicate. Only descend into plain groups
+                        // here; IsGroup() is false for a Command.
+                        if(group->IsGroup())
+                        {
+                            group->DetectDuplicateFlags(usedShortFlags, usedLongFlags);
+                        }
                     }
                 }
             }

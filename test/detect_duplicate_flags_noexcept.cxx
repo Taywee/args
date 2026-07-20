@@ -64,6 +64,49 @@ void testDuplicateLongInTwoGroups()
     test::require(parser.GetError() == args::Error::Usage);
 }
 
+void testFlagReuseAcrossCommandBoundary()
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command run(commands, "run", "run command");
+    args::Flag run_message(run, "message", "message", {'m', "message"});
+    args::Flag top_message(parser, "message", "top message", {'m', "message"});
+    test::require(parser.GetError() == args::Error::None);
+}
+
+void testFlagReuseInNestedGroupAcrossCommandBoundary()
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command run(commands, "run", "run command");
+    args::Group runopts(run, "run options");
+    args::Flag run_message(runopts, "message", "message", {'m', "message"});
+    args::Flag top_message(parser, "message", "top message", {'m', "message"});
+    test::require(parser.GetError() == args::Error::None);
+}
+
+void testFlagReuseBetweenSiblingCommands()
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command commit(commands, "commit", "commit command");
+    args::Flag commit_message(commit, "message", "message", {'m', "message"});
+    args::Command tag(commands, "tag", "tag command");
+    args::Flag tag_message(tag, "message", "message", {'m', "message"});
+    test::require(parser.GetError() == args::Error::None);
+}
+
+void testDuplicateWithinCommandStillDetected()
+{
+    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+    args::Group commands(parser, "commands");
+    args::Command run(commands, "run", "run command");
+    args::Flag run_aone(run, "aone", "test flag", {'a', "aone"});
+    args::Flag run_atwo(run, "atwo", "test flag", {'a', "atwo"});
+    // The duplicate is recorded on the offending flag when it is added.
+    test::require(run_atwo.GetError() == args::Error::Usage);
+}
+
 int main()
 {
     testDuplicateShort();
@@ -72,4 +115,8 @@ int main()
     testDuplicateLongInGroup();
     testDuplicateShortInTwoGroups();
     testDuplicateLongInTwoGroups();
+    testFlagReuseAcrossCommandBoundary();
+    testFlagReuseInNestedGroupAcrossCommandBoundary();
+    testFlagReuseBetweenSiblingCommands();
+    testDuplicateWithinCommandStillDetected();
 }
