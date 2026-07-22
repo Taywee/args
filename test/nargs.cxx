@@ -12,7 +12,7 @@ int main()
 {
     args::ArgumentParser parser("Test command");
     args::NargsValueFlag<int> a(parser, "", "", {'a'}, 2);
-    args::NargsValueFlag<int> b(parser, "", "", {'b'}, {2, 3});
+    args::NargsValueFlag<int> b(parser, "", "", {"b", 'b'}, {2, 3});
     args::NargsValueFlag<std::string> c(parser, "", "", {'c'}, {0, 2});
     args::NargsValueFlag<int> d(parser, "", "", {'d'}, {1, 3});
     args::Flag f(parser, "", "", {'f'});
@@ -28,13 +28,29 @@ int main()
 
     test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-a", "1"}); });
     test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-a1"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-a1", "2"}); });
+    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-a1", "2"}); });
 
     test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-b", "1", "-2", "-f"}); });
     test::require((*b == std::vector<int>{1, -2}));
     test::require(f);
 
     test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-b", "1", "2", "3"}); });
+    test::require((*b == std::vector<int>{1, 2, 3}));
+    test::require(!f);
+
+    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--b", "1", "-2", "-f"}); });
+    test::require((*b == std::vector<int>{1, -2}));
+    test::require(f);
+
+    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--b", "1", "2", "3"}); });
+    test::require((*b == std::vector<int>{1, 2, 3}));
+    test::require(!f);
+
+    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--b=1", "-2", "-f"}); });
+    test::require((*b == std::vector<int>{1, -2}));
+    test::require(f);
+
+    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--b=1", "2", "3"}); });
     test::require((*b == std::vector<int>{1, 2, 3}));
     test::require(!f);
 

@@ -2807,7 +2807,7 @@ namespace args
                     {
                         return "Flag '" + arg + "' was passed a separate argument, but these are disallowed";
                     }
-                } else
+                }
                 {
                     auto valueIt = it;
                     ++valueIt;
