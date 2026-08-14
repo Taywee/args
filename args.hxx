@@ -2744,6 +2744,22 @@ namespace args
                 // prefix instead of being swallowed as a nameless long flag.
                 if (matchesLong && matchesShort)
                 {
+                    // Identical prefixes (e.g. Windows "/") make every flag
+                    // look both short and long. Prefer short when the next
+                    // character is a registered short flag so /h and /ifile
+                    // still go through ParseShort (#26).
+                    if (longprefix == shortprefix && s.size() > shortprefix.size())
+                    {
+                        const char ch = s[shortprefix.size()];
+                        for (FlagBase *flag : GetAllFlags())
+                        {
+                            if (flag->GetMatcher().Match(ch))
+                            {
+                                return OptionType::ShortFlag;
+                            }
+                        }
+                        return OptionType::LongFlag;
+                    }
                     return longprefix.length() >= shortprefix.length() ? OptionType::LongFlag : OptionType::ShortFlag;
                 }
 
