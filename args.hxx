@@ -1278,6 +1278,22 @@ namespace args
             return {};
         }
 
+        // Keep emplace_back for sequences: insert can require move assignment
+        // even when appending a copyable value at the end of a vector.
+        template <typename Container, typename T>
+        auto AppendMappedValue(Container &container, const T &value, int)
+            -> decltype(container.emplace_back(value), void())
+        {
+            container.emplace_back(value);
+        }
+
+        template <typename Container, typename T>
+        auto AppendMappedValue(Container &container, const T &value, long)
+            -> decltype(container.insert(std::end(container), value), void())
+        {
+            container.insert(std::end(container), value);
+        }
+
         template <typename T>
         std::vector<std::string> MapKeysToStrings(const T &map)
         {
@@ -4771,7 +4787,7 @@ namespace args
 #endif
                 } else
                 {
-                    this->values.emplace_back(it->second);
+                    detail::AppendMappedValue(values, it->second, 0);
                 }
             }
 
@@ -5279,7 +5295,7 @@ namespace args
 #endif
                 } else
                 {
-                    this->values.emplace_back(it->second);
+                    detail::AppendMappedValue(values, it->second, 0);
                     matched = true;
                 }
             }
