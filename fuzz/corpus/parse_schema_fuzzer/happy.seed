@@ -1,0 +1,1 @@
+-n 7 --number=42 -m fast src.txt alpha
