@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <limits>
+#include <climits>
 
 /** Test suite for checked arithmetic functions
  * 
@@ -63,17 +64,16 @@ void TestSafeMultiplySizeT()
     test::require(result == 0);
     std::cout << "PASS: SafeMultiply with zero (0 * 1000000 = 0)" << std::endl;
 
-    // Test large multiplications that overflow (for 64-bit systems)
-    // Use values that will definitely overflow
-    size_t large_val = 10000000000UL;  // 10 billion
+    // Test large multiplications that overflow
+    const size_t large_val = static_cast<size_t>(1) << (sizeof(size_t) * CHAR_BIT - 1);
     test::require_false(args::SafeMultiply<size_t>(large_val, large_val, result));
-    std::cout << "PASS: SafeMultiply large value overflow (10B * 10B)" << std::endl;
+    std::cout << "PASS: SafeMultiply large value overflow" << std::endl;
 
     // Test multiplication that doesn't overflow
-    size_t safe_val = 1000000UL;  // 1 million
+    size_t safe_val = 10000UL;
     test::require(args::SafeMultiply<size_t>(safe_val, safe_val, result));
     test::require(result == safe_val * safe_val);
-    std::cout << "PASS: SafeMultiply safe value success (1M * 1M)" << std::endl;
+    std::cout << "PASS: SafeMultiply safe value success" << std::endl;
 }
 
 // Test SafeAdd with int
