@@ -37,10 +37,10 @@
 #undef min
 #undef max
 
-#define ARGS_VERSION "6.6.0"
+#define ARGS_VERSION "6.6.1"
 #define ARGS_VERSION_MAJOR 6
 #define ARGS_VERSION_MINOR 6
-#define ARGS_VERSION_PATCH 0
+#define ARGS_VERSION_PATCH 1
 
 #include <algorithm>
 #include <iterator>
