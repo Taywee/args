@@ -104,10 +104,28 @@ endif()
 option(BUILD_FUZZERS "Build fuzzing targets" OFF)
 
 if(BUILD_FUZZERS AND NOT MSVC)
-    add_executable(fuzz_parser fuzz/fuzz_parser.cpp)
-    target_link_libraries(fuzz_parser args)
-    target_compile_options(fuzz_parser PRIVATE -fsanitize=fuzzer,address)
-    target_link_options(fuzz_parser PRIVATE -fsanitize=fuzzer,address)
+    # Generic fuzzer discovery: every fuzz/*_fuzzer.cpp becomes a target
+    # named after its file, so new harnesses need no CMake edits. Each
+    # harness selects its own compile-time configuration (e.g.
+    # noexcept_mode_fuzzer.cpp defines ARGS_NOEXCEPT itself).
+    file(GLOB ARGS_FUZZ_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/fuzz/*_fuzzer.cpp")
+    foreach(fuzz_src ${ARGS_FUZZ_SOURCES})
+        get_filename_component(fuzz_name ${fuzz_src} NAME_WE)
+        add_executable(${fuzz_name} ${fuzz_src})
+        target_link_libraries(${fuzz_name} PRIVATE args)
+        if(DEFINED ENV{LIB_FUZZING_ENGINE} AND NOT "$ENV{LIB_FUZZING_ENGINE}" STREQUAL "")
+            # OSS-Fuzz build: sanitizer and coverage instrumentation arrive
+            # via CXXFLAGS and the fuzzing engine via LIB_FUZZING_ENGINE.
+            # Sanitizers must NOT be hardcoded here (it would break build
+            # matrix variants such as MSAN).
+            target_link_libraries(${fuzz_name} PRIVATE "$ENV{LIB_FUZZING_ENGINE}")
+        else()
+            # Local development fallback: clang's libFuzzer.
+            target_compile_options(${fuzz_name} PRIVATE -fsanitize=fuzzer-no-link)
+            target_link_options(${fuzz_name} PRIVATE -fsanitize=fuzzer)
+        endif()
+    endforeach()
 endif()
 
 option(ARGS_BUILD_EXAMPLE "Build example" ON)
