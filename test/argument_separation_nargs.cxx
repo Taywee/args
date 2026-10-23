@@ -54,15 +54,16 @@ int main()
         test::require(args::get(pos) == "5");
     }
 
-    // The default separations still let a joined value be followed by separate
-    // ones, which is what nargs needs.
+    // Nargs must be separated.
     {
         args::ArgumentParser parser("This is a test program.");
         args::NargsValueFlag<int> a(parser, "A", "a", {'a', "aa"}, 2);
-        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-a1", "2"}); });
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-a", "1", "2"}); });
         test::require((args::get(a) == std::vector<int>{1, 2}));
-        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--aa=1", "2"}); });
-        test::require((args::get(a) == std::vector<int>{1, 2}));
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--aa", "3", "4"}); });
+        test::require((args::get(a) == std::vector<int>{3, 4}));
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-a1", "2"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--a=1", "2"}); });
     }
     return 0;
 }

@@ -2834,14 +2834,11 @@ namespace args
                     {
                         return "Flag '" + arg + "' was passed a separate argument, but these are disallowed";
                     }
-                }
-
-                // Only gather separate values when they are allowed. A joined
-                // value that was discarded rather than taken (short chunks such
-                // as -nf when joined short values are off) means this flag isn't
-                // taking an argument here, so the rest of the chunk is flags.
-                if (allowSeparate && (!hasJoined || !values.empty()))
-                {
+                } else if (allowSeparate && (!hasJoined || !values.empty())) {
+                    // Only gather separate values when they are allowed. A joined
+                    // value that was discarded rather than taken (short chunks such
+                    // as -nf when joined short values are off) means this flag isn't
+                    // taking an argument here, so the rest of the chunk is flags.
                     auto valueIt = it;
                     ++valueIt;
 
