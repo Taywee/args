@@ -10,31 +10,51 @@
 
 int main()
 {
-    args::ArgumentParser parser("This is a test program.", "This goes after the options.");
-    args::ValueFlag<std::string> bar(parser, "BAR", "test flag", {'b', "bar"});
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
-    parser.SetArgumentSeparations(true, false, false, false);
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
-    parser.SetArgumentSeparations(false, true, false, false);
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
-    parser.SetArgumentSeparations(false, false, true, false);
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
-    parser.SetArgumentSeparations(false, false, false, true);
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
-    test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
-    test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
+    {
+        args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+        args::ValueFlag<std::string> bar(parser, "BAR", "test flag", {'b', "bar"});
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
+        parser.SetArgumentSeparations(true, false, false, false);
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
+        parser.SetArgumentSeparations(false, true, false, false);
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
+        parser.SetArgumentSeparations(false, false, true, false);
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
+        parser.SetArgumentSeparations(false, false, false, true);
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-btest"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"--bar=test"}); });
+        test::require_throws_as<args::ParseError>([&] { parser.ParseArgs(std::vector<std::string>{"-b", "test"}); });
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--bar", "test"}); });
+    }
+    {
+        args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+        args::ImplicitValueFlag<std::string> my_implicit_value_flag(parser, "VALUE", "test flag", {"my-implicit-value-flag"});
+        args::PositionalList<std::string> positional_list(parser, "VALUE", "test flag");
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--my-implicit-value-flag", "file1", "file2", "file3"}); });
+        test::require((args::get(my_implicit_value_flag) == "file1"));
+        test::require((args::get(positional_list) == std::vector<std::string>{"file2", "file3"}));
+    }
+    {
+        args::ArgumentParser parser("This is a test program.", "This goes after the options.");
+        parser.SetArgumentSeparations(true, true, false, false);
+        args::ImplicitValueFlag<std::string> my_implicit_value_flag(parser, "VALUE", "test flag", {"my-implicit-value-flag"});
+        args::PositionalList<std::string> positional_list(parser, "VALUE", "test flag");
+        test::require_nothrow([&] { parser.ParseArgs(std::vector<std::string>{"--my-implicit-value-flag", "file1", "file2", "file3"}); });
+        test::require(my_implicit_value_flag);
+        test::require(*my_implicit_value_flag == "");
+        test::require((args::get(positional_list) == std::vector<std::string>{"file1", "file2", "file3"}));
+    }
     return 0;
 }
